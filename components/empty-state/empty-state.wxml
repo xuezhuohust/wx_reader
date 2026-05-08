@@ -1,0 +1,14 @@
+<view class="empty-wrap">
+  <view class="empty-visual">
+    <text class="empty-mark">读</text>
+  </view>
+  <text class="empty-title">{{title}}</text>
+  <text class="empty-desc">{{description}}</text>
+  <button
+    wx:if="{{buttonText}}"
+    class="empty-btn"
+    bindtap="handleAction"
+  >
+    {{buttonText}}
+  </button>
+</view>

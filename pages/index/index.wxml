@@ -1,0 +1,153 @@
+<view class="page-shell home-page">
+  <!-- Header Intro & Search (Similar to Library) -->
+  <view class="page-intro">
+    <view class="header-main">
+      <view class="intro-content">
+        <view class="intro-eyebrow">
+          <text>欢迎回来 · {{currentRoleLabel}}</text>
+          <view class="role-switch-btn" bindtap="handleRoleChange" data-role="{{currentRole === 'reader' ? 'publisher' : 'reader'}}">
+            <text class="role-switch-btn__label">切换至{{currentRole === 'reader' ? '出版商' : '读者'}} →</text>
+          </view>
+        </view>
+        <text class="page-intro-title text-serif">静心阅读，深度思考</text>
+        <text class="page-intro-desc">在这里，与每一本书进行超越时空的对话。</text>
+      </view>
+      <view class="user-avatar" wx:if="{{identity}}">
+        <image src="{{identity.avatarUrl}}" mode="aspectFill" />
+      </view>
+    </view>
+  </view>
+
+  <!-- Search Bar -->
+  <view class="input-shell">
+    <text class="input-icon">⌕</text>
+    <input
+      class="input-field"
+      placeholder="搜索书名、作者或关键词..."
+      placeholder-style="color:var(--text-muted);"
+      confirm-type="search"
+      bindinput="handleKeywordInput"
+      bindconfirm="handleSearch"
+    />
+  </view>
+
+  <!-- Reader View -->
+  <block wx:if="{{currentRole === 'reader'}}">
+    <view class="section-container">
+      <view class="section-header">
+        <text class="section-title text-serif">为您推荐</text>
+      </view>
+
+      <scroll-view class="recommend-scroll" scroll-x enhanced show-scrollbar="{{false}}">
+        <view class="recommend-row">
+          <view
+            wx:for="{{recommendBooks}}"
+            wx:key="id"
+            class="recommend-card-literary"
+            data-id="{{item.id}}"
+            bindtap="handleRecommendTap"
+          >
+            <view class="recommend-cover-box {{item.cover}}">
+              <view class="cover-overlay"></view>
+              <text class="recommend-book-title">{{item.title}}</text>
+              <text class="recommend-book-author">{{item.author}}</text>
+            </view>
+          </view>
+        </view>
+      </scroll-view>
+    </view>
+
+    <!-- Library Tabs (Integrated) -->
+    <scroll-view class="tab-scroll" scroll-x enhanced show-scrollbar="{{false}}">
+      <view class="tab-row">
+        <view
+          wx:for="{{categories}}"
+          wx:key="*this"
+          class="tab-item {{activeCategory === item ? 'tab-item--active' : ''}}"
+          data-value="{{item}}"
+          bindtap="handleTabChange"
+        >
+          {{item}}
+        </view>
+      </view>
+    </scroll-view>
+
+    <!-- Library List (Integrated) -->
+    <view class="section-container" style="margin-top: 0;">
+      <view class="section-header">
+        <text class="section-title text-serif">全部书库</text>
+        <text class="section-more">{{filteredBooks.length}} 册结果</text>
+      </view>
+
+      <view wx:if="{{filteredBooks.length}}" class="list-wrap">
+        <book-card
+          wx:for="{{filteredBooks}}"
+          wx:key="id"
+          book="{{item}}"
+          mode="market"
+          bind:cardtap="handleBookTap"
+          bind:actiontap="handleActionTap"
+        />
+      </view>
+
+      <empty-state
+        wx:else
+        title="没有找到符合条件的书"
+        description="你可以换个关键词，或者切换其他分类看看"
+      />
+    </view>
+  </block>
+
+  <!-- Publisher View -->
+  <block wx:else>
+    <view class="section-container">
+      <view class="section-header">
+        <text class="section-title text-serif">工作台概览</text>
+      </view>
+      <view class="publisher-stats-row">
+        <view class="stat-box card-panel">
+          <text class="stat-count">{{publisherStats.totalBooks || 0}}</text>
+          <text class="stat-tag">管理书目</text>
+        </view>
+        <view class="stat-box card-panel">
+          <text class="stat-count">{{publisherStats.totalChatCount || 0}}</text>
+          <text class="stat-tag">累计对话</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="section-container">
+      <view class="section-header">
+        <text class="section-title text-serif">管理操作</text>
+      </view>
+      <view class="publisher-actions">
+        <view
+          wx:for="{{publisherEntries}}"
+          wx:key="title"
+          class="action-item card-panel"
+          data-path="{{item.path}}"
+          data-type="{{item.type}}"
+          bindtap="handlePublisherActionTap"
+        >
+          <text class="action-title">{{item.title}}</text>
+          <text class="action-desc">{{item.desc}}</text>
+        </view>
+      </view>
+    </view>
+  </block>
+
+  <!-- Permission Modal -->
+  <view wx:if="{{showPermissionModal}}" class="profile-overlay" bindtap="handleClosePermission">
+    <view class="profile-sheet" catchtap="handleStopPropagation">
+      <view class="profile-header">
+        <text class="profile-sheet-title">权限使用说明</text>
+      </view>
+      
+      <view class="permission-content">
+        <text class="permission-text">为了提供更好的 AI 阅读伴读体验，我们需要使用您的麦克风权限，以便您可以与书籍进行语音交谈。</text>
+      </view>
+
+      <button class="btn-primary" bindtap="handleClosePermission">我知道了</button>
+    </view>
+  </view>
+</view>

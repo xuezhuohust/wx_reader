@@ -1,0 +1,128 @@
+/* Remove the padding-bottom override to use global page-shell padding from app.wxss */
+
+.page-intro {
+  padding: 12rpx 0 64rpx;
+  background: transparent;
+}
+
+.intro-eyebrow {
+  margin-bottom: 24rpx;
+  font-size: 20rpx;
+  font-weight: 500;
+  color: var(--accent-literary);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.page-intro-title {
+  font-size: 52rpx;
+  font-weight: 600;
+  color: var(--text-ink);
+  display: block;
+  line-height: 1.25;
+}
+
+.page-intro-desc {
+  font-size: 28rpx;
+  color: var(--text-body);
+  margin-top: 24rpx;
+  display: block;
+  line-height: 1.6;
+  opacity: 0.8;
+}
+
+.input-shell {
+  margin-bottom: 64rpx;
+  height: 100rpx;
+  padding: 0 40rpx;
+  background: var(--bg-pure);
+  border-radius: 50rpx;
+  border: 1rpx solid var(--border-ink);
+  display: flex;
+  align-items: center;
+  box-shadow: var(--shadow-soft);
+}
+
+.publisher-book-list {
+  display: flex;
+  flex-direction: column;
+  gap: 32rpx;
+}
+
+.publisher-book {
+  padding: 40rpx;
+  background: var(--bg-pure);
+  border-radius: var(--radius-document);
+  box-shadow: var(--shadow-soft);
+  border: 1rpx solid var(--border-subtle);
+  position: relative;
+}
+
+.publisher-book-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 32rpx;
+}
+
+.book-info-area {
+  flex: 1;
+  min-width: 0;
+}
+
+.publisher-book-title {
+  font-size: 34rpx;
+  font-weight: 600;
+  color: var(--text-ink);
+  display: block;
+  word-break: break-all;
+}
+
+.publisher-book-author {
+  font-size: 26rpx;
+  color: var(--text-muted);
+  margin-top: 8rpx;
+  display: block;
+}
+
+.toggle-btn {
+  flex-shrink: 0;
+  min-width: 140rpx;
+  height: 64rpx;
+  line-height: 64rpx;
+  padding: 0 24rpx;
+  border-radius: 32rpx;
+  background: var(--bg-paper);
+  color: var(--text-body);
+  font-size: 24rpx;
+  font-weight: 500;
+  border: 1rpx solid var(--border-ink);
+  margin: 0;
+  text-align: center;
+}
+
+.toggle-btn--active {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+
+.publisher-pills {
+  margin-top: 32rpx;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+}
+
+.publisher-book-meta {
+  margin-top: 32rpx;
+  padding-top: 32rpx;
+  border-top: 1rpx solid var(--border-subtle);
+}
+
+.publisher-meta-text {
+  font-size: 22rpx;
+  color: var(--text-muted);
+  display: block;
+  margin-top: 8rpx;
+}

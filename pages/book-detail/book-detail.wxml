@@ -1,0 +1,134 @@
+<view wx:if="{{book}}" class="page-shell detail-page {{!isPublisherScene ? 'detail-page--reader' : ''}}">
+  <view class="page-intro">
+    <view class="intro-eyebrow">
+      <text>{{isPublisherScene ? '运营视角' : '沉浸阅读'}} · {{pageTitle}}</text>
+    </view>
+    <text class="page-intro-title text-serif">{{book.title}}</text>
+    <text class="page-intro-desc">
+      {{isPublisherScene ? '围绕建库、上架与运营状态查看这本书的完整信息。' : '像翻开一本真实的纸书一样，先认识它，再进入对话。'}}
+    </text>
+  </view>
+
+  <view class="section-container">
+    <view class="detail-hero card-panel">
+      <view class="detail-cover {{book.cover}}">
+        <text class="detail-cover-category">{{book.category}}</text>
+        <text class="detail-cover-title text-serif">{{book.title}}</text>
+        <text class="detail-cover-author">{{book.author}}</text>
+      </view>
+
+      <view class="detail-main">
+        <view class="pill-row">
+          <status-tag wx:if="{{!isPublisherScene}}" type="purchase" status="{{book.purchased || ''}}" />
+          <status-tag wx:if="{{!isPublisherScene}}" text="支持对话" theme="success" />
+          <status-tag wx:if="{{isPublisherScene}}" type="build" status="{{book.buildStatus || ''}}" />
+          <status-tag wx:if="{{isPublisherScene}}" type="online" status="{{book.onlineStatus || ''}}" />
+        </view>
+        <text class="detail-title text-serif">{{book.title}}</text>
+        <text class="detail-author">{{book.author}}</text>
+        <text class="detail-publisher">{{book.publisher}}</text>
+        <text class="detail-price">{{priceText}}</text>
+        <text class="detail-desc">{{book.description}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{!isPublisherScene}}" class="section-container">
+    <view class="info-card card-panel">
+      <view class="section-header">
+        <text class="section-title text-serif">书籍目录</text>
+        <text class="section-more">知识库章节</text>
+      </view>
+      <view class="chapter-list">
+        <view wx:for="{{book.chapters}}" wx:key="*this" class="chapter-item">
+          <text class="chapter-index">{{index + 1}}</text>
+          <text class="chapter-name">{{item}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{isPublisherScene}}" class="section-container">
+    <view class="info-card card-panel">
+      <view class="section-header">
+        <text class="section-title text-serif">建库状态</text>
+        <status-tag type="build" status="{{book.buildStatus || ''}}" />
+      </view>
+      <progress
+        class="build-progress"
+        percent="{{book.buildProgress}}"
+        stroke-width="8"
+        active="{{book.buildStatus === 'building'}}"
+        activeColor="#c2410c"
+        backgroundColor="#f0ede4"
+      />
+      <text class="build-desc">当前进度 {{book.buildProgress}}%。状态与后端异步建库任务保持一致，完成后会落盘到知识库目录并开放 AI 对话。</text>
+      <text wx:if="{{book.buildStage}}" class="build-task-text">当前阶段：{{book.buildStage}}</text>
+      <text wx:if="{{book.taskId}}" class="build-task-text">任务编号：{{book.taskId}}</text>
+      <text wx:if="{{book.buildError}}" class="build-error-text">失败原因：{{book.buildError}}</text>
+    </view>
+  </view>
+
+  <view class="section-container">
+    <view class="info-card card-panel">
+      <view class="section-header">
+        <text class="section-title text-serif">{{isPublisherScene ? '运营信息' : '版权信息'}}</text>
+      </view>
+      <view wx:if="{{isPublisherScene}}" class="ops-list">
+        <view class="ops-item">
+          <text class="ops-label">上传时间</text>
+          <text class="ops-value">{{book.uploadTime}}</text>
+        </view>
+        <view class="ops-item">
+          <text class="ops-label">上架状态</text>
+          <text class="ops-value">{{book.onlineStatus === 'online' ? '已上架' : '已下架'}}</text>
+        </view>
+        <view class="ops-item">
+          <text class="ops-label">建库状态</text>
+          <text class="ops-value">
+            {{book.buildStatus === 'done' ? '已完成' : book.buildStatus === 'building' ? '建库中' : book.buildStatus === 'failed' ? '失败' : '未建库'}}
+          </text>
+        </view>
+        <view wx:if="{{book.taskId}}" class="ops-item">
+          <text class="ops-label">任务编号</text>
+          <text class="ops-value">{{book.taskId}}</text>
+        </view>
+        <view wx:if="{{book.buildError}}" class="ops-item">
+          <text class="ops-label">失败原因</text>
+          <text class="ops-value ops-value--multiline">{{book.buildError}}</text>
+        </view>
+        <view class="ops-item">
+          <text class="ops-label">版权说明</text>
+          <text class="ops-value ops-value--multiline">{{book.copyright}}</text>
+        </view>
+      </view>
+      <text wx:else class="copyright-text">{{book.copyright}}</text>
+    </view>
+  </view>
+
+  <view wx:if="{{!isPublisherScene}}" class="action-wrap">
+    <button
+      wx:if="{{book.purchased}}"
+      class="primary-btn action-main"
+      bindtap="handleStartChat"
+    >
+      开始对话
+    </button>
+    <button
+      wx:else
+      class="primary-btn action-main"
+      bindtap="handlePurchase"
+    >
+      购买后解锁对话
+    </button>
+  </view>
+
+  <view wx:if="{{isPublisherScene}}" class="publisher-action-wrap">
+    <button class="ghost-btn publisher-action-btn" bindtap="handleToggleOnlineStatus">
+      {{book.onlineStatus === 'online' ? '下架书籍' : '上架书籍'}}
+    </button>
+    <button class="primary-btn publisher-action-btn" bindtap="handleGotoBuild">
+      去建库任务
+    </button>
+  </view>
+</view>

@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "书目管理",
+  "usingComponents": {
+    "status-tag": "/components/status-tag/status-tag",
+    "empty-state": "/components/empty-state/empty-state"
+  }
+}

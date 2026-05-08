@@ -1,0 +1,359 @@
+.home-page {
+  padding-bottom: calc(140rpx + env(safe-area-inset-bottom));
+}
+
+.page-intro {
+  padding: 0 0 48rpx;
+  background: transparent;
+}
+
+.intro-eyebrow {
+  margin-bottom: 24rpx;
+  font-size: 20rpx;
+  font-weight: 500;
+  color: var(--accent-literary);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.role-switch-btn {
+  background: rgba(194, 65, 12, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44rpx;
+  padding: 10rpx 16rpx;
+  border-radius: 22rpx;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.role-switch-btn__label {
+  display: block;
+  font-size: 18rpx;
+  line-height: 24rpx;
+  letter-spacing: 0.02em;
+}
+
+.role-switch-btn:active {
+  background: rgba(194, 65, 12, 0.15);
+  transform: scale(0.96);
+}
+
+.header-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.page-intro-title {
+  font-size: 56rpx;
+  font-weight: 600;
+  color: var(--text-ink);
+  display: block;
+  line-height: 1.2;
+}
+
+.page-intro-desc {
+  font-size: 28rpx;
+  color: var(--text-body);
+  display: block;
+  line-height: 1.6;
+  margin-top: 16rpx;
+  opacity: 0.7;
+}
+
+.user-avatar {
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 1rpx solid var(--border-ink);
+  background: var(--bg-pure);
+  flex-shrink: 0;
+}
+
+.user-avatar image {
+  width: 100%;
+  height: 100%;
+}
+
+/* Search Bar (Borrowed from Library) */
+.input-shell {
+  margin-bottom: 64rpx;
+  height: 100rpx;
+  padding: 0 40rpx;
+  background: var(--bg-pure);
+  border-radius: 50rpx;
+  border: 1rpx solid var(--border-ink);
+  display: flex;
+  align-items: center;
+  box-shadow: var(--shadow-soft);
+}
+
+.input-icon {
+  font-size: 32rpx;
+  color: var(--text-muted);
+  margin-right: 20rpx;
+}
+
+.input-field {
+  flex: 1;
+  font-size: 30rpx;
+  color: var(--text-ink);
+}
+
+/* Tabs (Integrated) */
+.tab-scroll {
+  margin-bottom: 48rpx;
+}
+
+.tab-row {
+  display: flex;
+  gap: 20rpx;
+}
+
+.tab-item {
+  white-space: nowrap;
+  padding: 16rpx 36rpx;
+  background: var(--bg-pure);
+  border: 1rpx solid var(--border-subtle);
+  border-radius: 40rpx;
+  font-size: 26rpx;
+  color: var(--text-body);
+  transition: all 0.3s;
+}
+
+.tab-item--active {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+
+.list-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 32rpx;
+}
+
+/* Sections */
+.section-container {
+  margin-bottom: 80rpx;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 32rpx;
+}
+
+.section-title {
+  font-size: 40rpx;
+  font-weight: 600;
+  color: var(--text-ink);
+}
+
+.section-more {
+  font-size: 24rpx;
+  color: var(--accent-literary);
+  font-weight: 500;
+}
+
+/* Horizontal Recommendations */
+.recommend-scroll {
+  width: 100vw;
+  margin-left: -40rpx;
+}
+
+.recommend-row {
+  display: flex;
+  padding: 0 40rpx;
+  gap: 32rpx;
+}
+
+.recommend-card-literary {
+  width: 300rpx;
+  flex-shrink: 0;
+}
+
+.recommend-cover-box {
+  height: 420rpx;
+  padding: 40rpx 32rpx;
+  border-radius: 12rpx;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  color: #fff;
+  position: relative;
+  box-shadow: 0 12rpx 32rpx rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  background-color: var(--primary);
+}
+
+.cover-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(180deg, transparent 40%, rgba(0, 0, 0, 0.7) 100%);
+  z-index: 0;
+}
+
+.recommend-book-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  z-index: 1;
+  line-height: 1.3;
+}
+
+.recommend-book-author {
+  font-size: 22rpx;
+  opacity: 0.8;
+  margin-top: 12rpx;
+  z-index: 1;
+  letter-spacing: 0.02em;
+}
+
+/* Publisher Specific */
+.publisher-stats-row {
+  display: flex;
+  gap: 24rpx;
+  margin-bottom: 24rpx;
+}
+
+.stat-box {
+  flex: 1;
+  padding: 48rpx 32rpx;
+  text-align: center;
+}
+
+.stat-count {
+  font-size: 56rpx;
+  font-weight: 700;
+  color: var(--accent-literary);
+  display: block;
+}
+
+.stat-tag {
+  font-size: 22rpx;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-top: 12rpx;
+}
+
+.publisher-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24rpx;
+}
+
+.action-item {
+  padding: 40rpx;
+  min-height: 180rpx;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.action-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: var(--text-ink);
+  display: block;
+}
+
+.action-desc {
+  font-size: 22rpx;
+  color: var(--text-muted);
+  margin-top: 12rpx;
+  line-height: 1.4;
+}
+
+
+/* Profile Overlay */
+.profile-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.45);
+  backdrop-filter: blur(10rpx);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40rpx;
+}
+
+.profile-sheet {
+  width: 100%;
+  max-width: 600rpx;
+  background: var(--bg-pure);
+  border-radius: var(--radius-document);
+  padding: 60rpx 40rpx;
+  box-shadow: 0 32rpx 80rpx rgba(0, 0, 0, 0.2);
+  animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.profile-sheet-title {
+  font-size: 40rpx;
+  font-weight: 600;
+  margin-bottom: 48rpx;
+  display: block;
+}
+
+.avatar-uploader {
+  width: 160rpx;
+  height: 160rpx;
+  border-radius: 50%;
+  background: var(--bg-paper);
+  margin: 0 auto 48rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1rpx solid var(--border-subtle);
+}
+
+.avatar-uploader image {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+}
+
+.avatar-plus {
+  font-size: 60rpx;
+  color: var(--border-ink);
+}
+
+.nickname-field {
+  margin-bottom: 60rpx;
+}
+
+.permission-content {
+  margin-bottom: 64rpx;
+}
+
+.permission-text {
+  font-size: 28rpx;
+  color: var(--text-body);
+  line-height: 1.8;
+  display: block;
+  opacity: 0.9;
+}
+
+.field-label {
+  font-size: 24rpx;
+  color: var(--text-muted);
+  margin-bottom: 16rpx;
+  display: block;
+}
+
+.field-input {
+  width: 100%;
+  height: 100rpx;
+  background: var(--bg-paper);
+  border-radius: 12rpx;
+  padding: 0 32rpx;
+  font-size: 32rpx;
+}

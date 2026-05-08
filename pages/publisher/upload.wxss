@@ -1,0 +1,103 @@
+.page-intro {
+  padding: 12rpx 0 64rpx;
+  background: transparent;
+}
+
+.intro-eyebrow {
+  margin-bottom: 24rpx;
+  font-size: 20rpx;
+  font-weight: 500;
+  color: var(--accent-literary);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.page-intro-title {
+  font-size: 52rpx;
+  font-weight: 600;
+  color: var(--text-ink);
+  display: block;
+  line-height: 1.25;
+}
+
+.page-intro-desc {
+  font-size: 28rpx;
+  color: var(--text-body);
+  margin-top: 24rpx;
+  display: block;
+  line-height: 1.6;
+  opacity: 0.8;
+}
+
+.upload-form {
+  padding: 60rpx 40rpx;
+  background: var(--bg-pure);
+  border-radius: var(--radius-document);
+  box-shadow: var(--shadow-soft);
+  border: 1rpx solid var(--border-subtle);
+  margin-top: 16rpx;
+}
+
+.form-item {
+  margin-bottom: 48rpx;
+}
+
+.form-label {
+  display: block;
+  font-size: 24rpx;
+  color: var(--text-muted);
+  margin-bottom: 16rpx;
+  font-weight: 500;
+}
+
+.form-input,
+.picker-value {
+  width: 100%;
+  height: 100rpx;
+  line-height: 100rpx;
+  background: var(--bg-paper);
+  border-radius: var(--radius-ui);
+  padding: 0 32rpx;
+  font-size: 30rpx;
+  color: var(--text-ink);
+  border: 1rpx solid var(--border-subtle);
+}
+
+.form-textarea {
+  width: 100%;
+  min-height: 240rpx;
+  background: var(--bg-paper);
+  border-radius: var(--radius-ui);
+  padding: 32rpx;
+  font-size: 30rpx;
+  color: var(--text-ink);
+  border: 1rpx solid var(--border-subtle);
+  line-height: 1.6;
+}
+
+.file-box {
+  padding: 48rpx;
+  border-radius: var(--radius-ui);
+  background: #fff;
+  border: 2rpx dashed var(--border-ink);
+  text-align: center;
+}
+
+.file-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: var(--text-ink);
+  display: block;
+}
+
+.file-desc {
+  font-size: 24rpx;
+  color: var(--text-muted);
+  margin-top: 12rpx;
+  display: block;
+}
+
+.submit-btn {
+  margin-top: 64rpx;
+  width: 100%;
+}

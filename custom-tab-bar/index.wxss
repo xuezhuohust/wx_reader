@@ -1,0 +1,55 @@
+.tab-shell {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(20px);
+  border-top: 1rpx solid var(--border-subtle);
+  z-index: 99;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.tab-inner {
+  display: flex;
+  height: 100rpx;
+  align-items: center;
+}
+
+.tab-item {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.tab-icon {
+  width: 42rpx;
+  height: 42rpx;
+  opacity: 0.35;
+  transition: all 0.2s ease;
+}
+
+/* 
+   We use filter to unify the icon color with the label. 
+   For a perfect match with #c2410c (literary orange):
+*/
+.tab-item--active .tab-icon {
+  opacity: 1;
+  filter: brightness(0) saturate(100%) invert(29%) sepia(94%) saturate(1353%) hue-rotate(1deg) brightness(92%) contrast(98%);
+}
+
+.tab-label {
+  font-size: 20rpx;
+  color: var(--text-muted);
+  margin-top: 4rpx;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+}
+
+.tab-item--active .tab-label {
+  color: var(--accent-literary);
+  font-weight: 500;
+}

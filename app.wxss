@@ -1,0 +1,111 @@
+/** Claude-inspired Literary Design System **/
+page {
+  --bg-paper: #f9f7f2; 
+  --bg-pure: #ffffff;
+  --primary: #3d3d3d; 
+  --accent-literary: #c2410c; 
+  --text-ink: #1a1a1a;
+  --text-body: #4a4a4a;
+  --text-muted: #8c8c8c;
+  --border-subtle: #e5e5e0;
+  --border-ink: #d1d1cc;
+  
+  --radius-document: 12rpx;
+  --radius-ui: 8rpx;
+  --shadow-soft: 0 2rpx 12rpx rgba(0, 0, 0, 0.03);
+
+  background: var(--bg-paper);
+  color: var(--text-ink);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", "PingFang SC", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.6;
+}
+
+view,
+text,
+button,
+input,
+textarea,
+picker,
+scroll-view {
+  box-sizing: border-box;
+}
+
+/* Typography Enhancements */
+.text-serif {
+  font-family: "Charter", "Georgia", "Baskerville", serif;
+}
+
+.text-subtle {
+  font-size: 24rpx;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.text-ink-mark {
+  color: var(--accent-literary);
+  font-weight: 600;
+}
+
+/* Page Shell Refinement */
+.page-shell {
+  min-height: 100vh;
+  padding: 48rpx 40rpx calc(140rpx + env(safe-area-inset-bottom));
+  background: var(--bg-paper);
+}
+
+/* Layout Components */
+.card-panel {
+  background: var(--bg-pure);
+  border: 1rpx solid var(--border-subtle);
+  border-radius: var(--radius-document);
+  box-shadow: var(--shadow-soft);
+  overflow: hidden;
+  transition: background 0.2s ease;
+}
+
+.card-panel:active {
+  background: rgba(0, 0, 0, 0.01);
+}
+
+.btn-primary, .primary-btn {
+  background: var(--primary);
+  color: #fff;
+  border-radius: var(--radius-ui);
+  font-weight: 500;
+  font-size: 28rpx;
+  padding: 24rpx 48rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s;
+  border: none;
+}
+
+.btn-primary:active, .primary-btn:active {
+  opacity: 0.8;
+}
+
+.btn-ghost, .ghost-btn {
+  background: transparent;
+  color: var(--primary);
+  border: 1rpx solid var(--border-ink);
+  border-radius: var(--radius-ui);
+  font-weight: 500;
+  font-size: 28rpx;
+  padding: 24rpx 48rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20rpx); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}

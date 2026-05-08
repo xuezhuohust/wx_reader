@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "建库任务",
+  "usingComponents": {
+    "status-tag": "/components/status-tag/status-tag"
+  }
+}

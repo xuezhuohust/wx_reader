@@ -1,0 +1,51 @@
+<view class="page-shell">
+  <view class="page-intro">
+    <view class="intro-eyebrow">
+      <text>管理工作台 · 出版商视图</text>
+    </view>
+    <text class="page-intro-title text-serif">{{publisher.name || '出版商工坊'}}</text>
+    <text class="page-intro-desc">{{publisher.intro || '管理您的书目，构建知识的数字桥梁。'}}</text>
+  </view>
+
+  <view class="stats-grid">
+    <view class="stat-card">
+      <text class="stat-value">{{stats.totalBooks || 0}}</text>
+      <text class="stat-label">书籍总数</text>
+    </view>
+    <view class="stat-card">
+      <text class="stat-value">{{stats.builtCount || 0}}</text>
+      <text class="stat-label">已建库</text>
+    </view>
+    <view class="stat-card">
+      <text class="stat-value">{{stats.pendingCount || 0}}</text>
+      <text class="stat-label">待建库</text>
+    </view>
+    <view class="stat-card">
+      <text class="stat-value">{{stats.totalChatCount || 0}}</text>
+      <text class="stat-label">累计对话</text>
+    </view>
+  </view>
+
+  <view class="section-container">
+    <view class="section-header">
+      <text class="section-title">功能入口</text>
+    </view>
+    
+    <view class="publisher-entry-list">
+      <view
+        wx:for="{{entries}}"
+        wx:key="title"
+        class="publisher-entry card-panel"
+        data-path="{{item.path}}"
+        data-type="{{item.type}}"
+        bindtap="handleEntryTap"
+      >
+        <view class="publisher-entry-main">
+          <text class="publisher-entry-title">{{item.title}}</text>
+          <text class="publisher-entry-desc">{{item.desc}}</text>
+        </view>
+        <text class="publisher-entry-link">进入 →</text>
+      </view>
+    </view>
+  </view>
+</view>

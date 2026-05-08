@@ -1,0 +1,55 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/my-books/my-books",
+    "pages/publisher/index",
+    "pages/book-detail/book-detail",
+    "pages/chat/chat",
+    "pages/publisher/books",
+    "pages/publisher/upload",
+    "pages/publisher/build"
+  ],
+  "window": {
+    "navigationBarBackgroundColor": "#f9f7f2",
+    "navigationBarTitleText": "读书助手",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#f9f7f2",
+    "backgroundTextStyle": "light"
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents",
+  "tabBar": {
+    "custom": true,
+    "color": "#6b7280",
+    "selectedColor": "#c2410c",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页",
+        "iconPath": "app-assets/tab-default.png",
+        "selectedIconPath": "app-assets/tab-active.png"
+      },
+      {
+        "pagePath": "pages/my-books/my-books",
+        "text": "我的",
+        "iconPath": "app-assets/tab-default.png",
+        "selectedIconPath": "app-assets/tab-active.png"
+      },
+      {
+        "pagePath": "pages/publisher/books",
+        "text": "书目",
+        "iconPath": "app-assets/tab-default.png",
+        "selectedIconPath": "app-assets/tab-active.png"
+      },
+      {
+        "pagePath": "pages/publisher/build",
+        "text": "建库",
+        "iconPath": "app-assets/tab-default.png",
+        "selectedIconPath": "app-assets/tab-active.png"
+      }
+    ]
+  }
+}

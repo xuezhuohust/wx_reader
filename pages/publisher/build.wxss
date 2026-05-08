@@ -1,0 +1,115 @@
+.page-intro {
+  padding: 12rpx 0 64rpx;
+  background: transparent;
+}
+
+.intro-eyebrow {
+  margin-bottom: 24rpx;
+  font-size: 20rpx;
+  font-weight: 500;
+  color: var(--accent-literary);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.page-intro-title {
+  font-size: 52rpx;
+  font-weight: 600;
+  color: var(--text-ink);
+  display: block;
+  line-height: 1.25;
+}
+
+.page-intro-desc {
+  font-size: 28rpx;
+  color: var(--text-body);
+  margin-top: 24rpx;
+  display: block;
+  line-height: 1.6;
+  opacity: 0.8;
+}
+
+.build-list {
+  display: flex;
+  flex-direction: column;
+  gap: 32rpx;
+  margin-top: 16rpx;
+}
+
+.build-card {
+  padding: 40rpx;
+  background: var(--bg-pure);
+  border-radius: var(--radius-document);
+  box-shadow: var(--shadow-soft);
+  border: 1rpx solid var(--border-subtle);
+}
+
+.build-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 32rpx;
+}
+
+.build-title {
+  font-size: 34rpx;
+  font-weight: 600;
+  color: var(--text-ink);
+  display: block;
+}
+
+.build-author {
+  font-size: 26rpx;
+  color: var(--text-muted);
+  margin-top: 8rpx;
+  display: block;
+}
+
+.build-progress-wrap {
+  margin-bottom: 32rpx;
+}
+
+.build-progress-text {
+  font-size: 22rpx;
+  color: var(--text-muted);
+  display: block;
+  margin-bottom: 12rpx;
+}
+
+.build-stage {
+  font-size: 24rpx;
+  color: var(--text-body);
+  display: block;
+  margin-top: 16rpx;
+}
+
+.build-error {
+  font-size: 24rpx;
+  color: #991b1b;
+  margin-top: 16rpx;
+  display: block;
+}
+
+.build-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 32rpx;
+  border-top: 1rpx solid var(--border-subtle);
+}
+
+.build-meta {
+  font-size: 22rpx;
+  color: var(--text-muted);
+}
+
+.build-btn {
+  height: 64rpx;
+  line-height: 64rpx;
+  padding: 0 32rpx;
+  background: var(--primary);
+  color: #fff;
+  border-radius: 32rpx;
+  font-size: 24rpx;
+  margin: 0;
+}

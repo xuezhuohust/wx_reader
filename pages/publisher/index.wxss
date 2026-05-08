@@ -1,0 +1,106 @@
+.page-intro {
+  padding: 12rpx 0 64rpx;
+  background: transparent;
+}
+
+.intro-eyebrow {
+  margin-bottom: 24rpx;
+  font-size: 20rpx;
+  font-weight: 500;
+  color: var(--accent-literary);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.page-intro-title {
+  font-size: 52rpx;
+  font-weight: 600;
+  color: var(--text-ink);
+  display: block;
+  line-height: 1.25;
+}
+
+.page-intro-desc {
+  font-size: 28rpx;
+  color: var(--text-body);
+  margin-top: 24rpx;
+  display: block;
+  line-height: 1.6;
+  opacity: 0.8;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24rpx;
+  margin-bottom: 80rpx;
+}
+
+.stat-card {
+  padding: 40rpx;
+  background: var(--bg-pure);
+  border-radius: var(--radius-document);
+  border: 1rpx solid var(--border-subtle);
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 48rpx;
+  font-weight: 600;
+  color: var(--text-ink);
+  display: block;
+}
+
+.stat-label {
+  font-size: 20rpx;
+  color: var(--text-muted);
+  margin-top: 8rpx;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.section-container {
+  margin-top: 80rpx;
+}
+
+.section-header {
+  margin-bottom: 32rpx;
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: var(--text-ink);
+}
+
+.publisher-entry-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24rpx;
+}
+
+.publisher-entry {
+  padding: 40rpx;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.publisher-entry-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: var(--text-ink);
+  display: block;
+}
+
+.publisher-entry-desc {
+  font-size: 24rpx;
+  color: var(--text-muted);
+  margin-top: 8rpx;
+}
+
+.publisher-entry-link {
+  font-size: 26rpx;
+  color: var(--accent-literary);
+  font-weight: 500;
+}

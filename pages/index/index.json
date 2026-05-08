@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "读书助手",
+  "usingComponents": {
+    "book-card": "/components/book-card/book-card",
+    "empty-state": "/components/empty-state/empty-state"
+  }
+}

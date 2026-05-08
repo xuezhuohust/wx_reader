@@ -1,0 +1,55 @@
+<view class="page-shell">
+  <view class="page-intro">
+    <view class="intro-eyebrow">
+      <text>内容录入 · 异步建库</text>
+    </view>
+    <text class="page-intro-title text-serif">录入新书籍</text>
+    <text class="page-intro-desc">录入书目并上传源文件。提交后系统将自动开启 AI 深度理解流程。</text>
+  </view>
+
+  <view class="upload-form card-panel">
+    <view class="form-item">
+      <text class="form-label">书名</text>
+      <input class="form-input" value="{{form.title}}" data-field="title" bindinput="handleInput" placeholder="请输入书名" />
+    </view>
+
+    <view class="form-item">
+      <text class="form-label">作者</text>
+      <input class="form-input" value="{{form.author}}" data-field="author" bindinput="handleInput" placeholder="请输入作者" />
+    </view>
+
+    <view class="form-item">
+      <text class="form-label">出版社</text>
+      <input class="form-input" value="{{form.publisher}}" data-field="publisher" bindinput="handleInput" placeholder="请输入出版社" />
+    </view>
+
+    <view class="form-item">
+      <text class="form-label">分类</text>
+      <picker range="{{categories}}" value="{{categoryIndex}}" bindchange="handleCategoryChange">
+        <view class="picker-value">{{form.category}}</view>
+      </picker>
+    </view>
+
+    <view class="form-item">
+      <text class="form-label">简介</text>
+      <textarea class="form-textarea" value="{{form.description}}" data-field="description" bindinput="handleInput" placeholder="请输入书籍简介" />
+    </view>
+
+    <view class="form-item">
+      <text class="form-label">价格</text>
+      <input class="form-input" value="{{form.price}}" data-field="price" bindinput="handleInput" placeholder="请输入价格" type="digit" />
+    </view>
+
+    <view class="form-item">
+      <text class="form-label">版权说明</text>
+      <textarea class="form-textarea" value="{{form.copyright}}" data-field="copyright" bindinput="handleInput" placeholder="请输入版权说明" />
+    </view>
+
+    <view class="file-box" bindtap="handleChooseFile">
+      <text class="file-title">文件上传</text>
+      <text class="file-desc">{{fileName || '点击选择 .txt / .docx / .pdf 文件'}}</text>
+    </view>
+
+    <button class="primary-btn submit-btn" bindtap="handleSubmit">提交并上传</button>
+  </view>
+</view>
