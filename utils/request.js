@@ -6,11 +6,33 @@ function buildUrl(url) {
 
 function normalizeError(res, fallbackMessage) {
   const data = res && res.data
-  return new Error(
+  const error = new Error(
     (data && (data.error || data.message))
       || fallbackMessage
       || '请求失败'
   )
+  if (data && typeof data === 'object') {
+    error.code = data.code
+    error.requestId = data.requestId
+    error.details = data.details
+  }
+  return error
+}
+
+function unwrapApiResponse(data, fallbackMessage) {
+  if (!data || typeof data !== 'object' || typeof data.success === 'undefined') {
+    return data || {}
+  }
+
+  if (data.success) {
+    return data.data == null ? {} : data.data
+  }
+
+  const error = new Error(data.message || fallbackMessage || '请求失败')
+  error.code = data.code
+  error.requestId = data.requestId
+  error.details = data.details
+  throw error
 }
 
 function rawRequest(options) {
@@ -27,7 +49,12 @@ function rawRequest(options) {
       success: (res) => {
         console.info('[request] response', res.statusCode, requestUrl)
         if (res.statusCode >= 200 && res.statusCode < 300) {
-          resolve(res.data || {})
+          try {
+            resolve(unwrapApiResponse(res.data || {}, '请求失败'))
+          } catch (error) {
+            error.statusCode = res.statusCode
+            reject(error)
+          }
           return
         }
 
@@ -115,11 +142,21 @@ function uploadFile(url, filePath, formData, hasRetriedAfterAuth) {
           }
 
           if (res.statusCode >= 200 && res.statusCode < 300) {
-            resolve(data)
+            try {
+              resolve(unwrapApiResponse(data, '上传失败'))
+            } catch (error) {
+              error.statusCode = res.statusCode
+              reject(error)
+            }
             return
           }
 
-          reject(new Error(data.error || '上传失败'))
+          const error = new Error(data.error || data.message || '上传失败')
+          error.statusCode = res.statusCode
+          error.code = data.code
+          error.requestId = data.requestId
+          error.details = data.details
+          reject(error)
         },
         fail: (error) => {
           reject(error)
@@ -146,6 +183,7 @@ function uploadFile(url, filePath, formData, hasRetriedAfterAuth) {
 
 module.exports = {
   BASE_URL,
+  unwrapApiResponse,
   request,
   requestWithoutAuth,
   uploadFile,

@@ -137,6 +137,42 @@ function decodeChunk(decoder, arrayBuffer) {
   }
 }
 
+function parseResponseData(data) {
+  if (!data || typeof data !== 'object') {
+    return data || {}
+  }
+
+  if (typeof ArrayBuffer !== 'undefined' && data instanceof ArrayBuffer) {
+    const text = decodeChunk(null, data)
+    try {
+      return JSON.parse(text || '{}')
+    } catch (error) {
+      return { message: text }
+    }
+  }
+
+  return data
+}
+
+function getStreamEvent(payload) {
+  if (!payload || typeof payload !== 'object') {
+    return {
+      event: '',
+      content: '',
+      success: false,
+      message: '',
+    }
+  }
+
+  const data = payload.data && typeof payload.data === 'object' ? payload.data : {}
+  return {
+    event: payload.type || payload.event || data.event || '',
+    content: payload.content || data.content || '',
+    success: typeof payload.success === 'boolean' ? payload.success : true,
+    message: payload.message || payload.error || '',
+  }
+}
+
 function sendBookChatMessageStream(bookId, message, handlers) {
   const callbacks = handlers || {}
 
@@ -190,8 +226,15 @@ function sendBookChatMessageStream(bookId, message, handlers) {
             return
           }
 
-          if (payload.type === 'segment') {
-            const segment = String(payload.content || '')
+          const streamEvent = getStreamEvent(payload)
+
+          if (!streamEvent.success || streamEvent.event === 'error') {
+            finishReject(new Error(streamEvent.content || streamEvent.message || '对话失败'))
+            return
+          }
+
+          if (streamEvent.event === 'segment') {
+            const segment = String(streamEvent.content || '')
             if (!segment) {
               return
             }
@@ -202,12 +245,7 @@ function sendBookChatMessageStream(bookId, message, handlers) {
             return
           }
 
-          if (payload.type === 'error') {
-            finishReject(new Error(payload.content || '对话失败'))
-            return
-          }
-
-          if (payload.type === 'end') {
+          if (streamEvent.event === 'end') {
             finishResolve()
           }
         })
@@ -229,11 +267,17 @@ function sendBookChatMessageStream(bookId, message, handlers) {
         },
         success: (res) => {
           if (res.statusCode < 200 || res.statusCode >= 300) {
+            const responseData = parseResponseData(res.data)
             const error = new Error(
-              (res.data && (res.data.error || res.data.message))
+              (responseData && (responseData.error || responseData.message))
                 || '请求失败'
             )
             error.statusCode = res.statusCode
+            if (responseData && typeof responseData === 'object') {
+              error.code = responseData.code
+              error.requestId = responseData.requestId
+              error.details = responseData.details
+            }
             finishReject(error)
             return
           }

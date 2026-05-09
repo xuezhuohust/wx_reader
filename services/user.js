@@ -1,5 +1,4 @@
-const { BASE_URL } = require('../utils/request')
-const { getUserRole } = require('../utils/role')
+const { BASE_URL, unwrapApiResponse } = require('../utils/request')
 const { loadIdentity, saveIdentity } = require('../utils/storage')
 
 let bootstrapPromise = null
@@ -66,7 +65,12 @@ function callLoginApi(url, code) {
       success: (res) => {
         console.info('[auth] login response', res.statusCode, `${BASE_URL}${url}`)
         if (res.statusCode >= 200 && res.statusCode < 300) {
-          resolve(res.data || {})
+          try {
+            resolve(unwrapApiResponse(res.data || {}, '登录失败'))
+          } catch (error) {
+            error.statusCode = res.statusCode
+            reject(error)
+          }
           return
         }
 
@@ -108,7 +112,7 @@ function loginWithWechat() {
       const isSameUser = previousIdentity.openid === openid
       const displayName = isSameUser && String(previousIdentity.displayName || '').trim()
         ? String(previousIdentity.displayName || '').trim()
-        : getDefaultDisplayName(openid)
+        : (String(data.displayName || '').trim() || getDefaultDisplayName(openid))
       const avatarUrl = isSameUser ? (previousIdentity.avatarUrl || data.avatarUrl || '') : (data.avatarUrl || '')
       const roles = Array.isArray(data.roles) && data.roles.length ? data.roles : (previousIdentity.roles || ['reader'])
       const activeRole = String(data.activeRole || previousIdentity.activeRole || 'reader')
@@ -122,6 +126,8 @@ function loginWithWechat() {
         role: activeRole,
         displayName,
         avatarUrl,
+        profileCompleted: !!data.profileCompleted,
+        phoneBound: !!data.phoneBound,
         updatedAt: Date.now(),
       })
     })
