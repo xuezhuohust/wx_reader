@@ -13,12 +13,19 @@ Page({
     currentRole: 'reader',
     currentRoleLabel: '读者',
     showPermissionModal: false,
+    navBarHeight: getApp().globalData.navBarHeight,
+    statusBarHeight: getApp().globalData.statusBarHeight,
+    menuRight: getApp().globalData.menuRight,
+    menuTop: getApp().globalData.menuTop,
+    menuHeight: getApp().globalData.menuHeight,
+    menuWidth: 87, // Default width
     // Library Data
     searchValue: '',
     activeCategory: '全部',
     categories: ['全部', '文学', '科技', '经管', '教育'],
     books: [],
     filteredBooks: [],
+    loadError: false,
     publisherEntries: [
       {
         title: '书目管理',
@@ -39,6 +46,20 @@ Page({
         type: 'tab',
       },
     ],
+  },
+
+  onLoad(options) {
+    const app = getApp()
+    this.setData({
+      navBarHeight: app.globalData.navBarHeight,
+      statusBarHeight: app.globalData.statusBarHeight,
+      menuRight: app.globalData.menuRight,
+      menuTop: app.globalData.menuTop,
+      menuHeight: app.globalData.menuHeight,
+      menuWidth: app.globalData.menuWidth,
+    })
+
+    // Check for publisher build intent
   },
 
   onShow() {
@@ -118,6 +139,12 @@ Page({
     syncRoleTabBar(this, 'pages/index/index', identity)
   },
 
+  handleProfileTap() {
+    wx.switchTab({
+      url: '/pages/my-books/my-books',
+    })
+  },
+
   loadRoleContent(identity) {
     if (getUserRole(identity) === 'publisher') {
       return this.loadPublisherStats()
@@ -132,11 +159,17 @@ Page({
   loadRecommendBooks(done) {
     return api.getRecommendBooks()
       .then((recommendBooks) => {
-        this.setData({ recommendBooks })
+        this.setData({
+          recommendBooks,
+          loadError: false,
+        })
       })
       .catch((error) => {
         console.error('loadRecommendBooks failed:', error)
-        this.setData({ recommendBooks: [] })
+        this.setData({
+          recommendBooks: [],
+          loadError: true,
+        })
       })
       .finally(() => {
         if (typeof done === 'function') {
@@ -148,7 +181,10 @@ Page({
   loadLibraryBooks(done) {
     return api.getAllBooks()
       .then((books) => {
-        this.setData({ books })
+        this.setData({
+          books,
+          loadError: false,
+        })
         this.applyFilters(books, this.data.searchValue, this.data.activeCategory)
       })
       .catch((error) => {
@@ -156,6 +192,7 @@ Page({
         this.setData({
           books: [],
           filteredBooks: [],
+          loadError: true,
         })
       })
       .finally(() => {

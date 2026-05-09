@@ -28,14 +28,25 @@ Page({
     }
     const isPublisherScene = scene === 'publisher'
     const pageTitle = isPublisherScene ? '书目详情' : '书籍详情'
+    
+    const app = getApp()
     this.setData({
       scene,
       isPublisherScene,
       pageTitle,
+      navBarHeight: app.globalData.navBarHeight,
+      menuRight: app.globalData.menuRight,
+      menuTop: app.globalData.menuTop,
+      menuHeight: app.globalData.menuHeight,
+      menuWidth: app.globalData.menuWidth,
     })
     wx.setNavigationBarTitle({
       title: pageTitle,
     })
+  },
+
+  handleBack() {
+    wx.navigateBack()
   },
 
   onShow() {

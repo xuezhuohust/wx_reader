@@ -2,8 +2,10 @@
   <view class="book-cover {{coverTheme}}">
     <view class="cover-inner">
       <view class="spine-shadow"></view>
-      <text class="cover-title text-serif">{{book.title}}</text>
-      <text class="cover-author">{{book.author}}</text>
+      <view class="cover-content-card">
+        <text class="cover-title-card text-serif">{{book.title}}</text>
+        <text class="cover-author-card">{{book.author}}</text>
+      </view>
     </view>
   </view>
 

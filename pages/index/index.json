@@ -1,5 +1,5 @@
 {
-  "navigationBarTitleText": "读书助手",
+  "navigationStyle": "custom",
   "usingComponents": {
     "book-card": "/components/book-card/book-card",
     "empty-state": "/components/empty-state/empty-state"
