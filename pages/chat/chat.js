@@ -14,6 +14,8 @@ Page({
     playingMessageId: '',
     audioLoadingMessageId: '',
     keyboardHeight: 0,
+    isRecording: false,
+    isTranscribing: false,
   },
 
   onLoad(options) {
@@ -27,11 +29,10 @@ Page({
     this.ignoreNextStopEvent = false
     this.audioQueue = []
     this.streamSpeechBuffer = ''
+    this.sttPendingStop = false
+    this.recorderManager = null
+    this.bindRecorderManager()
     this.loadBook()
-  },
-
-  onUnload() {
-    this.destroyAudioContext()
   },
 
   createMessage(role, content, loading) {
@@ -141,6 +142,148 @@ Page({
     this.setData(this.buildComposerState({
       keyboardHeight: 0,
     }))
+  },
+
+  bindRecorderManager() {
+    if (this.recorderManager || typeof wx.getRecorderManager !== 'function') {
+      return
+    }
+
+    const recorderManager = wx.getRecorderManager()
+    recorderManager.onStart(() => {
+      this.setData({
+        isRecording: true,
+      })
+    })
+
+    recorderManager.onStop((result) => {
+      const tempFilePath = result && result.tempFilePath
+      this.setData({
+        isRecording: false,
+      })
+
+      if (!this.sttPendingStop) {
+        return
+      }
+
+      this.sttPendingStop = false
+
+      if (!tempFilePath) {
+        wx.showToast({
+          title: '录音文件为空',
+          icon: 'none',
+        })
+        return
+      }
+
+      this.transcribeAudio(tempFilePath)
+    })
+
+    recorderManager.onError((error) => {
+      console.error('[chat] recorder error', error)
+      this.sttPendingStop = false
+      this.setData({
+        isRecording: false,
+        isTranscribing: false,
+      })
+      wx.showToast({
+        title: '录音失败',
+        icon: 'none',
+      })
+    })
+
+    this.recorderManager = recorderManager
+  },
+
+  ensureRecordPermission() {
+    return new Promise((resolve, reject) => {
+      wx.authorize({
+        scope: 'scope.record',
+        success: () => resolve(true),
+        fail: (error) => {
+          reject(error)
+        },
+      })
+    })
+  },
+
+  startRecording() {
+    this.bindRecorderManager()
+    if (!this.recorderManager) {
+      wx.showToast({
+        title: '当前环境不支持录音',
+        icon: 'none',
+      })
+      return
+    }
+    if (this.data.isRecording || this.data.isTranscribing) {
+      return
+    }
+
+    this.ensureRecordPermission()
+      .then(() => {
+        this.sttPendingStop = true
+        this.recorderManager.start({
+          duration: 60000,
+          sampleRate: 16000,
+          numberOfChannels: 1,
+          format: 'PCM',
+        })
+      })
+      .catch((error) => {
+        console.error('[chat] record authorize failed', error)
+        wx.showToast({
+          title: '请先允许麦克风权限',
+          icon: 'none',
+        })
+      })
+  },
+
+  stopRecording() {
+    if (!this.recorderManager || !this.data.isRecording) {
+      return
+    }
+    this.recorderManager.stop()
+  },
+
+  transcribeAudio(filePath) {
+    this.setData({
+      isTranscribing: true,
+    })
+
+    api.requestSpeechToText(filePath, 'zh_cn', 'recording.pcm')
+      .then(({ text }) => {
+        if (!text) {
+          throw new Error('未识别到语音内容')
+        }
+
+        this.setData(this.buildComposerState({
+          inputValue: text,
+        }))
+      })
+      .catch((error) => {
+        console.error('[chat] stt failed', error)
+        wx.showToast({
+          title: error && error.message ? error.message : '语音转写失败',
+          icon: 'none',
+        })
+      })
+      .finally(() => {
+        this.setData({
+          isTranscribing: false,
+        })
+      })
+  },
+
+  handleVoiceInput() {
+    if (this.data.isTranscribing) {
+      return
+    }
+    if (this.data.isRecording) {
+      this.stopRecording()
+      return
+    }
+    this.startRecording()
   },
 
   ensureAudioContext() {
@@ -469,5 +612,13 @@ Page({
     this.setData({
       scrollIntoView: last.id,
     })
+  },
+
+  onUnload() {
+    if (this.data.isRecording && this.recorderManager) {
+      this.sttPendingStop = false
+      this.recorderManager.stop()
+    }
+    this.destroyAudioContext()
   },
 })

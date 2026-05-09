@@ -181,6 +181,30 @@
   border-radius: 32rpx;
 }
 
+.voice-btn {
+  min-width: 96rpx;
+  height: 72rpx;
+  padding: 0 20rpx;
+  border-radius: 36rpx;
+  background: #f3ede3;
+  color: var(--text-ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24rpx;
+  flex-shrink: 0;
+}
+
+.voice-btn--recording {
+  background: #c95d3a;
+  color: #fff;
+}
+
+.voice-btn--loading {
+  background: #d7d0c3;
+  color: var(--text-muted);
+}
+
 .chat-input-wrap {
   flex: 1;
   min-height: 72rpx;

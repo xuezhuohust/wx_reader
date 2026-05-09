@@ -115,6 +115,47 @@ function requestWithoutAuth(options) {
   return rawRequest(options)
 }
 
+function uploadFileWithoutAuth(url, filePath, formData) {
+  return new Promise((resolve, reject) => {
+    wx.uploadFile({
+      url: buildUrl(url),
+      filePath,
+      name: 'file',
+      formData,
+      success: (res) => {
+        let data = {}
+
+        try {
+          data = JSON.parse(res.data || '{}')
+        } catch (error) {
+          reject(error)
+          return
+        }
+
+        if (res.statusCode >= 200 && res.statusCode < 300) {
+          try {
+            resolve(unwrapApiResponse(data, '上传失败'))
+          } catch (error) {
+            error.statusCode = res.statusCode
+            reject(error)
+          }
+          return
+        }
+
+        const error = new Error(data.error || data.message || '上传失败')
+        error.statusCode = res.statusCode
+        error.code = data.code
+        error.requestId = data.requestId
+        error.details = data.details
+        reject(error)
+      },
+      fail: (error) => {
+        reject(error)
+      },
+    })
+  })
+}
+
 function uploadFile(url, filePath, formData, hasRetriedAfterAuth) {
   const { ensureUserIdentity } = require('../services/user')
   const { clearIdentity } = require('./storage')
@@ -186,5 +227,6 @@ module.exports = {
   unwrapApiResponse,
   request,
   requestWithoutAuth,
+  uploadFileWithoutAuth,
   uploadFile,
 }

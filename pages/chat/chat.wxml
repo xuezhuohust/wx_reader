@@ -73,10 +73,16 @@
     </view>
 
     <view class="input-area {{isInputExpanded ? 'input-area--expanded' : ''}}">
+      <view
+        class="voice-btn {{isRecording ? 'voice-btn--recording' : ''}} {{isTranscribing ? 'voice-btn--loading' : ''}}"
+        bindtap="handleVoiceInput"
+      >
+        <text>{{isRecording ? '结束' : (isTranscribing ? '转写中' : '语音')}}</text>
+      </view>
       <view class="chat-input-wrap">
         <textarea
           class="chat-input"
-          placeholder="向这本书提问..."
+          placeholder="{{isRecording ? '录音中，再点一次结束' : (isTranscribing ? '正在转写语音...' : '向这本书提问...')}}"
           placeholder-style="color:#999;"
           value="{{inputValue}}"
           bindinput="handleInput"
@@ -89,6 +95,7 @@
           adjust-position="{{false}}"
           cursor-spacing="32"
           maxlength="500"
+          disabled="{{isRecording || isTranscribing}}"
         />
       </view>
       <view class="send-btn {{inputValue ? 'send-btn--active' : ''}} {{isInputExpanded ? 'send-btn--expanded' : ''}}" bindtap="handleSend">

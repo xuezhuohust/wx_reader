@@ -1,5 +1,5 @@
 const { ensureUserIdentity } = require('../services/user')
-const { BASE_URL, request, requestWithoutAuth, uploadFile } = require('./request')
+const { BASE_URL, request, requestWithoutAuth, uploadFile, uploadFileWithoutAuth } = require('./request')
 
 function toAbsoluteUrl(path) {
   const rawPath = String(path || '').trim()
@@ -118,6 +118,22 @@ function reportVoicePlay(duration) {
       timestamp: Date.now(),
     },
   }).catch(() => null)
+}
+
+function requestSpeechToText(filePath, language, filename) {
+  const selectedLanguage = String(language || 'zh_cn').trim().toLowerCase() || 'zh_cn'
+  const uploadFilename = String(filename || '').trim() || filePath.split('/').pop() || 'recording.pcm'
+
+  return uploadFileWithoutAuth('/api/stt', filePath, {
+    language: selectedLanguage,
+    filename: uploadFilename,
+  }).then((data) => {
+    return {
+      text: String(data.text || '').trim(),
+      duration: Number(data.duration || 0),
+      status: data.status || '',
+    }
+  })
 }
 
 function decodeChunk(decoder, arrayBuffer) {
@@ -353,6 +369,7 @@ module.exports = {
   sendBookChatMessage,
   sendBookChatMessageStream,
   requestSpeech,
+  requestSpeechToText,
   reportVoicePlay,
   getPublisherStats,
   getPublisherBooks,
