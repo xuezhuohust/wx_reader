@@ -16,6 +16,10 @@ Component({
       type: String,
       value: 'market',
     },
+    showAuthor: {
+      type: Boolean,
+      value: true,
+    },
   },
 
   data: {
@@ -51,7 +55,7 @@ Component({
       this.setData({
         priceText: formatPrice(book.price),
         readTimeText: formatRelativeReadTime(book.lastReadAt),
-        actionText: mode === 'owned' ? '继续对话' : (book.purchased ? '进入阅读' : '购买'),
+        actionText: '阅读',
         coverTheme: book.cover || 'cover-sunset',
         coverInitial: book.title ? book.title.slice(0, 1) : '书',
         buildMeta: getBuildStatusMeta(book.buildStatus),

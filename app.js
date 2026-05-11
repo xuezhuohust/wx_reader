@@ -1,4 +1,5 @@
-const { loadIdentity } = require('./utils/storage')
+const { loadIdentity, saveIdentity } = require('./utils/storage')
+const api = require('./utils/api')
 
 App({
   globalData: {
@@ -16,6 +17,18 @@ App({
   onLaunch() {
     this.globalData.identity = loadIdentity()
     this.setupNavBar()
+  },
+
+  switchUserRole(role) {
+    return api.switchUserRole(role)
+      .then((res) => {
+        const nextIdentity = Object.assign({}, this.globalData.identity, {
+          role: res.role || role,
+          updatedAt: Date.now(),
+        })
+        this.globalData.identity = saveIdentity(nextIdentity)
+        return nextIdentity
+      })
   },
 
   setupNavBar() {

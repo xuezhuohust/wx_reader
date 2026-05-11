@@ -1,18 +1,18 @@
-<view wx:if="{{book}}" class="chat-container">
-  <!-- Header with book info -->
+<view wx:if="{{book}}" class="page-shell chat-page">
+  <!-- Header -->
   <view class="chat-header">
-    <view class="book-info">
-      <text class="book-title text-serif">{{book.title}}</text>
-      <text class="book-author">{{book.author}}</text>
+    <view class="nav-back" bindtap="handleBack">
+      <view class="back-arrow"></view>
     </view>
-    <view class="chat-intro">
-      <text>与书籍深度对话。AI 助手将根据书本内容为您解答，带您领略文字背后的意蕴。</text>
+    <view class="header-book-info">
+      <text class="header-title">{{book.title}}</text>
+      <text class="header-author">{{book.author}}</text>
     </view>
   </view>
 
-  <!-- Messages list -->
+  <!-- Messages -->
   <scroll-view
-    class="chat-messages"
+    class="chat-body"
     scroll-y
     enhanced
     scroll-with-animation
@@ -20,49 +20,52 @@
     enable-back-to-top
   >
     <view class="message-list">
+      <view class="welcome-section">
+        <view class="welcome-icon">AI</view>
+        <text class="welcome-title">与《{{book.title}}》对话</text>
+        <text class="welcome-desc">我是您的智能阅读助手，您可以针对书中的内容向我提问。</text>
+      </view>
+
       <view
         wx:for="{{messages}}"
         wx:key="id"
         id="{{item.id}}"
-        class="message-item {{item.role === 'user' ? 'user-message' : 'ai-message'}}"
+        class="message-row {{item.role === 'user' ? 'row-user' : 'row-ai'}}"
       >
-        <view class="message-content">
-          <view wx:if="{{item.role === 'ai'}}" class="ai-avatar">
-            <text class="text-serif">A</text>
+        <view class="message-bubble {{item.role === 'user' ? 'bubble-user' : 'bubble-ai'}}">
+          <view class="message-text">
+            <text user-select>{{item.content}}</text>
+            <view wx:if="{{item.loading}}" class="typing-indicator">
+              <view class="dot"></view><view class="dot"></view><view class="dot"></view>
+            </view>
           </view>
-          <view class="message-bubble">
-            <view class="message-text {{item.loading ? 'loading-text' : ''}}">
-              <text>{{item.content}}</text>
-            </view>
-            <view
-              wx:if="{{item.role === 'ai' && !item.loading}}"
-              class="audio-action"
-              data-id="{{item.id}}"
-              data-content="{{item.content}}"
-              data-loading="{{item.loading}}"
-              bindtap="handleSpeakMessage"
-            >
-              <text wx:if="{{audioLoadingMessageId === item.id}}">生成语音中...</text>
-              <text wx:elif="{{playingMessageId === item.id}}">停止朗读</text>
-              <text wx:else>朗读回答</text>
-            </view>
+          
+          <view
+            wx:if="{{item.role === 'ai' && !item.loading}}"
+            class="voice-btn"
+            data-id="{{item.id}}"
+            data-content="{{item.content}}"
+            bindtap="handleSpeakMessage"
+          >
+            <view class="voice-icon {{playingMessageId === item.id ? 'playing' : ''}}"></view>
+            <text>{{playingMessageId === item.id ? '正在播放' : '播放语音'}}</text>
           </view>
         </view>
       </view>
-      <!-- Bottom spacing for fixed input -->
-      <view class="bottom-placeholder" style="height: calc({{composerPlaceholderRpx}}rpx + {{keyboardHeight}}px);"></view>
+      
+      <view class="bottom-space" style="height: {{keyboardHeight + 200}}rpx;"></view>
     </view>
   </scroll-view>
 
-  <!-- Fixed Bottom Input Area -->
+  <!-- Input Area -->
   <view class="chat-footer" style="bottom: {{keyboardHeight}}px;">
-    <view class="quick-queries" wx:if="{{!inputValue && keyboardHeight === 0}}">
+    <view class="quick-tips" wx:if="{{!inputValue && keyboardHeight === 0}}">
       <scroll-view scroll-x enhanced show-scrollbar="{{false}}">
-        <view class="query-list">
+        <view class="tips-row">
           <view
             wx:for="{{quickQuestions}}"
             wx:key="*this"
-            class="query-chip"
+            class="tip-pill"
             data-question="{{item}}"
             bindtap="handleQuickQuestion"
           >
@@ -72,26 +75,20 @@
       </scroll-view>
     </view>
 
-    <view class="input-area {{isInputExpanded ? 'input-area--expanded' : ''}}">
-      <view class="chat-input-wrap">
-        <textarea
-          class="chat-input"
-          placeholder="向这本书提问..."
-          placeholder-style="color:#999;"
-          value="{{inputValue}}"
-          bindinput="handleInput"
-          bindblur="handleInputBlur"
-          bindlinechange="handleInputLineChange"
-          bindkeyboardheightchange="handleKeyboardHeightChange"
-          bindconfirm="handleSend"
-          confirm-type="send"
-          auto-height
-          adjust-position="{{false}}"
-          cursor-spacing="32"
-          maxlength="500"
-        />
-      </view>
-      <view class="send-btn {{inputValue ? 'send-btn--active' : ''}} {{isInputExpanded ? 'send-btn--expanded' : ''}}" bindtap="handleSend">
+    <view class="input-panel">
+      <textarea
+        class="message-input"
+        placeholder="向 AI 提问..."
+        placeholder-style="color:var(--stone);"
+        value="{{inputValue}}"
+        bindinput="handleInput"
+        bindconfirm="handleSend"
+        confirm-type="send"
+        auto-height
+        adjust-position="{{false}}"
+        maxlength="1000"
+      />
+      <view class="send-action {{inputValue ? 'active' : ''}}" bindtap="handleSend">
         <view class="send-icon"></view>
       </view>
     </view>

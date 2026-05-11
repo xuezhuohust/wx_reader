@@ -13,28 +13,28 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
-  background: var(--bg-paper);
-  border: 1rpx solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  background: var(--bg-surface);
+  border: 1rpx solid var(--hairline);
   margin-bottom: 40rpx;
 }
 
 .empty-mark {
   font-size: 40rpx;
-  color: var(--text-muted);
+  color: var(--stone);
 }
 
 .empty-title {
-  font-size: 36rpx;
+  font-size: 32rpx;
   font-weight: 600;
-  color: var(--text-ink);
+  color: var(--ink);
 }
 
 .empty-desc {
   margin-top: 16rpx;
   font-size: 26rpx;
   line-height: 1.6;
-  color: var(--text-muted);
+  color: var(--steel);
   max-width: 480rpx;
 }
 
@@ -43,10 +43,9 @@
   height: 80rpx;
   line-height: 80rpx;
   padding: 0 48rpx;
-  border-radius: 40rpx;
-  background: var(--primary);
+  border-radius: var(--radius-md);
+  background: var(--notion-primary);
   color: #fff;
   font-size: 26rpx;
   font-weight: 500;
-  box-shadow: var(--shadow-soft);
 }

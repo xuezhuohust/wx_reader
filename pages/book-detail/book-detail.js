@@ -6,6 +6,7 @@ Page({
   data: {
     book: null,
     priceText: '',
+    scrolled: false,
     scene: 'user',
     isPublisherScene: false,
     pageTitle: '书籍详情',
@@ -47,6 +48,15 @@ Page({
 
   handleBack() {
     wx.navigateBack()
+  },
+
+  onPageScroll(e) {
+    const isScrolled = e.scrollTop > 50
+    if (isScrolled !== this.data.scrolled) {
+      this.setData({
+        scrolled: isScrolled,
+      })
+    }
   },
 
   onShow() {

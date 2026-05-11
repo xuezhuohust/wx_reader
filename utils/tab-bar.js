@@ -14,6 +14,12 @@ const READER_TAB_ITEMS = [
     selectedIconPath: SHARED_ICON.selectedIconPath,
   },
   {
+    pagePath: 'pages/bookshelf/bookshelf',
+    text: '书架',
+    iconPath: SHARED_ICON.iconPath,
+    selectedIconPath: SHARED_ICON.selectedIconPath,
+  },
+  {
     pagePath: 'pages/my-books/my-books',
     text: '我的',
     iconPath: SHARED_ICON.iconPath,

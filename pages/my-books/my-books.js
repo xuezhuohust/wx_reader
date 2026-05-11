@@ -28,13 +28,15 @@ Page({
   },
 
   onShow() {
-    if (!this.guardReaderRole()) {
-      return
-    }
-
-    syncRoleTabBar(this, 'pages/my-books/my-books')
-    this.bootstrapIdentity()
     this.loadBooks()
+
+    const app = getApp()
+    const identity = app.globalData.identity
+    this.setData({
+      identity,
+      currentRole: (identity && identity.role) || 'reader'
+    })
+    syncRoleTabBar(this, 'pages/my-books/my-books', identity)
   },
 
   bootstrapIdentity() {
@@ -184,10 +186,36 @@ Page({
     })
   },
 
+  handleRoleChange(event) {
+    const { role } = event.currentTarget.dataset
+    const app = getApp()
+    
+    wx.showLoading({ title: '切换中...' })
+    app.switchUserRole(role)
+      .then((identity) => {
+        this.setData({ 
+          identity,
+          currentRole: role 
+        })
+        syncRoleTabBar(this, 'pages/my-books/my-books', identity)
+        wx.hideLoading()
+        wx.showToast({ title: '身份已切换', icon: 'success' })
+        
+        // 如果切换到出版商，建议跳转到首页工作台
+        if (role === 'publisher') {
+          wx.switchTab({ url: '/pages/index/index' })
+        }
+      })
+      .catch(() => {
+        wx.hideLoading()
+        wx.showToast({ title: '切换失败', icon: 'none' })
+      })
+  },
+
   handleActionTap(event) {
     const { book } = event.detail
     wx.navigateTo({
-      url: `/pages/chat/chat?bookId=${book.id}`,
+      url: `/pages/book-detail/book-detail?id=${book.id}`,
     })
   },
 

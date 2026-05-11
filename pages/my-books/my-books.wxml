@@ -1,69 +1,75 @@
-<view class="page-shell">
-  <view class="profile-section card-panel" style="margin-bottom: 40rpx; padding: 40rpx;">
-    <view class="profile-info-row" bindtap="handleOpenProfile">
-      <view class="user-avatar-large">
+<view class="page-shell my-books-page">
+  <!-- Profile Section -->
+  <view class="profile-card" bindtap="handleOpenProfile">
+    <view class="profile-left">
+      <view class="user-avatar">
         <image wx:if="{{identity && identity.avatarUrl}}" src="{{identity.avatarUrl}}" mode="aspectFill" />
-        <view wx:else class="avatar-placeholder-large">{{identity ? '读' : '?'}}</view>
+        <view wx:else class="avatar-icon">?</view>
       </view>
-      <view class="user-meta">
-        <text class="user-nickname text-serif">{{identity.displayName || '未登录读者'}}</text>
-        <text class="user-id" wx:if="{{identity}}">ID: {{identity.userId}}</text>
-        <text class="user-hint" wx:else>点击此处登录并同步阅读数据</text>
+      <view class="user-info">
+        <text class="nickname">{{identity.displayName || '未登录读者'}}</text>
+        <view class="role-tag-row">
+          <text class="user-id" wx:if="{{identity}}">ID: {{identity.userId}}</text>
+          <view class="role-switch-pill-mini" catchtap="handleRoleChange" data-role="{{currentRole === 'reader' ? 'publisher' : 'reader'}}">
+            <text>{{currentRole === 'reader' ? '切换出版商' : '切换读者'}}</text>
+          </view>
+        </view>
       </view>
-      <view class="edit-icon" wx:if="{{identity}}">✎</view>
     </view>
+    <view class="edit-action" wx:if="{{identity}}">编辑</view>
   </view>
 
-  <view class="page-intro" style="padding-top: 0;">
-    <view class="intro-eyebrow">
-      <text>阅读足迹 · {{books.length}} 册已藏</text>
+  <!-- My Books Section -->
+  <view class="section-container">
+    <view class="section-header">
+      <text class="section-title">我的书架</text>
+      <text class="section-count">{{books.length}} 册已收藏</text>
     </view>
-    <text class="page-intro-title text-serif">您的知识回路正在静静生长</text>
-  </view>
 
-  <view wx:if="{{books.length}}" class="book-list">
-    <book-card
-      wx:for="{{books}}"
-      wx:key="id"
-      book="{{item}}"
-      mode="owned"
-      bind:cardtap="handleBookTap"
-      bind:actiontap="handleActionTap"
+    <view wx:if="{{books.length}}" class="book-list">
+      <book-card
+        wx:for="{{books}}"
+        wx:key="id"
+        book="{{item}}"
+        mode="owned"
+        bind:cardtap="handleBookTap"
+        bind:actiontap="handleActionTap"
+      />
+    </view>
+
+    <empty-state
+      wx:else
+      title="书架空空如也"
+      description="挑选一本好书，开启您的 AI 伴读之旅"
+      button-text="前往书库"
+      bind:actiontap="handleExplore"
     />
   </view>
-
-  <empty-state
-    wx:else
-    title="你还没有已购买书籍"
-    description="去全部书库挑一本到手，AI 对话和阅读记录就会出现在这里"
-    button-text="去逛书库"
-    bind:actiontap="handleExplore"
-  />
 
   <!-- Profile Modal -->
   <view wx:if="{{showProfileModal}}" class="profile-overlay" bindtap="handleCloseProfile">
     <view class="profile-sheet" catchtap="handleStopPropagation">
-      <view class="profile-header">
-        <text class="profile-sheet-title">完善您的读者名片</text>
+      <view class="sheet-header">
+        <text class="sheet-title">个人信息</text>
       </view>
       
-      <button class="avatar-uploader" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
+      <button class="avatar-box" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
         <image wx:if="{{identity && identity.avatarUrl}}" src="{{identity.avatarUrl}}" mode="aspectFill" />
-        <view wx:else class="avatar-plus">+</view>
+        <view wx:else class="plus-icon">+</view>
       </button>
 
-      <view class="nickname-field">
-        <text class="field-label">昵称</text>
+      <view class="form-item">
+        <text class="form-label">昵称</text>
         <input
-          class="field-input"
+          class="form-input"
           type="text"
           value="{{nicknameDraft}}"
-          placeholder="请输入昵称"
+          placeholder="设置您的昵称"
           bindinput="handleNicknameDraftInput"
         />
       </view>
 
-      <button class="btn-primary" bindtap="handleProfileSubmit">完成设置</button>
+      <button class="btn-primary" bindtap="handleProfileSubmit">保存设置</button>
     </view>
   </view>
 </view>

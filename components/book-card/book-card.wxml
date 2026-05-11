@@ -1,43 +1,38 @@
-<view class="book-card {{mode}}-mode" bindtap="handleTap">
-  <view class="book-cover {{coverTheme}}">
-    <view class="cover-inner">
-      <view class="spine-shadow"></view>
-      <view class="cover-content-card">
-        <text class="cover-title-card text-serif">{{book.title}}</text>
-        <text class="cover-author-card">{{book.author}}</text>
-      </view>
-    </view>
+<view class="book-card {{mode}}-mode">
+  <!-- Cover Section -->
+  <view class="book-cover" bindtap="handleTap">
+    <image class="cover-image" src="{{book.coverUrl || 'https://mp-8bdc7c18-cba4-4488-8c57-e587ac252b55.cdn.bspapp.com/fengmian.png'}}" mode="aspectFill" />
+    <view class="cover-overlay"></view>
+    <!-- Floating Tag -->
+    <view class="floating-category" wx:if="{{book.category}}">{{book.category}}</view>
   </view>
 
+  <!-- Content Section -->
   <view class="book-main">
     <view class="book-info">
       <view class="book-header">
-        <text class="book-title text-serif">{{book.title}}</text>
-        <view class="book-category" wx:if="{{book.category}}">
-          <text>{{book.category}}</text>
-        </view>
+        <text class="book-title">{{book.title}}</text>
       </view>
-      
-      <text class="book-author">{{book.author}}</text>
       
       <text wx:if="{{mode === 'market'}}" class="book-desc">{{book.description}}</text>
 
       <view wx:if="{{mode === 'owned'}}" class="owned-meta">
         <text class="meta-item">{{readTimeText}}</text>
-        <text class="meta-item">对话 {{book.chatCount}} 次</text>
+        <text class="meta-item">对话 {{book.chatCount || 0}}</text>
       </view>
     </view>
 
     <view class="book-footer">
-      <view class="footer-left">
-        <block wx:if="{{mode === 'market'}}">
-          <text class="price-text" wx:if="{{!book.purchased}}">{{priceText}}</text>
-          <text class="status-owned" wx:else>已拥有</text>
-        </block>
+      <view class="price-section" wx:if="{{mode === 'market'}}">
+        <text class="price-label">价格</text>
+        <text class="price-value" wx:if="{{!book.purchased}}">{{priceText}}</text>
+        <text class="status-owned" wx:else>已拥有</text>
       </view>
-      <button class="action-btn {{book.purchased ? 'btn-ghost' : 'btn-primary'}}" catchtap="handleAction">
-        {{actionText}}
-      </button>
+      
+      <view class="action-trigger" bindtap="handleTap">
+        <text class="action-label">{{actionText}}</text>
+        <view class="action-arrow"></view>
+      </view>
     </view>
   </view>
 </view>

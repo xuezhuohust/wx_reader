@@ -1,6 +1,7 @@
 {
   "pages": [
     "pages/index/index",
+    "pages/bookshelf/bookshelf",
     "pages/my-books/my-books",
     "pages/publisher/index",
     "pages/book-detail/book-detail",
@@ -29,6 +30,12 @@
       {
         "pagePath": "pages/index/index",
         "text": "首页",
+        "iconPath": "app-assets/tab-default.png",
+        "selectedIconPath": "app-assets/tab-active.png"
+      },
+      {
+        "pagePath": "pages/bookshelf/bookshelf",
+        "text": "书架",
         "iconPath": "app-assets/tab-default.png",
         "selectedIconPath": "app-assets/tab-active.png"
       },

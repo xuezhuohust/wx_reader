@@ -1,0 +1,7 @@
+<view class="page-shell bookshelf-page">
+  <view class="empty-state">
+    <view class="empty-icon">🛠️</view>
+    <text class="empty-title">书架功能开发中</text>
+    <text class="empty-desc">我们将为您打造更完美的阅读收藏体验，敬请期待。</text>
+  </view>
+</view>

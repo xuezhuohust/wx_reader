@@ -26,6 +26,7 @@ Page({
     books: [],
     filteredBooks: [],
     loadError: false,
+    scrolled: false,
     publisherEntries: [
       {
         title: '书目管理',
@@ -60,6 +61,22 @@ Page({
     })
 
     // Check for publisher build intent
+  },
+
+  onPageScroll(e) {
+    const isScrolled = e.scrollTop > 50
+    if (isScrolled !== this.data.scrolled) {
+      this.setData({
+        scrolled: isScrolled,
+      })
+    }
+  },
+
+  handleExplore() {
+    wx.pageScrollTo({
+      selector: '.main-content',
+      duration: 300,
+    })
   },
 
   onShow() {
@@ -265,34 +282,9 @@ Page({
 
   handleActionTap(event) {
     const { book } = event.detail
-    if (book.purchased) {
-      wx.navigateTo({
-        url: `/pages/chat/chat?bookId=${book.id}`,
-      })
-      return
-    }
-
-    wx.showLoading({ title: '购买中...' })
-    api.purchaseBook(book.id)
-      .then(() => {
-        wx.hideLoading()
-        wx.showToast({
-          title: '购买成功',
-          icon: 'success',
-        })
-        return api.getAllBooks()
-      })
-      .then((books) => {
-        this.setData({ books })
-        this.applyFilters(books, this.data.searchValue, this.data.activeCategory)
-      })
-      .catch(() => {
-        wx.hideLoading()
-        wx.showToast({
-          title: '购买失败',
-          icon: 'none',
-        })
-      })
+    wx.navigateTo({
+      url: `/pages/book-detail/book-detail?id=${book.id}`,
+    })
   },
 
   handleRecommendTap(event) {
