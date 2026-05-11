@@ -1,5 +1,6 @@
 {
   "navigationBarTitleText": "我的书库",
+  "disableScroll": true,
   "usingComponents": {
     "book-card": "/components/book-card/book-card",
     "empty-state": "/components/empty-state/empty-state"

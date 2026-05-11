@@ -1,75 +1,172 @@
 <view class="page-shell my-books-page">
-  <!-- Profile Section -->
-  <view class="profile-card" bindtap="handleOpenProfile">
-    <view class="profile-left">
-      <view class="user-avatar">
-        <image wx:if="{{identity && identity.avatarUrl}}" src="{{identity.avatarUrl}}" mode="aspectFill" />
-        <view wx:else class="avatar-icon">?</view>
+  <view class="content-body">
+    <!-- Hero Band: Consistent with Index/Bookshelf -->
+    <view class="hero-band" style="padding-top: {{statusBarHeight + 32}}px;">
+      <view class="hero-content">
+        <view class="profile-main" bindtap="handleOpenProfile">
+          <view class="avatar-container">
+            <image wx:if="{{identity && identity.avatarUrl}}" src="{{identity.avatarUrl}}" mode="aspectFill" class="avatar-img" />
+            <view wx:else class="avatar-placeholder">
+              <view class="icon-svg icon-user-on-dark"></view>
+            </view>
+            <!-- Quick Role Switch Button on Avatar -->
+            <view class="avatar-role-switch" catchtap="handleRoleChange" data-role="{{currentRole === 'reader' ? 'publisher' : 'reader'}}">
+              <view class="icon-svg icon-switch-mini"></view>
+            </view>
+          </view>
+          <view class="profile-info">
+            <view class="name-row">
+              <text class="user-display-name">{{identity.displayName || '未登录读者'}}</text>
+              <view class="chevron-right-white"></view>
+            </view>
+            <view class="user-status-row">
+              <view class="status-pill">
+                <view class="status-dot-active"></view>
+                <text>{{currentRole === 'reader' ? '智读模式' : '出版模式'}}</text>
+              </view>
+              <text class="level-text">L1 极客读者</text>
+            </view>
+          </view>
+        </view>
+
+        <!-- Stats Card: Floating Card (Refined) -->
+        <view class="stats-premium-card">
+          <view class="stat-col">
+            <text class="stat-v">{{books.length || 0}}</text>
+            <text class="stat-l">我的藏书</text>
+          </view>
+          <view class="stat-sep"></view>
+          <view class="stat-col">
+            <text class="stat-v">3</text>
+            <text class="stat-l">阅读天数</text>
+          </view>
+          <view class="stat-sep"></view>
+          <view class="stat-col">
+            <text class="stat-v">12</text>
+            <text class="stat-l">获赞</text>
+          </view>
+        </view>
       </view>
-      <view class="user-info">
-        <text class="nickname">{{identity.displayName || '未登录读者'}}</text>
-        <view class="role-tag-row">
-          <text class="user-id" wx:if="{{identity}}">ID: {{identity.userId}}</text>
-          <view class="role-switch-pill-mini" catchtap="handleRoleChange" data-role="{{currentRole === 'reader' ? 'publisher' : 'reader'}}">
-            <text>{{currentRole === 'reader' ? '切换出版商' : '切换读者'}}</text>
+      
+      <!-- Decorative Background Elements -->
+      <view class="hero-dots"></view>
+      <view class="hero-mesh"></view>
+    </view>
+
+    <!-- Role Switch Bar: Now moved to straddle the line -->
+    <view class="role-switch-premium-bar" bindtap="handleRoleChange" data-role="{{currentRole === 'reader' ? 'publisher' : 'reader'}}">
+      <view class="switch-bar-content">
+        <view class="switch-bar-left">
+          <view class="icon-svg icon-switch-bold-purple"></view>
+          <view class="switch-bar-info">
+            <text class="switch-bar-title">身份切换</text>
+            <text class="switch-bar-desc">当前：{{currentRole === 'reader' ? '读者模式' : '出版模式'}}</text>
+          </view>
+        </view>
+        <view class="btn-switch-action">立即切换</view>
+      </view>
+    </view>
+
+    <view class="main-content-refined">
+      <!-- Section: Activity Grid -->
+      <view class="menu-label-sub">常用功能</view>
+      <view class="menu-grid-refined card-base">
+        <view class="menu-grid-item" bindtap="handleExplore">
+          <view class="grid-icon-box tint-peach">
+            <view class="icon-svg icon-library-orange"></view>
+          </view>
+          <text class="grid-title">发现书库</text>
+        </view>
+        <view class="menu-grid-item" bindtap="handleDeveloping">
+          <view class="grid-icon-box tint-lavender">
+            <view class="icon-svg icon-medal-purple"></view>
+          </view>
+          <text class="grid-title">成就勋章</text>
+        </view>
+        <view class="menu-grid-item" bindtap="handleDeveloping">
+          <view class="grid-icon-box tint-sky">
+            <view class="icon-svg icon-wallet-blue"></view>
+          </view>
+          <text class="grid-title">我的钱包</text>
+        </view>
+        <view class="menu-grid-item" bindtap="handleDeveloping">
+          <view class="grid-icon-box tint-mint">
+            <view class="icon-svg icon-gift-green"></view>
+          </view>
+          <text class="grid-title">福利中心</text>
+        </view>
+      </view>
+
+      <view class="menu-label-sub">支持与服务</view>
+      <view class="menu-group-refined card-base">
+        <view class="menu-item-refined" bindtap="handleOpenSettings">
+          <view class="menu-icon-box tint-mint">
+            <view class="icon-svg icon-settings-green"></view>
+          </view>
+          <text class="menu-title">账号设置</text>
+          <view class="menu-suffix">
+            <view class="chevron-right-mini"></view>
+          </view>
+        </view>
+        <view class="menu-item-refined" bindtap="handleAbout">
+          <view class="menu-icon-box tint-gray">
+            <view class="icon-svg icon-about-gray"></view>
+          </view>
+          <text class="menu-title">关于我们</text>
+          <view class="menu-suffix">
+            <text class="suffix-text">v1.0.0</text>
+            <view class="chevron-right-mini"></view>
+          </view>
+        </view>
+        <view class="menu-item-refined item-logout" bindtap="handleLogout" wx:if="{{identity}}">
+          <view class="menu-icon-box tint-rose">
+            <view class="icon-svg icon-logout-red"></view>
+          </view>
+          <text class="menu-title text-error">退出当前账号</text>
+          <view class="menu-suffix">
+            <view class="chevron-right-mini"></view>
           </view>
         </view>
       </view>
     </view>
-    <view class="edit-action" wx:if="{{identity}}">编辑</view>
   </view>
 
-  <!-- My Books Section -->
-  <view class="section-container">
-    <view class="section-header">
-      <text class="section-title">我的书架</text>
-      <text class="section-count">{{books.length}} 册已收藏</text>
-    </view>
-
-    <view wx:if="{{books.length}}" class="book-list">
-      <book-card
-        wx:for="{{books}}"
-        wx:key="id"
-        book="{{item}}"
-        mode="owned"
-        bind:cardtap="handleBookTap"
-        bind:actiontap="handleActionTap"
-      />
-    </view>
-
-    <empty-state
-      wx:else
-      title="书架空空如也"
-      description="挑选一本好书，开启您的 AI 伴读之旅"
-      button-text="前往书库"
-      bind:actiontap="handleExplore"
-    />
-  </view>
-
-  <!-- Profile Modal -->
+  <!-- Profile Modal: Enhanced -->
   <view wx:if="{{showProfileModal}}" class="profile-overlay" bindtap="handleCloseProfile">
-    <view class="profile-sheet" catchtap="handleStopPropagation">
-      <view class="sheet-header">
-        <text class="sheet-title">个人信息</text>
+    <view class="profile-sheet-premium" catchtap="handleStopPropagation">
+      <view class="sheet-bar"></view>
+      <view class="sheet-head">
+        <text class="sheet-t">完善个人资料</text>
       </view>
       
-      <button class="avatar-box" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
-        <image wx:if="{{identity && identity.avatarUrl}}" src="{{identity.avatarUrl}}" mode="aspectFill" />
-        <view wx:else class="plus-icon">+</view>
+      <button class="avatar-uploader" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
+        <view class="uploader-inner">
+          <image wx:if="{{identity && identity.avatarUrl}}" src="{{identity.avatarUrl}}" mode="aspectFill" />
+          <view wx:else class="plus-icon-lg"></view>
+          <view class="uploader-mask">
+            <view class="icon-camera-white"></view>
+          </view>
+        </view>
+        <text class="uploader-hint">点击更换头像</text>
       </button>
 
-      <view class="form-item">
-        <text class="form-label">昵称</text>
-        <input
-          class="form-input"
-          type="text"
-          value="{{nicknameDraft}}"
-          placeholder="设置您的昵称"
-          bindinput="handleNicknameDraftInput"
-        />
+      <view class="input-group-premium">
+        <text class="input-label">读者昵称</text>
+        <view class="input-wrapper">
+          <input
+            class="input-field"
+            type="text"
+            value="{{nicknameDraft}}"
+            placeholder="请输入您的昵称"
+            placeholder-style="color:var(--muted);"
+            bindinput="handleNicknameDraftInput"
+          />
+        </view>
       </view>
 
-      <button class="btn-primary" bindtap="handleProfileSubmit">保存设置</button>
+      <button class="btn-premium-action" bindtap="handleProfileSubmit">
+        <text>保存更新</text>
+      </button>
     </view>
   </view>
 </view>

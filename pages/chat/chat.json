@@ -1,3 +1,4 @@
 {
-  "navigationBarTitleText": "书中对话"
+  "navigationBarTitleText": "书中对话",
+  "navigationStyle": "custom"
 }

@@ -25,6 +25,8 @@ Page({
     categories: ['全部', '文学', '科技', '经管', '教育'],
     books: [],
     filteredBooks: [],
+    searchResultBooks: [],
+    showSearchDrawer: false,
     loadError: false,
     scrolled: false,
     publisherEntries: [
@@ -219,15 +221,49 @@ Page({
       })
   },
 
-  applyFilters(books, keyword, category) {
+  handleKeywordInput(event) {
+    const searchValue = event.detail.value
+    this.setData({ searchValue })
+    
+    // 如果清空了搜索框，收起抽屉
+    if (!searchValue.trim()) {
+      this.setData({ 
+        showSearchDrawer: false,
+        searchResultBooks: [] 
+      })
+    }
+  },
+
+  handleSearch() {
+    const keyword = this.data.searchValue.trim()
+    if (keyword) {
+      const searchResultBooks = this.filterByKeyword(this.data.books, keyword)
+      this.setData({ 
+        searchResultBooks,
+        showSearchDrawer: true 
+      })
+    }
+  },
+
+  filterByKeyword(books, keyword) {
     const searchText = String(keyword || '').trim().toLowerCase()
-    const filteredBooks = (books || []).filter((item) => {
-      const matchedCategory = category === '全部' || item.category === category
-      const matchedKeyword = !searchText
-        || item.title.toLowerCase().indexOf(searchText) > -1
+    if (!searchText) return []
+    
+    return (books || []).filter((item) => {
+      return item.title.toLowerCase().indexOf(searchText) > -1
         || item.author.toLowerCase().indexOf(searchText) > -1
         || item.description.toLowerCase().indexOf(searchText) > -1
-      return matchedCategory && matchedKeyword
+    })
+  },
+
+  closeSearchDrawer() {
+    this.setData({ showSearchDrawer: false })
+  },
+
+  applyFilters(books, keyword, category) {
+    const filteredBooks = (books || []).filter((item) => {
+      const matchedCategory = category === '全部' || item.category === category
+      return matchedCategory
     })
 
     this.setData({
@@ -255,16 +291,6 @@ Page({
           done()
         }
       })
-  },
-
-  handleKeywordInput(event) {
-    const searchValue = event.detail.value
-    this.setData({ searchValue })
-    this.applyFilters(this.data.books, searchValue, this.data.activeCategory)
-  },
-
-  handleSearch() {
-    this.applyFilters(this.data.books, this.data.searchValue, this.data.activeCategory)
   },
 
   handleTabChange(event) {

@@ -25,6 +25,20 @@ Page({
     showProfileModal: false,
     nicknameDraft: '',
     profileSaving: false,
+    navBarHeight: 0,
+    statusBarHeight: 0,
+    menuTop: 0,
+    menuHeight: 0,
+  },
+
+  onLoad() {
+    const app = getApp()
+    this.setData({
+      navBarHeight: app.globalData.navBarHeight,
+      statusBarHeight: app.globalData.statusBarHeight,
+      menuTop: app.globalData.menuTop,
+      menuHeight: app.globalData.menuHeight,
+    })
   },
 
   onShow() {
@@ -180,9 +194,50 @@ Page({
   },
 
   handleBookTap(event) {
-    const { book } = event.detail
+    const { book } = event.currentTarget.dataset
     wx.navigateTo({
       url: `/pages/book-detail/book-detail?id=${book.id}`,
+    })
+  },
+
+  handleOpenSettings() {
+    wx.showToast({ title: '设置功能开发中', icon: 'none' })
+  },
+
+  handleFeedback() {
+    wx.showToast({ title: '反馈功能开发中', icon: 'none' })
+  },
+
+  handleAbout() {
+    wx.showModal({
+      title: '关于我们',
+      content: 'AI 伴读小程序 v1.0.0\n专注于为您提供沉浸式的阅读体验。',
+      showCancel: false
+    })
+  },
+
+  handleDeveloping() {
+    wx.showToast({
+      title: '功能开发中',
+      icon: 'none',
+      duration: 2000
+    })
+  },
+
+  handleLogout() {
+    wx.showModal({
+      title: '退出登录',
+      content: '确定要退出当前账号吗？',
+      success: (res) => {
+        if (res.confirm) {
+          // Clear identity and logout logic
+          const app = getApp()
+          app.globalData.identity = null
+          wx.setStorageSync('identity', null)
+          this.setData({ identity: null })
+          wx.showToast({ title: '已退出登录', icon: 'success' })
+        }
+      }
     })
   },
 

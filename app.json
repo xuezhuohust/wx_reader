@@ -11,6 +11,7 @@
     "pages/publisher/build"
   ],
   "window": {
+    "navigationStyle": "custom",
     "navigationBarBackgroundColor": "#f9f7f2",
     "navigationBarTitleText": "读书助手",
     "navigationBarTextStyle": "black",
@@ -28,14 +29,14 @@
     "borderStyle": "white",
     "list": [
       {
-        "pagePath": "pages/index/index",
-        "text": "首页",
+        "pagePath": "pages/bookshelf/bookshelf",
+        "text": "书架",
         "iconPath": "app-assets/tab-default.png",
         "selectedIconPath": "app-assets/tab-active.png"
       },
       {
-        "pagePath": "pages/bookshelf/bookshelf",
-        "text": "书架",
+        "pagePath": "pages/index/index",
+        "text": "首页",
         "iconPath": "app-assets/tab-default.png",
         "selectedIconPath": "app-assets/tab-active.png"
       },

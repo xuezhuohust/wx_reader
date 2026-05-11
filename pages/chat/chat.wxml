@@ -1,12 +1,14 @@
 <view wx:if="{{book}}" class="page-shell chat-page">
-  <!-- Header -->
-  <view class="chat-header">
-    <view class="nav-back" bindtap="handleBack">
-      <view class="back-arrow"></view>
-    </view>
-    <view class="header-book-info">
-      <text class="header-title">{{book.title}}</text>
-      <text class="header-author">{{book.author}}</text>
+  <!-- Custom Navigation Bar -->
+  <view class="custom-nav {{scrolled ? 'nav--scrolled' : ''}}" style="height: {{navBarHeight}}px;">
+    <view class="nav-inner" style="top: {{menuTop}}px; height: {{menuHeight}}px;">
+      <view class="nav-back" bindtap="handleBack" style="width: {{menuHeight}}px; height: {{menuHeight}}px;">
+        <view class="back-arrow"></view>
+      </view>
+      <view class="nav-book-meta">
+        <text class="nav-book-title">{{book.title}}</text>
+        <text class="nav-book-author">{{book.author}}</text>
+      </view>
     </view>
   </view>
 
@@ -18,6 +20,8 @@
     scroll-with-animation
     scroll-into-view="{{scrollIntoView}}"
     enable-back-to-top
+    bindscroll="handleScroll"
+    style="padding-top: {{navBarHeight}}px;"
   >
     <view class="message-list">
       <view class="welcome-section">
@@ -32,23 +36,28 @@
         id="{{item.id}}"
         class="message-row {{item.role === 'user' ? 'row-user' : 'row-ai'}}"
       >
-        <view class="message-bubble {{item.role === 'user' ? 'bubble-user' : 'bubble-ai'}}">
-          <view class="message-text">
-            <text user-select>{{item.content}}</text>
-            <view wx:if="{{item.loading}}" class="typing-indicator">
-              <view class="dot"></view><view class="dot"></view><view class="dot"></view>
+        <view class="message-container {{item.role === 'user' ? 'container-user' : 'container-ai'}}">
+          <view class="message-bubble {{item.role === 'user' ? 'bubble-user' : 'bubble-ai'}}">
+            <view class="message-text">
+              <text user-select>{{item.content}}</text>
+              <view wx:if="{{item.loading || (item.role === 'ai' && loadingReply && index === messages.length - 1)}}" class="typing-cursor"></view>
             </view>
           </view>
           
           <view
             wx:if="{{item.role === 'ai' && !item.loading}}"
-            class="voice-btn"
+            class="voice-control {{playingMessageId === item.id ? 'is-playing' : ''}}"
             data-id="{{item.id}}"
             data-content="{{item.content}}"
             bindtap="handleSpeakMessage"
           >
-            <view class="voice-icon {{playingMessageId === item.id ? 'playing' : ''}}"></view>
-            <text>{{playingMessageId === item.id ? '正在播放' : '播放语音'}}</text>
+            <view class="voice-wave" wx:if="{{playingMessageId === item.id}}">
+              <view class="wave-bar"></view>
+              <view class="wave-bar"></view>
+              <view class="wave-bar"></view>
+            </view>
+            <view class="voice-icon-new" wx:else></view>
+            <text class="voice-status-text">{{playingMessageId === item.id ? '停止播放' : '朗读'}}</text>
           </view>
         </view>
       </view>

@@ -14,9 +14,19 @@ Page({
     playingMessageId: '',
     audioLoadingMessageId: '',
     keyboardHeight: 0,
+    navBarHeight: 0,
+    menuTop: 0,
+    menuHeight: 0,
+    scrolled: false,
   },
 
   onLoad(options) {
+    const app = getApp()
+    this.setData({
+      navBarHeight: app.globalData.navBarHeight,
+      menuTop: app.globalData.menuTop,
+      menuHeight: app.globalData.menuHeight,
+    })
     this.bookId = options.bookId
     this.messageSeed = 0
     this.audioContext = null
@@ -64,6 +74,23 @@ Page({
           icon: 'none',
         })
       })
+  },
+
+  handleBack() {
+    wx.navigateBack({
+      fail: () => {
+        wx.switchTab({
+          url: '/pages/index/index',
+        })
+      }
+    })
+  },
+
+  handleScroll(e) {
+    const isScrolled = e.detail.scrollTop > 20
+    if (isScrolled !== this.data.scrolled) {
+      this.setData({ scrolled: isScrolled })
+    }
   },
 
   handleInput(event) {

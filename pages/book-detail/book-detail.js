@@ -47,7 +47,13 @@ Page({
   },
 
   handleBack() {
-    wx.navigateBack()
+    wx.navigateBack({
+      fail: () => {
+        wx.switchTab({
+          url: '/pages/index/index',
+        })
+      }
+    })
   },
 
   onPageScroll(e) {
@@ -102,6 +108,54 @@ Page({
           done()
         }
       })
+  },
+
+  handleAction() {
+    const { book } = this.data
+    if (!book) return
+
+    if (book.purchased) {
+      this.handleStartChat()
+    } else {
+      this.handlePurchase()
+    }
+  },
+
+  handleToggleOnline() {
+    this.handleToggleOnlineStatus()
+  },
+
+  handleDelete() {
+    const { book } = this.data
+    if (!book) return
+
+    wx.showModal({
+      title: '删除确认',
+      content: `确定要删除《${book.title}》吗？`,
+      success: (res) => {
+        if (res.confirm) {
+          wx.showLoading({ title: '删除中...' })
+          api.deleteBook(book.id)
+            .then(() => {
+              wx.hideLoading()
+              wx.showToast({
+                title: '删除成功',
+                icon: 'success',
+              })
+              setTimeout(() => {
+                wx.navigateBack()
+              }, 1500)
+            })
+            .catch((err) => {
+              wx.hideLoading()
+              wx.showToast({
+                title: err.message || '删除失败',
+                icon: 'none',
+              })
+            })
+        }
+      }
+    })
   },
 
   handlePurchase() {

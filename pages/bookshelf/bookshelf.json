@@ -1,4 +1,6 @@
 {
   "navigationBarTitleText": "我的书架",
-  "usingComponents": {}
+  "usingComponents": {
+    "book-card": "../../components/book-card/book-card"
+  }
 }

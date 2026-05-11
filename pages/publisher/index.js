@@ -25,6 +25,18 @@ Page({
         type: 'tab',
       },
     ],
+    navBarHeight: 0,
+    menuTop: 0,
+    menuHeight: 0,
+  },
+
+  onLoad() {
+    const app = getApp()
+    this.setData({
+      navBarHeight: app.globalData.navBarHeight,
+      menuTop: app.globalData.menuTop,
+      menuHeight: app.globalData.menuHeight,
+    })
   },
 
   onShow() {

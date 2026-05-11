@@ -343,6 +343,11 @@ function startBuildBook(id, onProgress) {
   })
 }
 
+function switchUserRole(role) {
+  // Simulator: return the role directly
+  return Promise.resolve({ role })
+}
+
 module.exports = {
   ensureLogin: ensureUserIdentity,
   getRecommendBooks,
@@ -359,4 +364,6 @@ module.exports = {
   uploadBook,
   updateBookOnlineStatus,
   startBuildBook,
+  switchUserRole,
+  toAbsoluteUrl,
 }

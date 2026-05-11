@@ -27,7 +27,7 @@
     <!-- Search Bar in Content Area -->
     <view class="content-search-section">
       <view class="search-bar-box">
-        <icon type="search" size="16" color="var(--steel)"></icon>
+        <icon type="search" size="16" color="var(--steel)" bindtap="handleSearch"></icon>
         <input
           class="search-input"
           placeholder="搜索书名、作者或关键词..."
@@ -175,6 +175,34 @@
       </view>
 
       <button class="btn-primary" bindtap="handleClosePermission">我知道了</button>
+    </view>
+  </view>
+
+  <!-- Search Results Drawer -->
+  <view class="drawer-overlay {{showSearchDrawer ? 'drawer--show' : ''}}" bindtap="closeSearchDrawer">
+    <view class="drawer-content" catchtap="handleStopPropagation">
+      <view class="drawer-handle"></view>
+      <view class="drawer-header">
+        <text class="drawer-title">搜索结果</text>
+        <text class="drawer-count">找到 {{searchResultBooks.length}} 本书</text>
+      </view>
+      
+      <scroll-view class="drawer-scroll" scroll-y>
+        <view class="drawer-list" wx:if="{{searchResultBooks.length > 0}}">
+          <book-card
+            wx:for="{{searchResultBooks}}"
+            wx:key="id"
+            book="{{item}}"
+            mode="market"
+            bind:cardtap="handleBookTap"
+            bind:actiontap="handleActionTap"
+          />
+        </view>
+        <view class="drawer-empty" wx:else>
+          <icon type="search" size="40" color="#e5e3df"></icon>
+          <text>未找到相关书籍</text>
+        </view>
+      </scroll-view>
     </view>
   </view>
 </view>

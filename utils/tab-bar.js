@@ -1,50 +1,53 @@
 const { loadIdentity } = require('./storage')
 const { getUserRole } = require('./role')
 
-const SHARED_ICON = {
-  iconPath: '/app-assets/tab-default.png',
-  selectedIconPath: '/app-assets/tab-active.png',
+const ICONS = {
+  bookshelf: 'data:image/svg+xml,<svg viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"></path><path d="M6.5 17H20"></path></svg>',
+  home: 'data:image/svg+xml,<svg viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>',
+  user: 'data:image/svg+xml,<svg viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>',
+  books: 'data:image/svg+xml,<svg viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M4 6h16"></path><path d="M4 12h16"></path><path d="M4 18h16"></path></svg>',
+  build: 'data:image/svg+xml,<svg viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>',
 }
 
 const READER_TAB_ITEMS = [
   {
-    pagePath: 'pages/index/index',
-    text: '首页',
-    iconPath: SHARED_ICON.iconPath,
-    selectedIconPath: SHARED_ICON.selectedIconPath,
-  },
-  {
     pagePath: 'pages/bookshelf/bookshelf',
     text: '书架',
-    iconPath: SHARED_ICON.iconPath,
-    selectedIconPath: SHARED_ICON.selectedIconPath,
+    iconPath: ICONS.bookshelf,
+    selectedIconPath: ICONS.bookshelf,
+  },
+  {
+    pagePath: 'pages/index/index',
+    text: '首页',
+    iconPath: ICONS.home,
+    selectedIconPath: ICONS.home,
   },
   {
     pagePath: 'pages/my-books/my-books',
     text: '我的',
-    iconPath: SHARED_ICON.iconPath,
-    selectedIconPath: SHARED_ICON.selectedIconPath,
+    iconPath: ICONS.user,
+    selectedIconPath: ICONS.user,
   },
 ]
 
 const PUBLISHER_TAB_ITEMS = [
   {
-    pagePath: 'pages/index/index',
-    text: '工作台',
-    iconPath: SHARED_ICON.iconPath,
-    selectedIconPath: SHARED_ICON.selectedIconPath,
-  },
-  {
     pagePath: 'pages/publisher/books',
     text: '书目',
-    iconPath: SHARED_ICON.iconPath,
-    selectedIconPath: SHARED_ICON.selectedIconPath,
+    iconPath: ICONS.books,
+    selectedIconPath: ICONS.books,
+  },
+  {
+    pagePath: 'pages/index/index',
+    text: '工作台',
+    iconPath: ICONS.home,
+    selectedIconPath: ICONS.home,
   },
   {
     pagePath: 'pages/publisher/build',
     text: '建库',
-    iconPath: SHARED_ICON.iconPath,
-    selectedIconPath: SHARED_ICON.selectedIconPath,
+    iconPath: ICONS.build,
+    selectedIconPath: ICONS.build,
   },
 ]
 
