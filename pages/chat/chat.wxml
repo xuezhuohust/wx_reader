@@ -75,20 +75,26 @@
       </scroll-view>
     </view>
 
-    <view class="input-panel">
-      <textarea
-        class="message-input"
-        placeholder="向 AI 提问..."
-        placeholder-style="color:var(--stone);"
-        value="{{inputValue}}"
-        bindinput="handleInput"
-        bindconfirm="handleSend"
-        confirm-type="send"
-        auto-height
-        adjust-position="{{false}}"
-        maxlength="1000"
-      />
-      <view class="send-action {{inputValue ? 'active' : ''}}" bindtap="handleSend">
+    <view class="input-area {{isInputExpanded ? 'input-area--expanded' : ''}}">
+      <view class="chat-input-wrap">
+        <textarea
+          class="chat-input"
+          placeholder="向这本书提问..."
+          placeholder-style="color:#999;"
+          value="{{inputValue}}"
+          bindinput="handleInput"
+          bindblur="handleInputBlur"
+          bindlinechange="handleInputLineChange"
+          bindkeyboardheightchange="handleKeyboardHeightChange"
+          bindconfirm="handleSend"
+          confirm-type="send"
+          auto-height
+          adjust-position="{{false}}"
+          cursor-spacing="32"
+          maxlength="500"
+        />
+      </view>
+      <view class="send-btn {{inputValue ? 'send-btn--active' : ''}} {{isInputExpanded ? 'send-btn--expanded' : ''}}" bindtap="handleSend">
         <view class="send-icon"></view>
       </view>
     </view>
