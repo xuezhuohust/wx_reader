@@ -1,49 +1,84 @@
 <view class="page-shell">
-  <view class="page-intro">
-    <view class="intro-eyebrow">
-      <text>任务中心 · AI 结构化</text>
+  <!-- Custom Navigation Bar -->
+  <view class="custom-nav" style="height: {{navBarHeight}}px;">
+    <view class="nav-inner" style="top: {{menuTop}}px; height: {{menuHeight}}px;">
+      <view class="nav-left" bindtap="handleBack">
+        <view class="chevron-left-black"></view>
+      </view>
+      <text class="nav-title">建库进度</text>
     </view>
-    <text class="page-intro-title text-serif">知识库构建任务</text>
-    <text class="page-intro-desc">这里展示了后端正在执行的文档解析、章节结构化和知识库转换任务的真实进度。</text>
   </view>
 
-  <view class="build-list">
-    <view wx:for="{{books}}" wx:key="id" class="build-card card-panel">
-      <view class="build-top">
-        <view>
-          <text class="build-title">{{item.title}}</text>
-          <text class="build-author">{{item.author}}</text>
+  <view class="content-wrap" style="padding-top: {{navBarHeight}}px;">
+    <view class="page-header">
+      <view class="header-intro">
+        <view class="intro-badge">
+          <text>TASK TRACKING</text>
         </view>
-        <status-tag type="build" status="{{item.buildStatus || ''}}" />
+        <text class="header-title">AI 建库队列</text>
+        <text class="header-desc">追踪书籍资产的 AI 训练与知识库构建进度</text>
+      </view>
+    </view>
+
+  <view class="build-list">
+    <view wx:for="{{books}}" wx:key="id" class="build-card card-base">
+      <view class="build-card-header">
+        <view class="header-main">
+          <text class="book-title">{{item.title}}</text>
+          <text class="book-author">{{item.author}}</text>
+        </view>
+        <view class="status-badge {{item.buildStatus === 'building' ? 'badge-processing' : (item.buildStatus === 'completed' ? 'badge-done' : 'badge-pending')}}">
+          {{item.buildStatus === 'building' ? '解析中' : (item.buildStatus === 'completed' ? '已就绪' : '待启动')}}
+        </view>
       </view>
 
-      <view class="build-progress-wrap">
-        <progress
-          percent="{{item.buildProgress}}"
-          stroke-width="8"
-          active="{{item.buildStatus === 'building'}}"
-          activeColor="#c2410c"
-          backgroundColor="#f0ede4"
-        />
-        <text class="build-progress-text">当前进度 {{item.buildProgress}}%</text>
-        <text wx:if="{{item.buildStage}}" class="build-stage">{{item.buildStage}}</text>
-        <text wx:if="{{item.taskId}}" class="build-task-id">任务编号 {{item.taskId}}</text>
-        <text wx:if="{{item.buildError}}" class="build-error">{{item.buildError}}</text>
+      <view class="build-content">
+        <view class="progress-section">
+          <view class="progress-header">
+            <text class="progress-label">{{item.buildStage || '准备就绪'}}</text>
+            <text class="progress-value">{{item.buildProgress || 0}}%</text>
+          </view>
+          <view class="progress-bar-bg">
+            <view class="progress-bar-fill" style="width: {{item.buildProgress || 0}}%"></view>
+          </view>
+        </view>
+
+        <view class="error-box" wx:if="{{item.buildError}}">
+          <view class="icon-svg icon-error-red"></view>
+          <text class="error-msg">{{item.buildError}}</text>
+        </view>
       </view>
 
-      <view class="build-bottom">
-        <text class="build-meta">{{item.category}} · {{item.publisher}}{{item.taskId ? ' · 任务 ' + item.taskId : ''}}</text>
+      <view class="build-card-footer">
+        <view class="footer-info">
+          <text class="info-item">{{item.category}}</text>
+          <text class="info-item" wx:if="{{item.taskId}}">ID: {{item.taskId}}</text>
+        </view>
+        
         <button
           wx:if="{{item.buildStatus === 'none' || item.buildStatus === 'failed'}}"
-          class="build-btn"
+          class="btn-build-action"
           data-id="{{item.id}}"
           bindtap="handleStartBuild"
         >
-          {{item.buildStatus === 'failed' ? '重新建库' : '开始建库'}}
+          {{item.buildStatus === 'failed' ? '重试任务' : '启动解析'}}
         </button>
-        <text wx:elif="{{item.buildStatus === 'building'}}" class="build-running">任务进行中...</text>
-        <text wx:else class="build-done">建库可用于 AI 对话</text>
+        <view wx:elif="{{item.buildStatus === 'building'}}" class="running-indicator">
+          <view class="dot-loading"></view>
+          <text>AI 正在理解内容...</text>
+        </view>
+        <view wx:else class="success-indicator">
+          <view class="icon-svg icon-check-green"></view>
+          <text>知识库构建完成</text>
+        </view>
       </view>
     </view>
+  </view>
+
+  <empty-state
+    wx:if="{{!books.length}}"
+    title="暂无建库任务"
+    description="上传书籍后，任务将在此处显示"
+  />
   </view>
 </view>

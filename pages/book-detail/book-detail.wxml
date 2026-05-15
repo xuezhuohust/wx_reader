@@ -80,7 +80,7 @@
   <view class="bottom-action-bar">
     <block wx:if="{{!isPublisherScene}}">
       <button class="btn-primary-full" bindtap="handleAction">
-        {{book.purchased ? '进入 AI 沉浸对话' : '立即解锁对话'}}
+        {{book.purchased ? '进入 AI 沉浸导读' : '立即解锁导读'}}
       </button>
     </block>
     <block wx:else>

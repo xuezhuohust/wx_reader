@@ -228,7 +228,6 @@
 .main-content {
   flex: 1;
   padding-bottom: 60rpx;
-  animation: slideUp 0.6s ease-out;
 }
 
 .bookshelf-canvas {

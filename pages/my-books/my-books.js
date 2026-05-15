@@ -44,11 +44,14 @@ Page({
   onShow() {
     this.loadBooks()
 
-    const app = getApp()
-    const identity = app.globalData.identity
+    const { getUserRole } = require('../../utils/role')
+    const { loadIdentity } = require('../../utils/storage')
+    const identity = loadIdentity()
+    const role = getUserRole(identity)
+
     this.setData({
       identity,
-      currentRole: (identity && identity.role) || 'reader'
+      currentRole: role
     })
     syncRoleTabBar(this, 'pages/my-books/my-books', identity)
   },
@@ -230,10 +233,8 @@ Page({
       content: '确定要退出当前账号吗？',
       success: (res) => {
         if (res.confirm) {
-          // Clear identity and logout logic
-          const app = getApp()
-          app.globalData.identity = null
-          wx.setStorageSync('identity', null)
+          const { clearIdentity } = require('../../utils/storage')
+          clearIdentity()
           this.setData({ identity: null })
           wx.showToast({ title: '已退出登录', icon: 'success' })
         }
@@ -252,12 +253,17 @@ Page({
           identity,
           currentRole: role 
         })
+        
+        // 关键修复：切换身份后先刷新底栏，再执行跳转
         syncRoleTabBar(this, 'pages/my-books/my-books', identity)
+        
         wx.hideLoading()
         wx.showToast({ title: '身份已切换', icon: 'success' })
         
-        // 如果切换到出版商，建议跳转到首页工作台
+        // 跳转到对应角色的首页/仪表盘
         if (role === 'publisher') {
+          wx.switchTab({ url: '/pages/publisher/index' })
+        } else {
           wx.switchTab({ url: '/pages/index/index' })
         }
       })

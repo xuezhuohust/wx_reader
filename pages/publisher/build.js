@@ -5,14 +5,29 @@ const { syncRoleTabBar } = require('../../utils/tab-bar')
 Page({
   data: {
     books: [],
+    navBarHeight: 0,
+    statusBarHeight: 0,
+    menuTop: 0,
+    menuHeight: 0,
   },
 
   onLoad(options) {
+    const app = getApp()
+    this.setData({
+      navBarHeight: app.globalData.navBarHeight,
+      statusBarHeight: app.globalData.statusBarHeight,
+      menuTop: app.globalData.menuTop,
+      menuHeight: app.globalData.menuHeight,
+    })
     this.applyBuildIntent({
       bookId: options.bookId,
       autoStart: options.autoStart === '1',
     })
     this.pendingBuildId = ''
+  },
+
+  handleBack() {
+    wx.navigateBack()
   },
 
   onShow() {

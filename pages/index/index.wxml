@@ -40,17 +40,26 @@
       </view>
     </view>
 
-    <!-- Reader View -->
-    <block wx:if="{{currentRole === 'reader'}}">
-      <view class="main-content">
-        <!-- Horizontal Recommendations -->
-        <view class="section-container">
-          <view class="section-header">
-            <text class="section-title">今日推荐</text>
-          </view>
+    <!-- Reader View (Now the only view for this page) -->
+    <view class="main-content">
+      <!-- Horizontal Recommendations -->
+      <view class="section-container">
+        <view class="section-header">
+          <text class="section-title">今日推荐</text>
+        </view>
 
-          <scroll-view class="recommend-scroll" scroll-x enhanced show-scrollbar="{{false}}">
-            <view class="recommend-row">
+        <scroll-view class="recommend-scroll" scroll-x enhanced show-scrollbar="{{false}}">
+          <view class="recommend-row">
+            <!-- Skeleton for Recommendations -->
+            <block wx:if="{{loading}}">
+              <view wx:for="{{[1,2,3]}}" wx:key="*this" class="recommend-card-minimal skeleton-pulse">
+                <view class="book-cover-wrapper skeleton-bg"></view>
+                <view class="book-info-minimal">
+                  <view class="skeleton-text skeleton-bg" style="width: 80%; height: 28rpx;"></view>
+                </view>
+              </view>
+            </block>
+            <block wx:else>
               <view
                 wx:for="{{recommendBooks}}"
                 wx:key="id"
@@ -66,34 +75,41 @@
                   <text class="book-title-minimal">{{item.title}}</text>
                 </view>
               </view>
-            </view>
-          </scroll-view>
+            </block>
+          </view>
+        </scroll-view>
+      </view>
+
+      <!-- Library Section -->
+      <view class="section-container library-section">
+        <view class="section-header">
+          <text class="section-title">探索库</text>
+          <text class="section-more">{{loading ? '...' : filteredBooks.length}} 本藏书</text>
         </view>
 
-        <!-- Library Section -->
-        <view class="section-container library-section">
-          <view class="section-header">
-            <text class="section-title">探索库</text>
-            <text class="section-more">{{filteredBooks.length}} 本藏书</text>
-          </view>
-
-          <!-- Integrated Library Tabs -->
-          <scroll-view class="library-tabs-scroll" scroll-x enhanced show-scrollbar="{{false}}">
-            <view class="library-tabs-row">
-              <view
-                wx:for="{{categories}}"
-                wx:key="*this"
-                class="tab-item-minimal {{activeCategory === item ? 'active' : ''}}"
-                data-value="{{item}}"
-                bindtap="handleTabChange"
-              >
-                {{item}}
-              </view>
+        <!-- Integrated Library Tabs -->
+        <scroll-view class="library-tabs-scroll" scroll-x enhanced show-scrollbar="{{false}}">
+          <view class="library-tabs-row">
+            <view
+              wx:for="{{categories}}"
+              wx:key="*this"
+              class="tab-item-minimal {{activeCategory === item ? 'active' : ''}}"
+              data-value="{{item}}"
+              bindtap="handleTabChange"
+            >
+              {{item}}
             </view>
-          </scroll-view>
+          </view>
+        </scroll-view>
 
-          <!-- Library List -->
-          <view wx:if="{{filteredBooks.length}}" class="list-wrap">
+        <!-- Library List with Skeleton -->
+        <view class="list-wrap">
+          <block wx:if="{{loading}}">
+            <view wx:for="{{[1,2,3,4]}}" wx:key="*this" class="skeleton-card-wrap skeleton-pulse">
+              <view class="skeleton-book-card skeleton-bg"></view>
+            </view>
+          </block>
+          <block wx:elif="{{filteredBooks.length}}">
             <book-card
               wx:for="{{filteredBooks}}"
               wx:key="id"
@@ -103,8 +119,7 @@
               bind:cardtap="handleBookTap"
               bind:actiontap="handleActionTap"
             />
-          </view>
-
+          </block>
           <empty-state
             wx:else
             title="暂无匹配书籍"
@@ -112,55 +127,7 @@
           />
         </view>
       </view>
-    </block>
-
-    <!-- Publisher View -->
-    <block wx:else>
-      <view class="main-content">
-        <view class="section-container">
-          <view class="section-header">
-            <text class="section-title">工作台概览</text>
-          </view>
-          <view class="publisher-stats-row">
-            <view class="stat-card tint-mint">
-              <text class="stat-count">{{publisherStats.totalBooks || 0}}</text>
-              <text class="stat-tag">管理书目</text>
-            </view>
-            <view class="stat-card tint-sky">
-              <text class="stat-count">{{publisherStats.totalChatCount || 0}}</text>
-              <text class="stat-tag">累计对话</text>
-            </view>
-          </view>
-        </view>
-
-        <view class="section-container">
-          <view class="section-header">
-            <text class="section-title">快捷操作</text>
-          </view>
-          <view class="publisher-actions">
-            <view
-              wx:for="{{publisherEntries}}"
-              wx:key="title"
-              class="action-card"
-              data-path="{{item.path}}"
-              data-type="{{item.type}}"
-              bindtap="handlePublisherActionTap"
-            >
-              <view class="action-card-header">
-                <view class="action-icon-box tint-{{index % 5}}">
-                  <text class="icon-char">{{item.title[0]}}</text>
-                </view>
-                <view class="arrow-right"></view>
-              </view>
-              <view class="action-info">
-                <text class="action-title">{{item.title}}</text>
-                <text class="action-desc">{{item.desc}}</text>
-              </view>
-            </view>
-          </view>
-        </view>
-      </view>
-    </block>
+    </view>
   </view>
 
   <!-- Permission Modal -->

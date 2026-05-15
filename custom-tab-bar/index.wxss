@@ -33,10 +33,16 @@
   transition: all 0.2s ease;
 }
 
-.tab-item--active .tab-icon {
+.tab-item--active.tab-item--reader .tab-icon {
   opacity: 1;
-  /* Filter for rgb(19, 30, 56) #131e38 */
+  /* Filter for #131e38 (Navy) */
   filter: brightness(0) saturate(100%) invert(9%) sepia(35%) saturate(1142%) hue-rotate(185deg) brightness(95%) contrast(96%);
+}
+
+.tab-item--active.tab-item--publisher .tab-icon {
+  opacity: 1;
+  /* Filter for rgb(10, 120, 105) */
+  filter: brightness(0) saturate(100%) invert(35%) sepia(87%) saturate(415%) hue-rotate(125deg) brightness(93%) contrast(96%);
 }
 
 .tab-label {
@@ -46,7 +52,12 @@
   font-weight: 500;
 }
 
-.tab-item--active .tab-label {
-  color: var(--notion-primary);
+.tab-item--active.tab-item--reader .tab-label {
+  color: var(--theme-reader);
+  font-weight: 600;
+}
+
+.tab-item--active.tab-item--publisher .tab-label {
+  color: rgb(10, 120, 105);
   font-weight: 600;
 }

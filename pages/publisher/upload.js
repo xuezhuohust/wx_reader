@@ -16,10 +16,28 @@ Page({
       price: '',
       copyright: '',
     },
+    navBarHeight: 0,
+    statusBarHeight: 0,
+    menuTop: 0,
+    menuHeight: 0,
+  },
+
+  onLoad() {
+    const app = getApp()
+    this.setData({
+      navBarHeight: app.globalData.navBarHeight,
+      statusBarHeight: app.globalData.statusBarHeight,
+      menuTop: app.globalData.menuTop,
+      menuHeight: app.globalData.menuHeight,
+    })
   },
 
   onShow() {
     this.guardPublisherRole()
+  },
+
+  handleBack() {
+    wx.navigateBack()
   },
 
   handleInput(event) {

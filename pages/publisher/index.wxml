@@ -1,60 +1,132 @@
 <view class="page-shell">
-  <!-- Custom Navigation Bar -->
-  <view class="custom-nav" style="height: {{navBarHeight}}px;">
+  <!-- Custom Navigation Bar (Transparent for Hero) -->
+  <view class="custom-nav nav-dark" style="height: {{navBarHeight}}px;">
     <view class="nav-inner" style="top: {{menuTop}}px; height: {{menuHeight}}px;">
-      <text class="nav-title">出版商工作台</text>
+      <!-- Title removed per user request -->
     </view>
   </view>
 
-  <view class="content-wrap" style="padding-top: {{navBarHeight}}px;">
-    <view class="page-intro">
-      <view class="intro-eyebrow">
-        <text>管理工作台 · 出版商视图</text>
+  <!-- Hero Band Section -->
+  <view class="hero-band-dark" style="padding-top: {{navBarHeight + 10}}px;">
+    <view class="hero-content">
+      <view class="hero-title-wrap">
+        <text class="hero-title">{{publisher.name || '运营数据概览'}}</text>
       </view>
-      <text class="page-intro-title text-serif">{{publisher.name || '出版商工坊'}}</text>
-      <text class="page-intro-desc">{{publisher.intro || '管理您的书目，构建知识的数字桥梁。'}}</text>
+      <text class="hero-desc">实时掌控书籍资产动态，深度洞察读者交互趋势。</text>
     </view>
 
-    <view class="stats-grid">
-      <view class="stat-card">
-        <text class="stat-value">{{stats.totalBooks || 0}}</text>
-        <text class="stat-label">书籍总数</text>
+    <!-- Floating Metrics: Positioned on the edge -->
+    <view class="floating-metrics">
+      <view class="metric-item">
+        <text class="m-label">管理规模</text>
+        <view class="m-value-row">
+          <text class="m-value">{{stats.totalBooks || 0}}</text>
+          <text class="m-unit">册</text>
+        </view>
+        <text class="m-sub">已上架 {{stats.totalBooks || 0}}</text>
       </view>
-      <view class="stat-card">
-        <text class="stat-value">{{stats.builtCount || 0}}</text>
-        <text class="stat-label">已建库</text>
+      <view class="m-divider"></view>
+      <view class="metric-item">
+        <text class="m-label">AI 对话量</text>
+        <view class="m-value-row">
+          <text class="m-value">{{stats.totalChatCount || 0}}</text>
+          <text class="m-unit">次</text>
+        </view>
+        <text class="m-sub">活跃度 100%</text>
       </view>
-      <view class="stat-card">
-        <text class="stat-value">{{stats.pendingCount || 0}}</text>
-        <text class="stat-label">待建库</text>
+    </view>
+  </view>
+
+  <view class="content-wrap main-content">
+    <!-- Charts and other content -->
+
+    <!-- Chart Section: Activity Trend -->
+    <view class="chart-section card-base">
+      <view class="chart-header">
+        <view class="chart-title-wrap">
+          <text class="chart-title">读者互动趋势</text>
+          <text class="chart-subtitle">最近 7 天对话统计</text>
+        </view>
+        <view class="chart-legend">
+          <view class="legend-item">
+            <view class="legend-dot bg-publisher"></view>
+            <text>对话次数</text>
+          </view>
+        </view>
       </view>
-      <view class="stat-card">
-        <text class="stat-value">{{stats.totalChatCount || 0}}</text>
-        <text class="stat-label">累计对话</text>
+      <view class="chart-body">
+        <view class="bar-chart">
+          <view wx:for="{{activityData}}" wx:key="day" class="bar-item">
+            <view class="bar-fill-wrap">
+              <view class="bar-fill bg-publisher" style="height: {{item.value / maxActivity * 100}}%"></view>
+            </view>
+            <text class="bar-label">{{item.day}}</text>
+          </view>
+        </view>
       </view>
     </view>
 
-    <view class="section-container">
+    <!-- Status Visualization -->
+    <view class="viz-section card-base tint-gray">
+      <view class="viz-header">
+        <text class="viz-title">资产构建进度</text>
+      </view>
+      <view class="viz-content">
+        <view class="viz-row">
+          <text class="viz-label">已建库书籍</text>
+          <view class="viz-bar-wrap">
+            <view class="viz-bar-fill bg-publisher" style="width: {{stats.totalBooks ? (stats.builtCount/stats.totalBooks*100) : 0}}%"></view>
+          </view>
+          <text class="viz-value">{{stats.builtCount || 0}}</text>
+        </view>
+        <view class="viz-row">
+          <text class="viz-label">待解析任务</text>
+          <view class="viz-bar-wrap">
+            <view class="viz-bar-fill chart-3" style="width: {{stats.totalBooks ? (stats.pendingCount/stats.totalBooks*100) : 0}}%"></view>
+          </view>
+          <text class="viz-value">{{stats.pendingCount || 0}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- Quick Actions (Designed as the user requested) -->
+    <view class="quick-actions">
       <view class="section-header">
         <text class="section-title">功能入口</text>
       </view>
-      
-      <view class="publisher-entry-list">
-        <view
-          wx:for="{{entries}}"
-          wx:key="title"
-          class="publisher-entry card-panel"
-          data-path="{{item.path}}"
-          data-type="{{item.type}}"
-          bindtap="handleEntryTap"
-        >
-          <view class="publisher-entry-main">
-            <text class="publisher-entry-title">{{item.title}}</text>
-            <text class="publisher-entry-desc">{{item.desc}}</text>
+      <view class="actions-grid">
+        <view wx:for="{{entries}}" wx:key="title" class="action-card card-base {{item.tintClass}}" bindtap="handleEntryTap" data-path="{{item.path}}" data-type="{{item.type}}">
+          <view class="action-icon-wrap">
+            <view class="icon-svg {{item.iconClass}}"></view>
           </view>
-          <text class="publisher-entry-link">进入 →</text>
+          <view class="action-info">
+            <text class="action-title">{{item.title}}</text>
+            <text class="action-desc">{{item.desc}}</text>
+          </view>
+          <view class="chevron-right-mini"></view>
         </view>
       </view>
+    </view>
+
+    <!-- Operational Activity (Simplified for Dashboard) -->
+    <view class="activity-section">
+      <view class="section-header">
+        <text class="section-title">管理中心</text>
+      </view>
+      <view class="activity-card card-base" bindtap="handleGoBooks">
+        <view class="activity-info">
+          <text class="activity-t">书目全量清单</text>
+          <text class="activity-d">管理书籍上下架与 AI 处理状态</text>
+        </view>
+        <view class="chevron-right-mini"></view>
+      </view>
+    </view>
+
+    <!-- Switch Back Button (Moved to Bottom of Dashboard) -->
+    <view class="switch-back-section">
+      <button class="btn-switch-back" bindtap="handleSwitchToReader">
+        退出管理模式
+      </button>
     </view>
   </view>
 </view>

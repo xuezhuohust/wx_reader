@@ -7,6 +7,20 @@ Page({
     searchValue: '',
     books: [],
     filteredBooks: [],
+    navBarHeight: 0,
+    statusBarHeight: 0,
+    menuTop: 0,
+    menuHeight: 0,
+  },
+
+  onLoad() {
+    const app = getApp()
+    this.setData({
+      navBarHeight: app.globalData.navBarHeight,
+      statusBarHeight: app.globalData.statusBarHeight,
+      menuTop: app.globalData.menuTop,
+      menuHeight: app.globalData.menuHeight,
+    })
   },
 
   onShow() {
@@ -20,8 +34,14 @@ Page({
   loadBooks() {
     api.getPublisherBooks()
       .then((books) => {
-        this.setData({ books })
-        this.applyFilter(books, this.data.searchValue)
+        const processedBooks = (books || []).map(book => {
+          const rawCover = book.coverUrl || book.cover
+          return Object.assign({}, book, {
+            coverUrl: rawCover ? api.toAbsoluteUrl(rawCover) : ''
+          })
+        })
+        this.setData({ books: processedBooks })
+        this.applyFilter(processedBooks, this.data.searchValue)
       })
       .catch((error) => {
         console.error('loadPublisherBooks failed:', error)
@@ -47,6 +67,18 @@ Page({
     const searchValue = event.detail.value
     this.setData({ searchValue })
     this.applyFilter(this.data.books, searchValue)
+  },
+
+  handleGoUpload() {
+    wx.navigateTo({
+      url: '/pages/publisher/upload',
+    })
+  },
+
+  handleGoBuild() {
+    wx.navigateTo({
+      url: '/pages/publisher/build',
+    })
   },
 
   handleBookTap(event) {

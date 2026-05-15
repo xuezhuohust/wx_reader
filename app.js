@@ -12,6 +12,12 @@ App({
     menuTop: 0,
     menuHeight: 0,
     menuWidth: 0,
+    // Cache for Home Data
+    homeCache: {
+      recommendBooks: null,
+      libraryBooks: null,
+      lastUpdated: 0,
+    },
   },
 
   onLaunch() {

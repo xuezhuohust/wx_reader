@@ -1,55 +1,83 @@
 <view class="page-shell">
-  <view class="page-intro">
-    <view class="intro-eyebrow">
-      <text>内容录入 · 异步建库</text>
+  <!-- Custom Navigation Bar -->
+  <view class="custom-nav" style="height: {{navBarHeight}}px;">
+    <view class="nav-inner" style="top: {{menuTop}}px; height: {{menuHeight}}px;">
+      <view class="nav-left" bindtap="handleBack">
+        <view class="chevron-left-black"></view>
+      </view>
+      <text class="nav-title">新书录入</text>
     </view>
-    <text class="page-intro-title text-serif">录入新书籍</text>
-    <text class="page-intro-desc">录入书目并上传源文件。提交后系统将自动开启 AI 深度理解流程。</text>
   </view>
 
-  <view class="upload-form card-panel">
-    <view class="form-item">
-      <text class="form-label">书名</text>
-      <input class="form-input" value="{{form.title}}" data-field="title" bindinput="handleInput" placeholder="请输入书名" />
+  <view class="content-wrap" style="padding-top: {{navBarHeight}}px;">
+    <view class="page-header">
+      <view class="header-intro">
+        <view class="intro-badge">
+          <text>录入流程</text>
+        </view>
+        <text class="header-title">图书资产上传</text>
+        <text class="header-desc">完善书籍信息并上传源文件，开启 AI 智能建库</text>
+      </view>
     </view>
 
-    <view class="form-item">
-      <text class="form-label">作者</text>
-      <input class="form-input" value="{{form.author}}" data-field="author" bindinput="handleInput" placeholder="请输入作者" />
+  <view class="upload-form">
+    <view class="form-group card-base">
+      <view class="form-item">
+        <text class="form-label">书籍名称</text>
+        <input class="form-input" value="{{form.title}}" data-field="title" bindinput="handleInput" placeholder="请输入书名" />
+      </view>
+
+      <view class="form-item">
+        <text class="form-label">作者/编著者</text>
+        <input class="form-input" value="{{form.author}}" data-field="author" bindinput="handleInput" placeholder="请输入作者" />
+      </view>
+
+      <view class="form-item">
+        <text class="form-label">出版单位</text>
+        <input class="form-input" value="{{form.publisher}}" data-field="publisher" bindinput="handleInput" placeholder="请输入出版社" />
+      </view>
+
+      <view class="form-item">
+        <text class="form-label">内容分类</text>
+        <picker class="form-picker" range="{{categories}}" value="{{categoryIndex}}" bindchange="handleCategoryChange">
+          <view class="picker-inner">
+            <text class="picker-value">{{form.category || '请选择分类'}}</text>
+            <view class="chevron-down-mini"></view>
+          </view>
+        </picker>
+      </view>
     </view>
 
-    <view class="form-item">
-      <text class="form-label">出版社</text>
-      <input class="form-input" value="{{form.publisher}}" data-field="publisher" bindinput="handleInput" placeholder="请输入出版社" />
+    <view class="form-group card-base">
+      <view class="form-item">
+        <text class="form-label">内容简介</text>
+        <textarea class="form-textarea" value="{{form.description}}" data-field="description" bindinput="handleInput" placeholder="请输入书籍核心内容简介" />
+      </view>
+
+      <view class="form-item">
+        <text class="form-label">定价 (元)</text>
+        <input class="form-input" value="{{form.price}}" data-field="price" bindinput="handleInput" placeholder="0.00" type="digit" />
+      </view>
+
+      <view class="form-item no-border">
+        <text class="form-label">版权及权利声明</text>
+        <textarea class="form-textarea" value="{{form.copyright}}" data-field="copyright" bindinput="handleInput" placeholder="请输入版权归属及授权说明" />
+      </view>
     </view>
 
-    <view class="form-item">
-      <text class="form-label">分类</text>
-      <picker range="{{categories}}" value="{{categoryIndex}}" bindchange="handleCategoryChange">
-        <view class="picker-value">{{form.category}}</view>
-      </picker>
+    <view class="file-upload-section card-base {{fileName ? 'file-ready' : ''}}" bindtap="handleChooseFile">
+      <view class="upload-icon-box">
+        <view class="icon-svg {{fileName ? 'icon-file-ready' : 'icon-upload-cloud'}}"></view>
+      </view>
+      <view class="upload-info">
+        <text class="upload-title">{{fileName || '点击上传源文件'}}</text>
+        <text class="upload-hint">支持 .txt / .docx / .pdf 格式</text>
+      </view>
     </view>
 
-    <view class="form-item">
-      <text class="form-label">简介</text>
-      <textarea class="form-textarea" value="{{form.description}}" data-field="description" bindinput="handleInput" placeholder="请输入书籍简介" />
+    <view class="submit-section">
+      <button class="btn-submit" bindtap="handleSubmit">提交并开启建库</button>
     </view>
-
-    <view class="form-item">
-      <text class="form-label">价格</text>
-      <input class="form-input" value="{{form.price}}" data-field="price" bindinput="handleInput" placeholder="请输入价格" type="digit" />
-    </view>
-
-    <view class="form-item">
-      <text class="form-label">版权说明</text>
-      <textarea class="form-textarea" value="{{form.copyright}}" data-field="copyright" bindinput="handleInput" placeholder="请输入版权说明" />
-    </view>
-
-    <view class="file-box" bindtap="handleChooseFile">
-      <text class="file-title">文件上传</text>
-      <text class="file-desc">{{fileName || '点击选择 .txt / .docx / .pdf 文件'}}</text>
-    </view>
-
-    <button class="primary-btn submit-btn" bindtap="handleSubmit">提交并上传</button>
   </view>
+</view>
 </view>

@@ -48,13 +48,13 @@
       },
       {
         "pagePath": "pages/publisher/books",
-        "text": "书目",
+        "text": "管理",
         "iconPath": "app-assets/tab-default.png",
         "selectedIconPath": "app-assets/tab-active.png"
       },
       {
-        "pagePath": "pages/publisher/build",
-        "text": "建库",
+        "pagePath": "pages/publisher/index",
+        "text": "仪表盘",
         "iconPath": "app-assets/tab-default.png",
         "selectedIconPath": "app-assets/tab-active.png"
       }

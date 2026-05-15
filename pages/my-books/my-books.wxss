@@ -11,6 +11,11 @@
   padding: 40rpx 24rpx 100rpx; /* Reduced horizontal padding from 40rpx */
   position: relative;
   overflow: hidden;
+  transition: background 0.4s ease;
+}
+
+.role-publisher .hero-band {
+  background: linear-gradient(135deg, #064e3b 0%, #0d9488 100%);
 }
 
 .hero-content {
@@ -122,8 +127,12 @@
 .status-dot-active {
   width: 8rpx;
   height: 8rpx;
-  background: var(--brand-green, #1aae39);
+  background: var(--semantic-success);
   border-radius: 50%;
+}
+
+.role-publisher .status-dot-active {
+  background: #2dd4bf; /* Teal dot for publisher status */
 }
 
 .level-text {
@@ -237,12 +246,17 @@
 }
 
 .btn-switch-action {
-  background: #f5f3ff;
-  color: #7b3ff2;
+  background: #f0fdfa;
+  color: var(--theme-publisher);
   font-size: 22rpx;
   font-weight: 700;
   padding: 12rpx 24rpx;
   border-radius: var(--radius-full);
+}
+
+.role-publisher .btn-switch-action {
+  background: #eff6ff;
+  color: var(--theme-reader);
 }
 
 .menu-label-sub {

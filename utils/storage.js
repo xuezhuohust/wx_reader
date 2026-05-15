@@ -1,4 +1,4 @@
-const IDENTITY_STORAGE_KEY = 'reader_user_identity'
+const IDENTITY_STORAGE_KEY = 'user_identity'
 
 function getAppInstance() {
   try {

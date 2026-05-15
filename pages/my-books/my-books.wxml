@@ -1,4 +1,4 @@
-<view class="page-shell my-books-page">
+<view class="page-shell my-books-page role-{{currentRole}}">
   <view class="content-body">
     <!-- Hero Band: Consistent with Index/Bookshelf -->
     <view class="hero-band" style="padding-top: {{statusBarHeight + 32}}px;">
@@ -30,7 +30,7 @@
         </view>
 
         <!-- Stats Card: Floating Card (Refined) -->
-        <view class="stats-premium-card">
+        <view class="stats-premium-card" wx:if="{{currentRole === 'reader'}}">
           <view class="stat-col">
             <text class="stat-v">{{books.length || 0}}</text>
             <text class="stat-l">我的藏书</text>
@@ -44,6 +44,24 @@
           <view class="stat-col">
             <text class="stat-v">12</text>
             <text class="stat-l">获赞</text>
+          </view>
+        </view>
+
+        <!-- Stats Card: Publisher Version -->
+        <view class="stats-premium-card" wx:else>
+          <view class="stat-col">
+            <text class="stat-v">8</text>
+            <text class="stat-l">管理书目</text>
+          </view>
+          <view class="stat-sep"></view>
+          <view class="stat-col">
+            <text class="stat-v">2</text>
+            <text class="stat-l">待处理</text>
+          </view>
+          <view class="stat-sep"></view>
+          <view class="stat-col">
+            <text class="stat-v">1.2k</text>
+            <text class="stat-l">服务读者</text>
           </view>
         </view>
       </view>
@@ -68,34 +86,67 @@
     </view>
 
     <view class="main-content-refined">
-      <!-- Section: Activity Grid -->
-      <view class="menu-label-sub">常用功能</view>
-      <view class="menu-grid-refined card-base">
-        <view class="menu-grid-item" bindtap="handleExplore">
-          <view class="grid-icon-box tint-peach">
-            <view class="icon-svg icon-library-orange"></view>
+      <!-- Section: Activity Grid (Reader) -->
+      <block wx:if="{{currentRole === 'reader'}}">
+        <view class="menu-label-sub">常用功能</view>
+        <view class="menu-grid-refined card-base">
+          <view class="menu-grid-item" bindtap="handleExplore">
+            <view class="grid-icon-box tint-peach">
+              <view class="icon-svg icon-library-orange"></view>
+            </view>
+            <text class="grid-title">发现书库</text>
           </view>
-          <text class="grid-title">发现书库</text>
-        </view>
-        <view class="menu-grid-item" bindtap="handleDeveloping">
-          <view class="grid-icon-box tint-lavender">
-            <view class="icon-svg icon-medal-purple"></view>
+          <view class="menu-grid-item" bindtap="handleDeveloping">
+            <view class="grid-icon-box tint-lavender">
+              <view class="icon-svg icon-medal-purple"></view>
+            </view>
+            <text class="grid-title">成就勋章</text>
           </view>
-          <text class="grid-title">成就勋章</text>
-        </view>
-        <view class="menu-grid-item" bindtap="handleDeveloping">
-          <view class="grid-icon-box tint-sky">
-            <view class="icon-svg icon-wallet-blue"></view>
+          <view class="menu-grid-item" bindtap="handleDeveloping">
+            <view class="grid-icon-box tint-sky">
+              <view class="icon-svg icon-wallet-blue"></view>
+            </view>
+            <text class="grid-title">我的钱包</text>
           </view>
-          <text class="grid-title">我的钱包</text>
-        </view>
-        <view class="menu-grid-item" bindtap="handleDeveloping">
-          <view class="grid-icon-box tint-mint">
-            <view class="icon-svg icon-gift-green"></view>
+          <view class="menu-grid-item" bindtap="handleDeveloping">
+            <view class="grid-icon-box tint-mint">
+              <view class="icon-svg icon-gift-green"></view>
+            </view>
+            <text class="grid-title">福利中心</text>
           </view>
-          <text class="grid-title">福利中心</text>
         </view>
-      </view>
+      </block>
+
+      <!-- Section: Activity Grid (Publisher) -->
+      <block wx:else>
+        <view class="menu-label-sub">管理工具</view>
+        <view class="menu-grid-refined card-base">
+          <view class="menu-grid-item" bindtap="handleDeveloping">
+            <view class="grid-icon-box tint-sky">
+              <view class="icon-svg icon-feedback-blue"></view>
+            </view>
+            <text class="grid-title">读者反馈</text>
+          </view>
+          <view class="menu-grid-item" bindtap="handleDeveloping">
+            <view class="grid-icon-box tint-mint">
+              <view class="icon-svg icon-medal-purple"></view>
+            </view>
+            <text class="grid-title">机构认证</text>
+          </view>
+          <view class="menu-grid-item" bindtap="handleDeveloping">
+            <view class="grid-icon-box tint-peach">
+              <view class="icon-svg icon-wallet-blue"></view>
+            </view>
+            <text class="grid-title">结算中心</text>
+          </view>
+          <view class="menu-grid-item" bindtap="handleDeveloping">
+            <view class="grid-icon-box tint-lavender">
+              <view class="icon-svg icon-settings-green"></view>
+            </view>
+            <text class="grid-title">数据报表</text>
+          </view>
+        </view>
+      </block>
 
       <view class="menu-label-sub">支持与服务</view>
       <view class="menu-group-refined card-base">

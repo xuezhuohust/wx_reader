@@ -28,6 +28,11 @@ page {
   --semantic-success: #1aae39;
   --semantic-warning: #dd5b00;
   --semantic-error: #e03131;
+
+  /* Theme Colors */
+  --theme-reader: #131e38;
+  --theme-publisher: rgb(10, 120, 105); /* Updated to exact color requested */
+  --theme-active: var(--theme-reader); /* Default */
   
   /* Card Tints */
   --tint-peach: #ffe8d4;
@@ -35,7 +40,17 @@ page {
   --tint-mint: #d9f3e1;
   --tint-lavender: #e6e0f5;
   --tint-sky: #dcecfa;
+  --tint-yellow: #fef7d6;
   --tint-yellow-bold: #f9e79f;
+  --tint-cream: #f8f5e8;
+  --tint-gray: #f0eeec;
+
+  /* Chart Colors */
+  --chart-1: #5645d4; /* Purple */
+  --chart-2: #2a9d99; /* Teal */
+  --chart-3: #dd5b00; /* Orange */
+  --chart-4: #ff64c8; /* Pink */
+  --chart-5: #1aae39; /* Green */
 
   /* Radius */
   --radius-xs: 4rpx;

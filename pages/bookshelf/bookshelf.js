@@ -34,6 +34,18 @@ Page({
   },
 
   onShow() {
+    const { getUserRole } = require('../../utils/role')
+    const { loadIdentity } = require('../../utils/storage')
+    const identity = loadIdentity()
+    const role = getUserRole(identity)
+    
+    if (role === 'publisher') {
+      wx.switchTab({
+        url: '/pages/publisher/books',
+      })
+      return
+    }
+
     syncRoleTabBar(this, 'pages/bookshelf/bookshelf')
     this.loadBookshelf()
   },

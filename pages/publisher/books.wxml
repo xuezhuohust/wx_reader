@@ -1,62 +1,108 @@
 <view class="page-shell">
-  <view class="page-intro">
-    <view class="intro-eyebrow">
-      <text>管理视角 · {{filteredBooks.length}} 册已录</text>
+  <!-- Custom Navigation Bar -->
+  <view class="custom-nav" style="height: {{navBarHeight}}px;">
+    <view class="nav-inner" style="top: {{menuTop}}px; height: {{menuHeight}}px;">
+      <text class="nav-title">业务管理中心</text>
     </view>
-    <text class="page-intro-title text-serif">书目生命周期管理</text>
-    <text class="page-intro-desc">在这里，您可以快速检索图书、查看建库状态，并掌控每一本书的上下架节奏。</text>
   </view>
 
-  <view class="input-shell">
-    <text class="input-icon">⌕</text>
-    <input
-      class="input-field"
-      placeholder="搜索书名、作者、分类"
-      placeholder-style="color:var(--text-light);"
-      value="{{searchValue}}"
-      bindinput="handleSearchInput"
-    />
+  <view class="content-wrap" style="padding-top: {{navBarHeight}}px;">
+    <view class="page-header">
+      <view class="header-intro">
+        <view class="intro-badge">
+          <text>OPERATIONS</text>
+        </view>
+        <text class="header-title">图书资产概览</text>
+        <text class="header-desc">处理书籍录入、AI 建库及发布状态</text>
+      </view>
+    </view>
+
+  <!-- Quick Operations -->
+  <view class="ops-grid">
+    <view class="ops-item card-base" bindtap="handleGoUpload">
+      <view class="ops-icon-box tint-sky">
+        <view class="icon-svg icon-upload-blue"></view>
+      </view>
+      <text class="ops-label">上传书籍</text>
+    </view>
+    <view class="ops-item card-base" bindtap="handleGoBuild">
+      <view class="ops-icon-box tint-lavender">
+        <view class="icon-svg icon-build-purple"></view>
+      </view>
+      <text class="ops-label">建库任务</text>
+    </view>
+  </view>
+
+  <view class="section-title-row">
+    <text class="section-title">书目清单</text> 
+    <text class="count-badge">{{filteredBooks.length}}</text>
+  </view>
+
+  <view class="search-container">
+    <view class="search-bar">
+      <view class="icon-svg icon-search-gray"></view>
+      <input
+        class="search-input"
+        placeholder="搜索书名、作者、分类"
+        placeholder-style="color:var(--stone);"
+        value="{{searchValue}}"
+        bindinput="handleSearchInput"
+      />
+    </view>
   </view>
 
   <view wx:if="{{filteredBooks.length}}" class="publisher-book-list">
     <view
       wx:for="{{filteredBooks}}"
       wx:key="id"
-      class="publisher-book card-panel"
+      class="publisher-book-card card-base"
       data-id="{{item.id}}"
       bindtap="handleBookTap"
     >
-      <view class="publisher-book-top">
-        <view class="book-info-area">
-          <text class="publisher-book-title">{{item.title}}</text>
-          <text class="publisher-book-author">{{item.author}}</text>
+      <view class="card-main">
+        <view class="book-cover-mini">
+          <image wx:if="{{item.coverUrl}}" src="{{item.coverUrl}}" mode="aspectFill" class="cover-img" />
+          <view wx:else class="icon-svg icon-book-muted"></view>
         </view>
-        <button
-          class="toggle-btn {{item.onlineStatus === 'online' ? '' : 'toggle-btn--active'}}"
-          catchtap="handleToggleStatus"
-          data-id="{{item.id}}"
-          data-status="{{item.onlineStatus}}"
-        >
-          {{item.onlineStatus === 'online' ? '下架' : '上架'}}
-        </button>
+        <view class="book-details">
+          <view class="title-row">
+            <text class="book-title">{{item.title}}</text>
+            <view class="status-indicator {{item.onlineStatus === 'online' ? 'status-online' : 'status-offline'}}"></view>
+          </view>
+          <text class="book-author">{{item.author}}</text>
+          
+          <view class="tag-row">
+            <view class="mini-tag tag-peach" wx:if="{{item.category}}">{{item.category}}</view>
+            <view class="mini-tag {{item.buildStatus === 'completed' ? 'tag-mint' : 'tag-gray'}}">
+              {{item.buildStatus === 'completed' ? '已建库' : '待处理'}}
+            </view>
+          </view>
+        </view>
       </view>
 
-      <view class="pill-row publisher-pills">
-        <status-tag text="{{item.category || ''}}" theme="primary" />
-        <status-tag type="build" status="{{item.buildStatus || ''}}" />
-        <status-tag type="online" status="{{item.onlineStatus || ''}}" />
-      </view>
-
-      <view class="publisher-book-meta">
-        <text class="publisher-meta-text">上传时间：{{item.uploadTime}}</text>
-        <text class="publisher-meta-text">价格：¥{{item.price}}</text>
+      <view class="card-footer">
+        <view class="footer-meta">
+          <text class="meta-price">¥{{item.price}}</text>
+          <text class="meta-date">{{item.uploadTime}}</text>
+        </view>
+        <view class="action-buttons">
+          <button
+            class="btn-action {{item.onlineStatus === 'online' ? 'btn-outline-danger' : 'btn-outline-primary'}}"
+            catchtap="handleToggleStatus"
+            data-id="{{item.id}}"
+            data-status="{{item.onlineStatus}}"
+          >
+            {{item.onlineStatus === 'online' ? '下架' : '上架'}}
+          </button>
+        </view>
       </view>
     </view>
   </view>
 
-  <empty-state
-    wx:else
-    title="暂时没有书目"
-    description="上传一本书后，这里会显示你的出版社书单"
-  />
+    <empty-state
+      wx:else
+      title="暂时没有书目"
+      description="上传一本书后，这里会显示你的出版社书单"
+    />
+  </view>
 </view>

@@ -5,6 +5,7 @@ const { syncRoleTabBar } = require('../../utils/tab-bar')
 
 Page({
   data: {
+    loading: true, // Add loading state
     keyword: '',
     recommendBooks: [],
     identity: null,
@@ -82,7 +83,19 @@ Page({
   },
 
   onShow() {
-    this.syncTabBar()
+    const { getUserRole } = require('../../utils/role')
+    const { loadIdentity } = require('../../utils/storage')
+    const identity = loadIdentity()
+    const role = getUserRole(identity)
+    
+    if (role === 'publisher') {
+      wx.switchTab({
+        url: '/pages/publisher/index',
+      })
+      return
+    }
+
+    syncRoleTabBar(this, 'pages/index/index')
     this.bootstrapHome()
 
     const app = getApp()
@@ -96,6 +109,10 @@ Page({
         this.applyFilters(this.data.books, keyword, this.data.activeCategory)
       }
     }
+
+    this.setData({
+      scrolled: false,
+    })
   },
 
   onPullDownRefresh() {
@@ -122,6 +139,7 @@ Page({
     }
 
     this.bootstrapting = true
+    this.setData({ loading: true }) // Ensure loading is true when starting
 
     bootstrapUserIdentity()
       .then((identity) => {
@@ -131,11 +149,18 @@ Page({
             recommendBooks: [],
             publisher: null,
             publisherStats: {},
+            loading: false, // Stop loading if no identity
           })
           return null
         }
 
         return this.loadRoleContent(identity)
+      })
+      .then(() => {
+        this.setData({ loading: false }) // Stop loading after content is loaded
+      })
+      .catch(() => {
+        this.setData({ loading: false }) // Stop loading on error
       })
       .finally(() => {
         this.bootstrapting = false
@@ -169,6 +194,27 @@ Page({
       return this.loadPublisherStats()
     }
 
+    const app = getApp()
+    const cache = app.globalData.homeCache
+    const now = Date.now()
+
+    // Use cache if it's fresh (within 5 minutes)
+    if (cache.recommendBooks && cache.libraryBooks && (now - cache.lastUpdated < 5 * 60 * 1000)) {
+      this.setData({
+        recommendBooks: cache.recommendBooks,
+        books: cache.libraryBooks,
+        loading: false,
+      })
+      this.applyFilters(cache.libraryBooks, this.data.searchValue, this.data.activeCategory)
+      
+      // Still refresh in background to keep data fresh
+      Promise.all([
+        this.loadRecommendBooks(),
+        this.loadLibraryBooks(),
+      ])
+      return Promise.resolve()
+    }
+
     return Promise.all([
       this.loadRecommendBooks(),
       this.loadLibraryBooks(),
@@ -178,6 +224,10 @@ Page({
   loadRecommendBooks(done) {
     return api.getRecommendBooks()
       .then((recommendBooks) => {
+        const app = getApp()
+        app.globalData.homeCache.recommendBooks = recommendBooks
+        app.globalData.homeCache.lastUpdated = Date.now()
+        
         this.setData({
           recommendBooks,
           loadError: false,
@@ -200,6 +250,10 @@ Page({
   loadLibraryBooks(done) {
     return api.getAllBooks()
       .then((books) => {
+        const app = getApp()
+        app.globalData.homeCache.libraryBooks = books
+        app.globalData.homeCache.lastUpdated = Date.now()
+
         this.setData({
           books,
           loadError: false,

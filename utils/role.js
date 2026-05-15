@@ -1,17 +1,14 @@
 const { loadIdentity, saveIdentity } = require('./storage')
 
 function getUserRole(identity) {
-  if (identity && identity.activeRole === 'publisher') {
-    return 'publisher'
-  }
-  if (identity && identity.role === 'publisher') {
+  if (identity && (identity.activeRole === 'publisher' || identity.role === 'publisher')) {
     return 'publisher'
   }
   return 'reader'
 }
 
 function getRoleLabel(role) {
-  return role === 'publisher' ? '出版社' : '读者'
+  return role === 'publisher' ? '出版模式' : '智读模式'
 }
 
 function updateIdentityRole(role) {
@@ -20,9 +17,10 @@ function updateIdentityRole(role) {
     return null
   }
 
+  const nextRole = role === 'publisher' ? 'publisher' : 'reader'
   return saveIdentity(Object.assign({}, identity, {
-    activeRole: getUserRole({ activeRole: role }),
-    role: getUserRole({ role }),
+    activeRole: nextRole,
+    role: nextRole,
   }))
 }
 
