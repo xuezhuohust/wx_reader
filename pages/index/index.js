@@ -443,6 +443,17 @@ Page({
       showPermissionModal: false,
     })
     wx.setStorageSync('permission_notified', true)
+    
+    // Request microphone permission proactively
+    wx.authorize({
+      scope: 'scope.record',
+      success() {
+        console.log('Microphone permission granted')
+      },
+      fail() {
+        console.log('Microphone permission denied')
+      }
+    })
   },
 
   handleStopPropagation() {},

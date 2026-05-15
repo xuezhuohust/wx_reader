@@ -85,8 +85,15 @@
     </view>
 
     <view class="input-area {{isInputExpanded ? 'input-area--expanded' : ''}}">
+      <!-- Mode Toggle: Keyboard/Voice -->
+      <view class="mode-toggle-btn" bindtap="handleToggleInputMode">
+        <view class="icon-svg {{inputMode === 'voice' ? 'icon-keyboard' : 'icon-voice'}}"></view>
+      </view>
+
       <view class="chat-input-wrap">
+        <!-- Text Input Mode -->
         <textarea
+          wx:if="{{inputMode === 'keyboard'}}"
           class="chat-input"
           placeholder="向这本书提问..."
           placeholder-style="color:#999;"
@@ -102,10 +109,45 @@
           cursor-spacing="32"
           maxlength="500"
         />
+
+        <!-- Voice Input Mode: Long Bar -->
+        <view
+          wx:else
+          class="voice-bar {{isRecording ? 'voice-bar--active' : ''}}"
+          bindtouchstart="handleVoiceStart"
+          bindtouchmove="handleVoiceMove"
+          bindtouchend="handleVoiceEnd"
+          bindtouchcancel="handleVoiceEnd"
+        >
+          <text>{{isRecording ? (isCancelReady ? '松开 取消' : '松开 发送') : '按住 说话'}}</text>
+        </view>
       </view>
-      <view class="send-btn {{inputValue ? 'send-btn--active' : ''}} {{isInputExpanded ? 'send-btn--expanded' : ''}}" bindtap="handleSend">
+
+      <view wx:if="{{inputMode === 'keyboard'}}" class="send-btn {{inputValue ? 'send-btn--active' : ''}} {{isInputExpanded ? 'send-btn--expanded' : ''}}" bindtap="handleSend">
         <view class="send-icon"></view>
       </view>
+    </view>
+  </view>
+
+  <!-- Recording Overlay -->
+  <view class="recording-overlay" wx:if="{{isRecording}}">
+    <view class="recording-card {{isCancelReady ? 'recording-card--cancel' : ''}}">
+      <block wx:if="{{!isCancelReady}}">
+        <view class="recording-wave">
+          <view class="wave-item"></view>
+          <view class="wave-item"></view>
+          <view class="wave-item"></view>
+          <view class="wave-item"></view>
+        </view>
+        <text class="recording-text">正在录音...</text>
+        <text class="recording-tip">上划取消</text>
+      </block>
+      <block wx:else>
+        <view class="cancel-icon-wrap">
+          <view class="icon-svg icon-undo-white"></view>
+        </view>
+        <text class="recording-text cancel-text">松开取消发送</text>
+      </block>
     </view>
   </view>
 </view>

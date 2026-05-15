@@ -338,22 +338,163 @@
   display: flex;
   align-items: flex-end;
   gap: 20rpx;
-  background: var(--bg-surface);
-  border-radius: 40rpx;
-  padding: 12rpx 12rpx 12rpx 32rpx;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  border: 1rpx solid transparent;
 }
 
-.input-area--expanded {
-  background: #ffffff;
-  border-color: var(--hairline);
-  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
+.mode-toggle-btn {
+  width: 72rpx;
+  height: 80rpx; /* Match voice bar height */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.icon-keyboard {
+  width: 44rpx;
+  height: 44rpx;
+  background-image: url('data:image/svg+xml,<svg viewBox="0 0 24 24" fill="none" stroke="%235d5b54" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="4" width="20" height="16" rx="2"></rect><path d="M6 8h.01"></path><path d="M10 8h.01"></path><path d="M14 8h.01"></path><path d="M18 8h.01"></path><path d="M8 12h.01"></path><path d="M12 12h.01"></path><path d="M16 12h.01"></path><path d="M7 16h10"></path></svg>');
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.icon-voice {
+  width: 44rpx;
+  height: 44rpx;
+  background-image: url('data:image/svg+xml,<svg viewBox="0 0 24 24" fill="none" stroke="%235d5b54" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>');
+  background-size: contain;
+  background-repeat: no-repeat;
 }
 
 .chat-input-wrap {
   flex: 1;
-  padding: 12rpx 0;
+  min-height: 80rpx;
+  display: flex;
+  align-items: center;
+  background: var(--bg-surface-soft);
+  border-radius: 40rpx;
+  border: 1rpx solid var(--hairline-soft);
+  box-sizing: border-box;
+}
+
+.chat-input {
+  width: 100%;
+  padding: 18rpx 32rpx;
+  font-size: 28rpx;
+  line-height: 1.4;
+  color: var(--ink);
+}
+
+.voice-bar {
+  width: 100%;
+  height: 78rpx; /* Slightly less than wrap to account for border */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28rpx;
+  font-weight: 700;
+  color: var(--ink);
+  border-radius: 40rpx;
+}
+
+.send-btn {
+  width: 72rpx;
+  height: 80rpx; /* Match voice bar height */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.voice-bar--active {
+  background: var(--hairline-soft);
+  transform: scale(0.98);
+}
+
+/* Recording Overlay */
+.recording-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.recording-card {
+  width: 320rpx;
+  height: 320rpx;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(20px);
+  border-radius: 40rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 24rpx 64rpx rgba(0, 0, 0, 0.2);
+  transition: all 0.2s;
+}
+
+.recording-card--cancel {
+  background: rgba(212, 48, 48, 0.8);
+}
+
+.recording-wave {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  height: 60rpx;
+  margin-bottom: 32rpx;
+}
+
+.wave-item {
+  width: 6rpx;
+  height: 20rpx;
+  background: #ffffff;
+  border-radius: 4rpx;
+  animation: wave-grow 1s ease-in-out infinite;
+}
+
+.wave-item:nth-child(2) { animation-delay: 0.2s; height: 40rpx; }
+.wave-item:nth-child(3) { animation-delay: 0.4s; height: 30rpx; }
+.wave-item:nth-child(4) { animation-delay: 0.6s; }
+
+@keyframes wave-grow {
+  0%, 100% { transform: scaleY(1); }
+  50% { transform: scaleY(2); }
+}
+
+.recording-text {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 8rpx;
+}
+
+.recording-tip {
+  font-size: 22rpx;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.cancel-icon-wrap {
+  width: 80rpx;
+  height: 80rpx;
+  margin-bottom: 32rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-undo-white {
+  width: 56rpx;
+  height: 56rpx;
+  background-image: url('data:image/svg+xml,<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M3 7v6h6"></path><path d="M21 17a9 9 0 0 0-9-15 9 9 0 0 0-6 3"></path></svg>');
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.cancel-text {
+  color: #ffffff;
 }
 
 .chat-input {

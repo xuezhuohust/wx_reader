@@ -13,6 +13,9 @@ Page({
     quickQuestions: ['总结这本书', '这本书适合谁读', '提炼三个核心观点', '帮我解释第一章'],
     playingMessageId: '',
     audioLoadingMessageId: '',
+    isRecording: false,
+    isCancelReady: false,
+    inputMode: 'keyboard', // 'keyboard' or 'voice'
     keyboardHeight: 0,
     navBarHeight: 0,
     menuTop: 0,
@@ -37,7 +40,90 @@ Page({
     this.ignoreNextStopEvent = false
     this.audioQueue = []
     this.streamSpeechBuffer = ''
+    this.initRecorder()
     this.loadBook()
+  },
+
+  initRecorder() {
+    this.recorderManager = wx.getRecorderManager()
+    this.recorderManager.onStart(() => {
+      console.log('recorder start')
+      this.setData({ isRecording: true })
+    })
+    this.recorderManager.onStop((res) => {
+      console.log('recorder stop', res)
+      this.setData({ isRecording: false })
+      const { tempFilePath } = res
+      this.handleVoiceUpload(tempFilePath)
+    })
+    this.recorderManager.onError((err) => {
+      console.error('recorder error', err)
+      this.setData({ isRecording: false })
+      wx.showToast({
+        title: '录音失败',
+        icon: 'none',
+      })
+    })
+  },
+
+  handleToggleInputMode() {
+    this.setData({
+      inputMode: this.data.inputMode === 'keyboard' ? 'voice' : 'keyboard',
+    })
+  },
+
+  handleVoiceStart(e) {
+    // Vibrate to feedback
+    wx.vibrateShort()
+    this.recordStartY = e.touches[0].clientY
+    this.setData({ 
+      isRecording: true,
+      isCancelReady: false
+    })
+    this.recorderManager.start({
+      duration: 60000,
+      sampleRate: 16000,
+      numberOfChannels: 1,
+      encodeBitRate: 48000,
+      format: 'aac',
+    })
+  },
+
+  handleVoiceMove(e) {
+    const moveY = e.touches[0].clientY
+    const isCancelReady = (this.recordStartY - moveY) > 50
+    if (isCancelReady !== this.data.isCancelReady) {
+      this.setData({ isCancelReady })
+    }
+  },
+
+  handleVoiceEnd() {
+    if (!this.data.isRecording) return
+    this.recorderManager.stop()
+  },
+
+  handleVoiceUpload(filePath) {
+    if (this.data.isCancelReady) {
+      console.log('Voice recording cancelled by user')
+      this.setData({ isCancelReady: false })
+      return
+    }
+
+    wx.showLoading({ title: '正在识别...', mask: true })
+    api.speechToText(filePath)
+      .then((text) => {
+        wx.hideLoading()
+        if (text) {
+          this.sendMessage(text)
+        }
+      })
+      .catch((err) => {
+        wx.hideLoading()
+        wx.showToast({
+          title: err.message || '识别失败',
+          icon: 'none',
+        })
+      })
   },
 
   onUnload() {
