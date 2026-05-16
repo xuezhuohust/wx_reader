@@ -10,6 +10,11 @@
     "pages/publisher/upload",
     "pages/publisher/build"
   ],
+  "permission": {
+    "scope.record": {
+      "desc": "用于语音对话功能"
+    }
+  },
   "window": {
     "navigationStyle": "custom",
     "navigationBarBackgroundColor": "#f9f7f2",
@@ -19,6 +24,7 @@
     "backgroundTextStyle": "light"
   },
   "style": "v2",
+  "__usePrivacyCheck__": true,
   "sitemapLocation": "sitemap.json",
   "lazyCodeLoading": "requiredComponents",
   "tabBar": {

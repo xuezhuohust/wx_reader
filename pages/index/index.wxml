@@ -172,4 +172,25 @@
       </scroll-view>
     </view>
   </view>
+
+  <!-- Privacy Authorization Modal -->
+  <view wx:if="{{showPrivacyModal}}" class="profile-overlay" catchtap="handleDisagreePrivacy">
+    <view class="profile-sheet" catchtap="handleStopPropagation">
+      <view class="profile-header">
+        <text class="profile-sheet-title">隐私授权说明</text>
+      </view>
+      <view class="permission-content">
+        <text class="permission-text">为了更好地提供服务，我们需要获取您的相关信息。我们会严格遵守相关法律法规，保护您的隐私安全。</text>
+      </view>
+      <view class="privacy-actions">
+        <button id="privacy-disagree" class="btn-secondary" bindtap="handleDisagreePrivacy">拒绝</button>
+        <button
+          id="privacy-agree"
+          class="btn-primary"
+          open-type="agreePrivacyAuthorization"
+          bindagreeprivacyauthorization="handleAgreePrivacy"
+        >同意</button>
+      </view>
+    </view>
+  </view>
 </view>

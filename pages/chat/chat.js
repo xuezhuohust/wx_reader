@@ -14,13 +14,13 @@ Page({
     playingMessageId: '',
     audioLoadingMessageId: '',
     isRecording: false,
-    isCancelReady: false,
     inputMode: 'keyboard', // 'keyboard' or 'voice'
     keyboardHeight: 0,
     navBarHeight: 0,
     menuTop: 0,
     menuHeight: 0,
     scrolled: false,
+    showPrivacyModal: false,
   },
 
   onLoad(options) {
@@ -40,8 +40,31 @@ Page({
     this.ignoreNextStopEvent = false
     this.audioQueue = []
     this.streamSpeechBuffer = ''
+    this.pendingPrivacyAction = null
     this.initRecorder()
     this.loadBook()
+  },
+
+  showPrivacyPopup() {
+    this.setData({ showPrivacyModal: true })
+  },
+
+  handleAgreePrivacy(event) {
+    wx.setStorageSync('privacy_agreed', true)
+    wx.setStorageSync('privacy_authorized_by_button', true)
+    this.setData({ showPrivacyModal: false })
+    getApp().resolvePrivacy(true, event)
+    const action = this.pendingPrivacyAction
+    this.pendingPrivacyAction = null
+    if (typeof action === 'function') {
+      action()
+    }
+  },
+
+  handleDisagreePrivacy(event) {
+    this.pendingPrivacyAction = null
+    this.setData({ showPrivacyModal: false })
+    getApp().resolvePrivacy(false, event)
   },
 
   initRecorder() {
@@ -72,43 +95,41 @@ Page({
     })
   },
 
-  handleVoiceStart(e) {
-    // Vibrate to feedback
+  handleVoiceTap() {
+    if (this.data.isRecording) {
+      this.recorderManager.stop()
+      return
+    }
+
     wx.vibrateShort()
-    this.recordStartY = e.touches[0].clientY
-    this.setData({ 
-      isRecording: true,
-      isCancelReady: false
-    })
+    if (!wx.getStorageSync('privacy_authorized_by_button')) {
+      this.requestPrivacyAuthorization(() => {
+        this.startRecording()
+      })
+      return
+    }
+    this.startRecording()
+  },
+
+  requestPrivacyAuthorization(next) {
+    this.pendingPrivacyAction = next
+    this.showPrivacyPopup()
+  },
+
+  startRecording() {
+    this.setData({ isRecording: true })
     this.recorderManager.start({
       duration: 60000,
       sampleRate: 16000,
       numberOfChannels: 1,
       encodeBitRate: 48000,
-      format: 'aac',
+      format: 'pcm',
     })
   },
 
-  handleVoiceMove(e) {
-    const moveY = e.touches[0].clientY
-    const isCancelReady = (this.recordStartY - moveY) > 50
-    if (isCancelReady !== this.data.isCancelReady) {
-      this.setData({ isCancelReady })
-    }
-  },
-
-  handleVoiceEnd() {
-    if (!this.data.isRecording) return
-    this.recorderManager.stop()
-  },
+  handleStopPropagation() {},
 
   handleVoiceUpload(filePath) {
-    if (this.data.isCancelReady) {
-      console.log('Voice recording cancelled by user')
-      this.setData({ isCancelReady: false })
-      return
-    }
-
     wx.showLoading({ title: '正在识别...', mask: true })
     api.speechToText(filePath)
       .then((text) => {

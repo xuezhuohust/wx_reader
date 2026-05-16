@@ -18,11 +18,31 @@ App({
       libraryBooks: null,
       lastUpdated: 0,
     },
+    // 隐私授权待处理
+    _privacyResolve: null,
   },
 
   onLaunch() {
     this.globalData.identity = loadIdentity()
     this.setupNavBar()
+  },
+
+  resolvePrivacy(agreed, event) {
+    const resolve = this.globalData._privacyResolve
+    if (resolve) {
+      const payload = { event: agreed ? 'agree' : 'disagree' }
+      const buttonId = event
+        && (
+          (event.detail && event.detail.buttonId)
+          || (event.currentTarget && event.currentTarget.id)
+          || (event.target && event.target.id)
+        )
+      if (buttonId) {
+        payload.buttonId = buttonId
+      }
+      resolve(payload)
+      this.globalData._privacyResolve = null
+    }
   },
 
   switchUserRole(role) {
@@ -38,14 +58,16 @@ App({
   },
 
   setupNavBar() {
-    const systemInfo = wx.getSystemInfoSync()
+    const windowInfo = typeof wx.getWindowInfo === 'function'
+      ? wx.getWindowInfo()
+      : wx.getSystemInfoSync()
     const menuButtonInfo = wx.getMenuButtonBoundingClientRect()
 
-    this.globalData.statusBarHeight = systemInfo.statusBarHeight
-    this.globalData.menuRight = systemInfo.screenWidth - menuButtonInfo.right
+    this.globalData.statusBarHeight = windowInfo.statusBarHeight
+    this.globalData.menuRight = windowInfo.screenWidth - menuButtonInfo.right
     this.globalData.menuTop = menuButtonInfo.top
     this.globalData.menuHeight = menuButtonInfo.height
     this.globalData.menuWidth = menuButtonInfo.width
-    this.globalData.navBarHeight = (menuButtonInfo.top - systemInfo.statusBarHeight) * 2 + menuButtonInfo.height + systemInfo.statusBarHeight
+    this.globalData.navBarHeight = (menuButtonInfo.top - windowInfo.statusBarHeight) * 2 + menuButtonInfo.height + windowInfo.statusBarHeight
   },
 })

@@ -14,6 +14,7 @@ Page({
     currentRole: 'reader',
     currentRoleLabel: '读者',
     showPermissionModal: false,
+    showPrivacyModal: false,
     navBarHeight: getApp().globalData.navBarHeight,
     statusBarHeight: getApp().globalData.statusBarHeight,
     menuRight: getApp().globalData.menuRight,
@@ -436,6 +437,22 @@ Page({
         })
         throw error
       })
+  },
+
+  showPrivacyPopup() {
+    this.setData({ showPrivacyModal: true })
+  },
+
+  handleAgreePrivacy(event) {
+    wx.setStorageSync('privacy_agreed', true)
+    wx.setStorageSync('privacy_authorized_by_button', true)
+    this.setData({ showPrivacyModal: false })
+    getApp().resolvePrivacy(true, event)
+  },
+
+  handleDisagreePrivacy(event) {
+    this.setData({ showPrivacyModal: false })
+    getApp().resolvePrivacy(false, event)
   },
 
   handleClosePermission() {

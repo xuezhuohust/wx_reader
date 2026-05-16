@@ -110,16 +110,14 @@ function requestSpeech(text, speaker) {
 }
 
 function speechToText(filePath) {
-  return uploadFile({
-    url: '/api/stt',
-    filePath,
-    name: 'file',
-  }).then((res) => {
-    const data = typeof res.data === 'string' ? JSON.parse(res.data) : res.data
-    if (data.success && data.data && data.data.text) {
-      return data.data.text
+  return uploadFile('/api/stt', filePath, {
+    filename: 'audio.pcm',
+    language: 'zh_cn',
+  }).then((data) => {
+    if (data && data.text) {
+      return data.text
     }
-    throw new Error(data.message || '语音识别失败')
+    throw new Error('语音识别失败')
   })
 }
 

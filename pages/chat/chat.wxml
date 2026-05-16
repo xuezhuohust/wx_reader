@@ -110,16 +110,13 @@
           maxlength="500"
         />
 
-        <!-- Voice Input Mode: Long Bar -->
+        <!-- Voice Input Mode: Tap to Toggle -->
         <view
           wx:else
           class="voice-bar {{isRecording ? 'voice-bar--active' : ''}}"
-          bindtouchstart="handleVoiceStart"
-          bindtouchmove="handleVoiceMove"
-          bindtouchend="handleVoiceEnd"
-          bindtouchcancel="handleVoiceEnd"
+          bindtap="handleVoiceTap"
         >
-          <text>{{isRecording ? (isCancelReady ? '松开 取消' : '松开 发送') : '按住 说话'}}</text>
+          <text>{{isRecording ? '点击停止' : '点击录音'}}</text>
         </view>
       </view>
 
@@ -130,24 +127,37 @@
   </view>
 
   <!-- Recording Overlay -->
-  <view class="recording-overlay" wx:if="{{isRecording}}">
-    <view class="recording-card {{isCancelReady ? 'recording-card--cancel' : ''}}">
-      <block wx:if="{{!isCancelReady}}">
-        <view class="recording-wave">
-          <view class="wave-item"></view>
-          <view class="wave-item"></view>
-          <view class="wave-item"></view>
-          <view class="wave-item"></view>
-        </view>
-        <text class="recording-text">正在录音...</text>
-        <text class="recording-tip">上划取消</text>
-      </block>
-      <block wx:else>
-        <view class="cancel-icon-wrap">
-          <view class="icon-svg icon-undo-white"></view>
-        </view>
-        <text class="recording-text cancel-text">松开取消发送</text>
-      </block>
+  <view class="recording-overlay" wx:if="{{isRecording}}" bindtap="handleVoiceTap">
+    <view class="recording-card">
+      <view class="recording-wave">
+        <view class="wave-item"></view>
+        <view class="wave-item"></view>
+        <view class="wave-item"></view>
+        <view class="wave-item"></view>
+      </view>
+      <text class="recording-text">正在录音...</text>
+      <text class="recording-tip">点击停止</text>
     </view>
   </view>
+
+  <view wx:if="{{showPrivacyModal}}" class="profile-overlay" catchtap="handleDisagreePrivacy">
+    <view class="profile-sheet" catchtap="handleStopPropagation">
+      <view class="profile-header">
+        <text class="profile-sheet-title">隐私授权说明</text>
+      </view>
+      <view class="permission-content">
+        <text class="permission-text">语音对话需要使用录音权限。请先同意隐私授权，再点击录音。</text>
+      </view>
+      <view class="privacy-actions">
+        <button id="chat-privacy-disagree" class="btn-secondary" bindtap="handleDisagreePrivacy">拒绝</button>
+        <button
+          id="chat-privacy-agree"
+          class="btn-primary"
+          open-type="agreePrivacyAuthorization"
+          bindagreeprivacyauthorization="handleAgreePrivacy"
+        >同意</button>
+      </view>
+    </view>
+  </view>
+
 </view>

@@ -540,3 +540,51 @@
 .bottom-space {
   width: 100%;
 }
+
+.profile-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  z-index: 3000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40rpx;
+}
+
+.profile-sheet {
+  width: 100%;
+  max-width: 640rpx;
+  background: #ffffff;
+  border-radius: 24rpx;
+  padding: 36rpx;
+}
+
+.profile-header {
+  margin-bottom: 20rpx;
+}
+
+.profile-sheet-title {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.permission-content {
+  margin-bottom: 28rpx;
+}
+
+.permission-text {
+  font-size: 26rpx;
+  line-height: 1.6;
+  color: var(--slate);
+}
+
+.privacy-actions {
+  display: flex;
+  gap: 20rpx;
+}
+
+.privacy-actions button {
+  flex: 1;
+}

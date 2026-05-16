@@ -492,6 +492,12 @@
   color: var(--steel);
 }
 
+.privacy-actions {
+  display: flex;
+  gap: 20rpx;
+  justify-content: flex-end;
+}
+
 @keyframes slideUp {
   from { transform: translateY(100%); }
   to { transform: translateY(0); }
