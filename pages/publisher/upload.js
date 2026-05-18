@@ -3,7 +3,7 @@ const { ensureRole } = require('../../utils/role')
 
 Page({
   data: {
-    categories: ['文学', '科技', '经管', '教育'],
+    categories: ['文学', '科技', '经管', '教育', '武侠', '科幻', '历史', '悬疑'],
     categoryIndex: 0,
     fileName: '',
     filePath: '',
@@ -20,15 +20,29 @@ Page({
     statusBarHeight: 0,
     menuTop: 0,
     menuHeight: 0,
+    showUploadPrivacyModal: false,
   },
 
   onLoad() {
     const app = getApp()
+    this.pendingChooseFileAfterPrivacy = false
+    this.registerPrivacyAuthorization()
     this.setData({
       navBarHeight: app.globalData.navBarHeight,
       statusBarHeight: app.globalData.statusBarHeight,
       menuTop: app.globalData.menuTop,
       menuHeight: app.globalData.menuHeight,
+    })
+  },
+
+  registerPrivacyAuthorization() {
+    if (typeof wx.onNeedPrivacyAuthorization !== 'function') {
+      return
+    }
+
+    wx.onNeedPrivacyAuthorization((resolve) => {
+      getApp().globalData._privacyResolve = resolve
+      this.setData({ showUploadPrivacyModal: true })
     })
   },
 
@@ -60,6 +74,52 @@ Page({
   },
 
   handleChooseFile() {
+    this.pendingChooseFileAfterPrivacy = true
+    if (typeof wx.requirePrivacyAuthorize !== 'function') {
+      this.setData({ showUploadPrivacyModal: true })
+      return
+    }
+
+    wx.requirePrivacyAuthorize({
+      success: () => {
+        if (!this.pendingChooseFileAfterPrivacy) {
+          return
+        }
+        this.pendingChooseFileAfterPrivacy = false
+        wx.setStorageSync('upload_file_privacy_authorized_by_button', true)
+        this.chooseBookFile()
+      },
+      fail: (error) => {
+        this.pendingChooseFileAfterPrivacy = false
+        console.error('[publisher] upload privacy authorize failed', error)
+        wx.showToast({
+          title: error && error.errno === 112
+            ? '请先在隐私指引声明文件上传用途'
+            : '未获得文件上传授权',
+          icon: 'none',
+        })
+      },
+    })
+  },
+
+  handleAgreeUploadPrivacy(event) {
+    wx.setStorageSync('upload_file_privacy_agreed', true)
+    wx.setStorageSync('upload_file_privacy_authorized_by_button', true)
+    this.setData({ showUploadPrivacyModal: false })
+    getApp().resolvePrivacy(true, event)
+    if (typeof wx.requirePrivacyAuthorize !== 'function' && this.pendingChooseFileAfterPrivacy) {
+      this.pendingChooseFileAfterPrivacy = false
+      this.chooseBookFile()
+    }
+  },
+
+  handleDisagreeUploadPrivacy(event) {
+    this.pendingChooseFileAfterPrivacy = false
+    this.setData({ showUploadPrivacyModal: false })
+    getApp().resolvePrivacy(false, event)
+  },
+
+  chooseBookFile() {
     wx.chooseMessageFile({
       count: 1,
       type: 'file',
@@ -77,14 +137,17 @@ Page({
           icon: 'success',
         })
       },
-      fail: () => {
+      fail: (error) => {
+        console.error('[publisher] choose file failed', error)
         wx.showToast({
-          title: '选取文件失败',
+          title: (error && error.errMsg) || '选取文件失败',
           icon: 'none',
         })
       },
     })
   },
+
+  handleStopPropagation() {},
 
   handleSubmit() {
     const { form, fileName, filePath } = this.data

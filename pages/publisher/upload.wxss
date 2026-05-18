@@ -229,3 +229,51 @@
 .icon-file-ready {
   background-image: url('data:image/svg+xml,<svg viewBox="0 0 24 24" fill="none" stroke="%231aae39" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>');
 }
+
+.privacy-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40rpx;
+  background: rgba(15, 23, 42, 0.45);
+}
+
+.privacy-sheet {
+  width: 100%;
+  max-width: 640rpx;
+  padding: 36rpx;
+  background: #ffffff;
+  border-radius: 24rpx;
+}
+
+.privacy-header {
+  margin-bottom: 20rpx;
+}
+
+.privacy-title {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.privacy-content {
+  margin-bottom: 28rpx;
+}
+
+.privacy-text {
+  font-size: 26rpx;
+  line-height: 1.6;
+  color: var(--slate);
+}
+
+.privacy-actions {
+  display: flex;
+  gap: 20rpx;
+}
+
+.privacy-actions button {
+  flex: 1;
+}

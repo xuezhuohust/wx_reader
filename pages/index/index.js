@@ -24,7 +24,7 @@ Page({
     // Library Data
     searchValue: '',
     activeCategory: '全部',
-    categories: ['全部', '文学', '科技', '经管', '教育'],
+    categories: ['全部', '文学', '科技', '经管', '教育', '武侠', '科幻', '历史', '悬疑'],
     books: [],
     filteredBooks: [],
     searchResultBooks: [],

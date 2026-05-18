@@ -1,4 +1,4 @@
-const BASE_URL = 'https://reader.xiandianzi.cn'
+const BASE_URL = 'https://yakosang.icu'
 
 function buildUrl(url) {
   return `${BASE_URL}${url}`

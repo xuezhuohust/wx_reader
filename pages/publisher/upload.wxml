@@ -79,5 +79,25 @@
       <button class="btn-submit" bindtap="handleSubmit">提交并开启建库</button>
     </view>
   </view>
+
+  <view wx:if="{{showUploadPrivacyModal}}" class="privacy-overlay" catchtap="handleDisagreeUploadPrivacy">
+    <view class="privacy-sheet" catchtap="handleStopPropagation">
+      <view class="privacy-header">
+        <text class="privacy-title">文件上传说明</text>
+      </view>
+      <view class="privacy-content">
+        <text class="privacy-text">上传源文件需要读取您主动选择的本地文件。文件将用于书籍内容建库、解析和后续阅读服务，不会读取未选择的其他文件。</text>
+      </view>
+      <view class="privacy-actions">
+        <button class="btn-secondary" bindtap="handleDisagreeUploadPrivacy">取消</button>
+        <button
+          id="upload-file-privacy-agree"
+          class="btn-primary"
+          open-type="agreePrivacyAuthorization"
+          bindagreeprivacyauthorization="handleAgreeUploadPrivacy"
+        >同意并选择</button>
+      </view>
+    </view>
+  </view>
 </view>
 </view>
