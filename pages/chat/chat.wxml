@@ -9,7 +9,40 @@
         <text class="nav-book-title">{{book.title}}</text>
         <text class="nav-book-author">{{book.author}}</text>
       </view>
+      <!-- 2026-05-19 新增：对话切换按钮 -->
+      <view class="nav-conv-btn" bindtap="handleToggleConversationList">
+        <text class="nav-conv-label">对话</text>
+        <text class="nav-conv-arrow {{showConversationList ? 'arrow-up' : 'arrow-down'}}"></text>
+      </view>
     </view>
+  </view>
+
+  <!-- 2026-05-19 新增：对话切换面板 -->
+  <view wx:if="{{showConversationList}}" class="conv-mask" bindtap="handleToggleConversationList"></view>
+  <view class="conv-panel {{showConversationList ? 'conv-panel--open' : ''}}">
+    <view class="conv-panel-header">
+      <text class="conv-panel-title">对话列表</text>
+      <view class="conv-panel-new" bindtap="handleNewConversation">
+        <text class="conv-panel-new-icon">+</text>
+        <text>新建对话</text>
+      </view>
+    </view>
+    <scroll-view class="conv-panel-list" scroll-y>
+      <view
+        wx:for="{{conversations}}"
+        wx:key="id"
+        class="conv-item {{item.id === currentConversationId ? 'conv-item--active' : ''}}"
+        data-id="{{item.id}}"
+        data-title="{{item.title}}"
+        bindtap="handleSwitchConversation"
+      >
+        <text class="conv-item-icon">💬</text>
+        <view class="conv-item-info">
+          <text class="conv-item-title">{{item.title}}</text>
+          <text class="conv-item-time">{{item.updatedAt ? item.updatedAt.slice(0, 10) : ''}}</text>
+        </view>
+      </view>
+    </scroll-view>
   </view>
 
   <!-- Messages -->

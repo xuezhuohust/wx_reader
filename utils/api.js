@@ -185,6 +185,46 @@ function getStreamEvent(payload) {
   }
 }
 
+// ====================================================================
+// 对话管理 API (2026-05-19 新增)
+// ====================================================================
+
+function listConversations(bookId) {
+  /* 获取某本书的所有活跃对话列表 */
+  return request({
+    url: '/api/chat/conversations',
+    data: { book: bookId },
+  }).then((data) => data.conversations || [])
+}
+
+function createConversation(bookId, title) {
+  /* 创建新的对话会话 */
+  return request({
+    url: '/api/chat/conversations',
+    method: 'POST',
+    data: { book: bookId, title: title || '新对话' },
+  }).then((data) => data.conversation)
+}
+
+function deleteConversation(conversationId) {
+  /* 删除某个对话（含所有消息） */
+  return request({
+    url: `/api/chat/conversations/${conversationId}`,
+    method: 'DELETE',
+  }).then((data) => data.deleted)
+}
+
+function getConversationMessages(conversationId) {
+  /* 获取某个对话的全部消息 */
+  return request({
+    url: `/api/chat/conversations/${conversationId}/messages`,
+  }).then((data) => data.messages || [])
+}
+
+// ====================================================================
+// 流式问答
+// ====================================================================
+
 function sendBookChatMessageStream(bookId, message, handlers) {
   const callbacks = handlers || {}
 
@@ -271,6 +311,7 @@ function sendBookChatMessageStream(bookId, message, handlers) {
         data: {
           book: bookId,
           question: message,
+          conversationId: callbacks.conversationId || '',
         },
         header: {
           'Content-Type': 'application/json',
@@ -369,6 +410,10 @@ module.exports = {
   purchaseBook,
   sendBookChatMessage,
   sendBookChatMessageStream,
+  listConversations,
+  createConversation,
+  deleteConversation,
+  getConversationMessages,
   requestSpeech,
   speechToText,
   reportVoicePlay,

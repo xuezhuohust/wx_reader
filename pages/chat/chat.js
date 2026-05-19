@@ -21,6 +21,11 @@ Page({
     menuHeight: 0,
     scrolled: false,
     showPrivacyModal: false,
+    // 2026-05-19 新增：对话列表支持
+    conversations: [],
+    currentConversationId: '',
+    currentConversationTitle: '新对话',
+    showConversationList: false,
   },
 
   onLoad(options) {
@@ -42,7 +47,9 @@ Page({
     this.streamSpeechBuffer = ''
     this.pendingPrivacyAction = null
     this.initRecorder()
-    this.loadBook()
+    // 2026-05-19: 改为加载书籍 + 对话列表 + 历史消息
+    this.initialized = false
+    this.loadBookAndConversations()
   },
 
   showPrivacyPopup() {
@@ -161,18 +168,16 @@ Page({
     }
   },
 
-  loadBook() {
+  // ====================================================================
+  // 2026-05-19: 重写加载逻辑，支持多对话
+  // ====================================================================
+
+  loadBookAndConversations() {
+    /* 加载书籍信息 + 对话列表 + 最近对话的消息 */
     api.getBookById(this.bookId)
       .then((book) => {
-        const welcomeMessage = this.createMessage(
-          'ai',
-          `你好，我已经了解《${book.title}》的内容，你可以问我关于这本书的问题。`
-        )
-        this.setData({
-          book,
-          messages: [welcomeMessage],
-          scrollIntoView: welcomeMessage.id,
-        })
+        this.setData({ book })
+        return this.loadConversations(book)
       })
       .catch((error) => {
         console.error('loadChatBook failed:', error)
@@ -180,6 +185,97 @@ Page({
           title: '加载书籍失败',
           icon: 'none',
         })
+      })
+  },
+
+  loadConversations(book) {
+    /* 加载对话列表，自动选中最近活跃的对话或新建一个 */
+    const bookTitle = book && book.title ? book.title : ''
+    return api.listConversations(this.bookId)
+      .then((convs) => {
+        if (convs && convs.length > 0) {
+          // 有已有对话 → 选中最近更新的一个
+          const latest = convs[0]
+          this.setData({
+            conversations: convs,
+            currentConversationId: latest.id,
+            currentConversationTitle: latest.title,
+          })
+          return this.loadMessages(latest.id, bookTitle)
+        }
+        // 没有对话 → 自动新建一个
+        return this.createAndSelectConversation(bookTitle)
+      })
+      .catch((error) => {
+        console.error('loadConversations failed:', error)
+        // 降级：显示欢迎消息
+        const welcomeMessage = this.createMessage(
+          'ai',
+          `你好，我已经了解《${bookTitle}》的内容，你可以问我关于这本书的问题。`
+        )
+        this.setData({
+          messages: [welcomeMessage],
+          scrollIntoView: welcomeMessage.id,
+        })
+      })
+  },
+
+  loadMessages(conversationId, bookTitle) {
+    /* 加载指定对话的历史消息 */
+    return api.getConversationMessages(conversationId)
+      .then((messages) => {
+        const formatted = messages.map((m) => ({
+          id: m.id,
+          role: m.role,
+          content: m.content,
+          loading: false,
+        }))
+        if (formatted.length === 0) {
+          // 空对话 → 显示欢迎消息
+          const welcomeMessage = this.createMessage(
+            'ai',
+            `你好，我已经了解《${bookTitle}》的内容，你可以问我关于这本书的问题。`
+          )
+          formatted.push(welcomeMessage)
+        }
+        this.setData({
+          messages: formatted,
+          scrollIntoView: formatted[formatted.length - 1].id,
+        })
+        this.initialized = true
+      })
+      .catch((error) => {
+        console.error('loadMessages failed:', error)
+        const welcomeMessage = this.createMessage(
+          'ai',
+          `你好，我已经了解《${bookTitle}》的内容，你可以问我关于这本书的问题。`
+        )
+        this.setData({
+          messages: [welcomeMessage],
+          scrollIntoView: welcomeMessage.id,
+        })
+        this.initialized = true
+      })
+  },
+
+  createAndSelectConversation(bookTitle) {
+    /* 创建新对话并选中 */
+    return api.createConversation(this.bookId)
+      .then((conv) => {
+        this.setData({
+          conversations: [conv],
+          currentConversationId: conv.id,
+          currentConversationTitle: conv.title,
+        })
+        const welcomeMessage = this.createMessage(
+          'ai',
+          `你好，我已经了解《${bookTitle}》的内容，你可以问我关于这本书的问题。`
+        )
+        this.setData({
+          messages: [welcomeMessage],
+          scrollIntoView: welcomeMessage.id,
+        })
+        this.initialized = true
       })
   },
 
@@ -191,6 +287,87 @@ Page({
         })
       }
     })
+  },
+
+  // ====================================================================
+  // 对话切换 (2026-05-19 新增)
+  // ====================================================================
+
+  handleToggleConversationList() {
+    /* 展开/收起对话切换面板 */
+    this.setData({
+      showConversationList: !this.data.showConversationList,
+    })
+  },
+
+  handleNewConversation() {
+    /* 新建对话并切换到新对话 */
+    if (this.data.loadingReply) {
+      return
+    }
+    this.resetAudioPlayback()
+    const book = this.data.book
+    const bookTitle = book && book.title ? book.title : ''
+    this.createAndSelectConversation(bookTitle)
+    this.setData({
+      showConversationList: false,
+    })
+  },
+
+  handleSwitchConversation(event) {
+    /* 切换到指定的对话 */
+    if (this.data.loadingReply) {
+      return
+    }
+    const convId = event.currentTarget.dataset.id
+    const convTitle = event.currentTarget.dataset.title || '新对话'
+    if (convId === this.data.currentConversationId) {
+      // 已在当前对话，收起面板
+      this.setData({ showConversationList: false })
+      return
+    }
+    // 切换对话时重置音频状态
+    this.resetAudioPlayback()
+    const book = this.data.book
+    const bookTitle = book && book.title ? book.title : ''
+    this.setData({
+      currentConversationId: convId,
+      currentConversationTitle: convTitle,
+      showConversationList: false,
+      messages: [],
+    })
+
+    api.getConversationMessages(convId)
+      .then((messages) => {
+        const formatted = messages.map((m) => ({
+          id: m.id,
+          role: m.role,
+          content: m.content,
+          loading: false,
+        }))
+        if (formatted.length === 0) {
+          const welcomeMessage = this.createMessage(
+            'ai',
+            `你好，我已经了解《${bookTitle}》的内容，你可以问我关于这本书的问题。`
+          )
+          formatted.push(welcomeMessage)
+        }
+        this.setData({
+          messages: formatted,
+          scrollIntoView: formatted[formatted.length - 1].id,
+        })
+      })
+      .catch((error) => {
+        console.error('switch conversation failed:', error)
+        const welcomeMessage = this.createMessage(
+          'ai',
+          `你好，我已经了解《${bookTitle}》的内容，你可以问我关于这本书的问题。`
+        )
+        this.setData({
+          messages: [welcomeMessage],
+          scrollIntoView: welcomeMessage.id,
+        })
+      })
   },
 
   handleScroll(e) {
@@ -527,7 +704,9 @@ Page({
       this.scrollToBottom()
     })
 
+    const convId = this.data.currentConversationId
     api.sendBookChatMessageStream(this.bookId, message, {
+      conversationId: convId,
       onSegment: (segment, fullReply) => {
         const nextMessages = this.data.messages.map((item) => {
           if (item.id === loadingMessage.id) {
