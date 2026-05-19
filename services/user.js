@@ -1,8 +1,12 @@
+// 用户身份服务模块 - 处理微信登录、身份缓存、角色切换
+
 const { BASE_URL, unwrapApiResponse } = require('../utils/request')
 const { loadIdentity, saveIdentity } = require('../utils/storage')
 
+/** 引导登录过程中缓存的 Promise，防止重复发起 */
 let bootstrapPromise = null
 
+/** 获取全局 App 实例 */
 function getAppInstance() {
   try {
     return getApp()
@@ -11,6 +15,7 @@ function getAppInstance() {
   }
 }
 
+/** 将身份信息同步到全局数据 */
 function syncGlobalIdentity(identity) {
   const app = getAppInstance()
   if (app && app.globalData) {
@@ -18,6 +23,7 @@ function syncGlobalIdentity(identity) {
   }
 }
 
+/** 检查身份信息是否完整有效 */
 function hasValidIdentity(identity) {
   return !!(
     identity
@@ -27,11 +33,13 @@ function hasValidIdentity(identity) {
   )
 }
 
+/** 根据 openid 生成默认显示名称 */
 function getDefaultDisplayName(openid) {
   const suffix = String(openid || '').slice(-4) || '用户'
   return `微信用户 ${suffix}`
 }
 
+/** 调用 wx.login 获取临时 code */
 function getWxLoginCode() {
   return new Promise((resolve, reject) => {
     wx.login({
@@ -52,6 +60,7 @@ function getWxLoginCode() {
   })
 }
 
+/** 请求登录接口兑换身份信息 */
 function callLoginApi(url, code) {
   return new Promise((resolve, reject) => {
     console.info('[auth] request login', `${BASE_URL}${url}`)
@@ -89,11 +98,13 @@ function callLoginApi(url, code) {
   })
 }
 
+/** 微信登录 - 获取 code 后请求后端，保存身份信息到本地存储 */
 function loginWithWechat() {
   const previousIdentity = loadIdentity() || {}
 
   return getWxLoginCode()
     .then((code) => {
+      // 优先新版 API，fallback 到旧版
       return callLoginApi('/api/auth/login', code).catch((error) => {
         if (error && error.statusCode && error.statusCode !== 404) {
           throw error
@@ -109,6 +120,7 @@ function loginWithWechat() {
         throw new Error('登录返回缺少身份信息')
       }
 
+      // 同一用户复用之前的 displayName / avatarUrl
       const isSameUser = previousIdentity.openid === openid
       const displayName = isSameUser && String(previousIdentity.displayName || '').trim()
         ? String(previousIdentity.displayName || '').trim()
@@ -133,6 +145,7 @@ function loginWithWechat() {
     })
 }
 
+/** 引导登录流程 - 有缓存则直接返回，否则调用微信登录并显示 loading */
 function bootstrapUserIdentity() {
   const cachedIdentity = loadIdentity()
   if (hasValidIdentity(cachedIdentity)) {
@@ -186,6 +199,7 @@ function bootstrapUserIdentity() {
   return bootstrapPromise
 }
 
+/** 确保用户已登录，返回身份信息；未登录则自动发起引导登录 */
 function ensureUserIdentity() {
   const cachedIdentity = loadIdentity()
   if (hasValidIdentity(cachedIdentity)) {
@@ -196,6 +210,7 @@ function ensureUserIdentity() {
   return bootstrapUserIdentity()
 }
 
+/** 更新用户资料并同步到本地存储 */
 function syncProfileIdentity(payload) {
   const { request } = require('../utils/request')
 
@@ -211,6 +226,7 @@ function syncProfileIdentity(payload) {
   })
 }
 
+/** 切换用户活跃角色（reader / publisher） */
 function switchActiveRole(role) {
   const { request } = require('../utils/request')
 

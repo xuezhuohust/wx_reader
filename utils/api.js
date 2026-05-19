@@ -1,6 +1,9 @@
+// API 接口封装模块 - 提供所有后端 API 调用方法
+
 const { ensureUserIdentity } = require('../services/user')
 const { BASE_URL, request, requestWithoutAuth, uploadFile } = require('./request')
 
+/** 将相对路径转为完整的 URL */
 function toAbsoluteUrl(path) {
   const rawPath = String(path || '').trim()
   if (!rawPath) {
@@ -12,6 +15,7 @@ function toAbsoluteUrl(path) {
   return `${BASE_URL}${rawPath.startsWith('/') ? rawPath : `/${rawPath}`}`
 }
 
+/** 轮询书籍建库状态，直到完成或失败 */
 function pollBuildStatus(id, onProgress) {
   return request({
     url: `/api/publisher/books/${id}/build/status`,
@@ -40,30 +44,35 @@ function pollBuildStatus(id, onProgress) {
   })
 }
 
+/** 获取推荐书籍列表 */
 function getRecommendBooks() {
   return request({
     url: '/api/books/recommend',
   }).then((data) => data.books || [])
 }
 
+/** 获取全部书籍列表 */
 function getAllBooks() {
   return request({
     url: '/api/books',
   }).then((data) => data.books || [])
 }
 
+/** 获取已购买书籍列表 */
 function getPurchasedBooks() {
   return request({
     url: '/api/books/purchased',
   }).then((data) => data.books || [])
 }
 
+/** 根据 ID 获取单本书籍信息 */
 function getBookById(id) {
   return request({
     url: `/api/books/${id}`,
   }).then((data) => data.book)
 }
 
+/** 购买指定书籍 */
 function purchaseBook(id) {
   return request({
     url: `/api/books/${id}/purchase`,
@@ -71,6 +80,7 @@ function purchaseBook(id) {
   }).then((data) => data.book)
 }
 
+/** 向书籍发送单次问答消息（非流式） */
 function sendBookChatMessage(bookId, message) {
   return request({
     url: '/api/ask',
@@ -87,6 +97,7 @@ function sendBookChatMessage(bookId, message) {
   })
 }
 
+/** 请求 TTS 语音合成，返回音频地址 */
 function requestSpeech(text, speaker) {
   return requestWithoutAuth({
     url: '/api/tts',
@@ -109,6 +120,7 @@ function requestSpeech(text, speaker) {
   })
 }
 
+/** 语音转文字（STT） */
 function speechToText(filePath) {
   return uploadFile('/api/stt', filePath, {
     filename: 'audio.pcm',
@@ -121,6 +133,7 @@ function speechToText(filePath) {
   })
 }
 
+/** 上报语音播放时长 */
 function reportVoicePlay(duration) {
   return requestWithoutAuth({
     url: '/api/metrics/voice_play',
@@ -132,6 +145,7 @@ function reportVoicePlay(duration) {
   }).catch(() => null)
 }
 
+/** 解码流式响应的二进制数据块 */
 function decodeChunk(decoder, arrayBuffer) {
   if (decoder && typeof decoder.decode === 'function') {
     return decoder.decode(arrayBuffer, { stream: true })
@@ -149,6 +163,7 @@ function decodeChunk(decoder, arrayBuffer) {
   }
 }
 
+/** 统一解析后端返回数据，兼容 ArrayBuffer 格式 */
 function parseResponseData(data) {
   if (!data || typeof data !== 'object') {
     return data || {}
@@ -166,6 +181,7 @@ function parseResponseData(data) {
   return data
 }
 
+/** 解析流式推送的事件数据 */
 function getStreamEvent(payload) {
   if (!payload || typeof payload !== 'object') {
     return {
@@ -225,6 +241,7 @@ function getConversationMessages(conversationId) {
 // 流式问答
 // ====================================================================
 
+/** 流式书籍问答 - 使用 chunked 传输逐段返回回答 */
 function sendBookChatMessageStream(bookId, message, handlers) {
   const callbacks = handlers || {}
 
@@ -352,18 +369,21 @@ function sendBookChatMessageStream(bookId, message, handlers) {
   })
 }
 
+/** 获取出版方统计数据 */
 function getPublisherStats() {
   return request({
     url: '/api/publisher/stats',
   })
 }
 
+/** 获取出版方管理的书籍列表 */
 function getPublisherBooks() {
   return request({
     url: '/api/publisher/books',
   }).then((data) => data.books || [])
 }
 
+/** 上传新书籍（出版方功能） */
 function uploadBook(formData) {
   return uploadFile('/api/publisher/books/upload', formData.filePath, {
     title: formData.title,
@@ -376,6 +396,7 @@ function uploadBook(formData) {
   }).then((data) => data.book)
 }
 
+/** 更新书籍上下架状态 */
 function updateBookOnlineStatus(id, status) {
   return request({
     url: `/api/publisher/books/${id}/online_status`,
@@ -384,6 +405,7 @@ function updateBookOnlineStatus(id, status) {
   }).then((data) => data.book)
 }
 
+/** 触发书籍建库并轮询等待完成 */
 function startBuildBook(id, onProgress) {
   return request({
     url: `/api/publisher/books/${id}/build`,

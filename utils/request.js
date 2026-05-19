@@ -1,9 +1,13 @@
+// 网络请求封装模块 - 提供统一的请求、响应处理和鉴权
+
 const BASE_URL = 'https://yakosang.icu'
 
+/** 拼接完整的请求 URL */
 function buildUrl(url) {
   return `${BASE_URL}${url}`
 }
 
+/** 从响应对象中提取错误信息，生成标准 Error */
 function normalizeError(res, fallbackMessage) {
   const data = res && res.data
   const error = new Error(
@@ -19,6 +23,7 @@ function normalizeError(res, fallbackMessage) {
   return error
 }
 
+/** 解包后端通用响应格式 { success, data, message } */
 function unwrapApiResponse(data, fallbackMessage) {
   if (!data || typeof data !== 'object' || typeof data.success === 'undefined') {
     return data || {}
@@ -35,6 +40,7 @@ function unwrapApiResponse(data, fallbackMessage) {
   throw error
 }
 
+/** 底层 wx.request 封装，处理状态码和异常 */
 function rawRequest(options) {
   const requestUrl = buildUrl(options.url)
 
@@ -71,6 +77,7 @@ function rawRequest(options) {
   })
 }
 
+/** 组装鉴权请求头 */
 function getIdentityHeaders(identity, header) {
   if (!identity) {
     return header || {}
@@ -82,6 +89,7 @@ function getIdentityHeaders(identity, header) {
   }, header || {})
 }
 
+/** 带身份鉴权的请求 - 自动注入 token，401 时尝试重新鉴权 */
 function request(options) {
   const { ensureUserIdentity } = require('../services/user')
   const { clearIdentity } = require('./storage')
@@ -111,10 +119,12 @@ function request(options) {
   })
 }
 
+/** 无需鉴权的请求 */
 function requestWithoutAuth(options) {
   return rawRequest(options)
 }
 
+/** 带鉴权的文件上传，401 时自动重试 */
 function uploadFile(url, filePath, formData, hasRetriedAfterAuth) {
   const { ensureUserIdentity } = require('../services/user')
   const { clearIdentity } = require('./storage')

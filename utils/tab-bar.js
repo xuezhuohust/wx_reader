@@ -1,6 +1,9 @@
+// TabBar 导航栏管理模块 - 根据用户角色动态切换底部导航项
+
 const { loadIdentity } = require('./storage')
 const { getUserRole } = require('./role')
 
+// 各 Tab 对应的 SVG 图标（内联 data URI）
 const ICONS = {
   bookshelf: 'data:image/svg+xml,<svg viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"></path><path d="M6.5 17H20"></path></svg>',
   home: 'data:image/svg+xml,<svg viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>',
@@ -10,6 +13,7 @@ const ICONS = {
   build: 'data:image/svg+xml,<svg viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>',
 }
 
+// 读者角色的底部导航配置
 const READER_TAB_ITEMS = [
   {
     pagePath: 'pages/bookshelf/bookshelf',
@@ -31,6 +35,7 @@ const READER_TAB_ITEMS = [
   },
 ]
 
+// 出版者角色的底部导航配置
 const PUBLISHER_TAB_ITEMS = [
   {
     pagePath: 'pages/publisher/books',
@@ -52,6 +57,7 @@ const PUBLISHER_TAB_ITEMS = [
   },
 ]
 
+/** 获取全局 App 实例 */
 function getAppInstance() {
   try {
     return getApp()
@@ -60,15 +66,18 @@ function getAppInstance() {
   }
 }
 
+/** 规范化页面路径（去除开头的 /） */
 function normalizePagePath(path) {
   return String(path || '').replace(/^\//, '')
 }
 
+/** 根据用户角色获取对应的导航项列表 */
 function getTabsByRole(role) {
   const source = role === 'publisher' ? PUBLISHER_TAB_ITEMS : READER_TAB_ITEMS
   return source.map((item) => Object.assign({}, item))
 }
 
+/** 解析用户身份信息（参数优先 > 全局数据 > 本地存储） */
 function resolveIdentity(identity) {
   if (identity) {
     return identity
@@ -82,6 +91,7 @@ function resolveIdentity(identity) {
   return loadIdentity()
 }
 
+/** 同步角色对应的 TabBar 到页面 */
 function syncRoleTabBar(page, pagePath, identity) {
   if (!page || typeof page.getTabBar !== 'function') {
     return
