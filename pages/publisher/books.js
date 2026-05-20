@@ -88,6 +88,13 @@ Page({
     })
   },
 
+  handleEditBook(event) {
+    const { id } = event.currentTarget.dataset
+    wx.navigateTo({
+      url: `/pages/publisher/edit?id=${id}`,
+    })
+  },
+
   handleToggleStatus(event) {
     const { id, status } = event.currentTarget.dataset
     const current = this.data.books.find((item) => item.id === id)

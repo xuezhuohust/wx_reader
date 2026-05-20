@@ -1,7 +1,5 @@
 .page-shell {
   background: var(--bg-canvas);
-  min-height: 100vh;
-  padding-bottom: env(safe-area-inset-bottom);
 }
 
 /* Custom Navigation Bar */

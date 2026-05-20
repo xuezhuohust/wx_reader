@@ -51,7 +51,7 @@
   align-items: center;
   gap: 6rpx;
   padding: 8rpx 16rpx;
-  margin-left: auto;
+  margin-left: 8rpx;
   background: var(--bg-card);
   border-radius: 24rpx;
   border: 1rpx solid var(--hairline);
@@ -644,7 +644,6 @@
   border-bottom: 1rpx solid var(--hairline);
   transform: translateY(-100%);
   transition: transform 0.25s ease;
-  padding-top: env(safe-area-inset-top);
   max-height: 60vh;
   display: flex;
   flex-direction: column;

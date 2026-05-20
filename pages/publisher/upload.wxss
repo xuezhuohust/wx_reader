@@ -1,7 +1,5 @@
 .page-shell {
   background: var(--bg-canvas);
-  min-height: 100vh;
-  padding-bottom: env(safe-area-inset-bottom);
 }
 
 /* Custom Navigation Bar */
@@ -194,6 +192,14 @@
 .upload-hint {
   font-size: 22rpx;
   color: var(--stone);
+}
+
+.cover-preview {
+  width: 120rpx;
+  height: 160rpx;
+  border-radius: var(--radius-lg);
+  margin-right: 24rpx;
+  object-fit: cover;
 }
 
 .submit-section {

@@ -1,7 +1,6 @@
 .my-books-page {
   background: var(--bg-canvas);
-  height: 100vh;
-  overflow: hidden;
+  min-height: 100vh;
 }
 
 /* Hero Band: High-Density Notion Style */

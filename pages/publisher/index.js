@@ -27,7 +27,7 @@ Page({
         title: '建库任务',
         desc: '启动 AI 建库并追踪进度',
         path: '/pages/publisher/build',
-        type: 'tab',
+        type: 'page',
         iconClass: 'icon-build-purple',
         tintClass: 'tint-lavender'
       },

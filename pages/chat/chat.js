@@ -41,9 +41,12 @@ Page({
     this.currentAudioMessageId = ''
     this.currentAudioStartedAt = 0
     this.isAudioPlaying = false
-    this.isAudioGenerating = false
     this.ignoreNextStopEvent = false
-    this.audioQueue = []
+    this.audioQueue = []        // {messageId, text} 待生成
+    this.readyMap = {}          // seq -> {messageId, audioUrl} 已生成
+    this.nextPlaySeq = 0       // 下一个该播放的序号
+    this.nextGenSeq = 0        // 下一个生成的序号
+    this.generatingCount = 0
     this.streamSpeechBuffer = ''
     this.pendingPrivacyAction = null
     this.initRecorder()
@@ -89,10 +92,7 @@ Page({
     this.recorderManager.onError((err) => {
       console.error('recorder error', err)
       this.setData({ isRecording: false })
-      wx.showToast({
-        title: '录音失败',
-        icon: 'none',
-      })
+      wx.showToast({ title: '录音失败', icon: 'none' })
     })
   },
 
@@ -130,7 +130,7 @@ Page({
       sampleRate: 16000,
       numberOfChannels: 1,
       encodeBitRate: 48000,
-      format: 'pcm',
+      format: 'mp3',
     })
   },
 
@@ -308,10 +308,17 @@ Page({
     this.resetAudioPlayback()
     const book = this.data.book
     const bookTitle = book && book.title ? book.title : ''
+    wx.showLoading({ title: '创建中...', mask: true })
     this.createAndSelectConversation(bookTitle)
-    this.setData({
-      showConversationList: false,
-    })
+      .then(() => {
+        wx.hideLoading()
+        this.setData({ showConversationList: false })
+      })
+      .catch((err) => {
+        wx.hideLoading()
+        console.error('handleNewConversation failed:', err)
+        wx.showToast({ title: err.message || '创建对话失败', icon: 'none' })
+      })
   },
 
   handleSwitchConversation(event) {
@@ -509,10 +516,11 @@ Page({
     this.currentAudioStartedAt = 0
     this.isAudioPlaying = false
 
-    this.setData({
-      playingMessageId: '',
-      audioLoadingMessageId: '',
-    })
+    // 如果还有待播放的段或正在生成的段，保持 loading 状态不变
+    const hasMore = this.generatingCount > 0 || this.readyMap.hasOwnProperty(this.nextPlaySeq)
+    if (!hasMore) {
+      this.setData({ playingMessageId: '', audioLoadingMessageId: '' })
+    }
 
     if (reportMetrics && duration > 0) {
       api.reportVoicePlay(duration)
@@ -522,7 +530,7 @@ Page({
       console.info('[chat] audio finished', finishedMessageId)
     }
 
-    this.processAudioQueue()
+    this.playNextIfIdle()
   },
 
   destroyAudioContext() {
@@ -540,8 +548,11 @@ Page({
     this.currentAudioMessageId = ''
     this.currentAudioStartedAt = 0
     this.isAudioPlaying = false
-    this.isAudioGenerating = false
     this.audioQueue = []
+    this.readyMap = {}
+    this.nextPlaySeq = 0
+    this.nextGenSeq = 0
+    this.generatingCount = 0
     this.streamSpeechBuffer = ''
     this.setData({
       playingMessageId: '',
@@ -551,8 +562,11 @@ Page({
 
   resetAudioPlayback() {
     this.audioQueue = []
+    this.readyMap = {}
+    this.nextPlaySeq = 0
+    this.nextGenSeq = 0
+    this.generatingCount = 0
     this.streamSpeechBuffer = ''
-    this.isAudioGenerating = false
     if (this.audioContext && (this.isAudioPlaying || this.currentAudioMessageId)) {
       this.ignoreNextStopEvent = true
       this.audioContext.stop()
@@ -576,10 +590,12 @@ Page({
     }
 
     const punctuationCount = (content.match(/[。！？!?]/g) || []).length
-    if (content.length >= 120) {
+    // 遇到句末标点就切（一句一段，更流畅）
+    if (punctuationCount >= 1 && content.length >= 10) {
       return true
     }
-    if (content.length >= 48 && punctuationCount >= 2) {
+    // 硬上限 80 字
+    if (content.length >= 80) {
       return true
     }
     return false
@@ -617,47 +633,67 @@ Page({
       return
     }
 
-    this.audioQueue.push({
-      messageId,
-      text: content,
+    // 分配序号，立即开始生成
+    const seq = this.nextGenSeq
+    this.nextGenSeq += 1
+    this.generateAudio(seq, messageId, content)
+  },
+
+  generateAudio(seq, messageId, text) {
+    this.generatingCount += 1
+    this.setData({ audioLoadingMessageId: messageId })
+
+    api.requestSpeech(text)
+      .then(({ audioUrl }) => {
+        this.generatingCount -= 1
+        // 按序号存入 readyMap
+        this.readyMap[seq] = { messageId, audioUrl }
+        this.playNextIfIdle()
+      })
+      .catch((error) => {
+        console.error('[chat] requestSpeech failed', error)
+        this.generatingCount -= 1
+        // 跳过失败的段，推进序号
+        this.readyMap[seq] = null
+        this.playNextIfIdle()
+      })
+  },
+
+  playNextIfIdle() {
+    if (this.isAudioPlaying) {
+      return
+    }
+
+    // 跳过失败的段（null）
+    while (this.readyMap.hasOwnProperty(this.nextPlaySeq) && this.readyMap[this.nextPlaySeq] === null) {
+      delete this.readyMap[this.nextPlaySeq]
+      this.nextPlaySeq += 1
+    }
+
+    const next = this.readyMap[this.nextPlaySeq]
+    if (!next) {
+      // 下一段还没生成好，等它回来再播
+      if (this.generatingCount === 0) {
+        this.setData({ audioLoadingMessageId: '' })
+      }
+      return
+    }
+
+    delete this.readyMap[this.nextPlaySeq]
+    this.nextPlaySeq += 1
+
+    const audio = this.ensureAudioContext()
+    this.currentAudioMessageId = next.messageId
+    this.setData({
+      playingMessageId: next.messageId,
+      audioLoadingMessageId: this.generatingCount > 0 ? next.messageId : '',
     })
-    this.processAudioQueue()
+    audio.src = next.audioUrl
+    audio.play()
   },
 
   processAudioQueue() {
-    if (this.isAudioPlaying || this.isAudioGenerating) {
-      return
-    }
-
-    const nextItem = this.audioQueue.shift()
-    if (!nextItem) {
-      this.setData({
-        audioLoadingMessageId: '',
-      })
-      return
-    }
-
-    this.isAudioGenerating = true
-    this.setData({
-      audioLoadingMessageId: nextItem.messageId,
-    })
-
-    api.requestSpeech(nextItem.text)
-      .then(({ audioUrl }) => {
-        const audio = this.ensureAudioContext()
-        this.isAudioGenerating = false
-        this.currentAudioMessageId = nextItem.messageId
-        audio.src = audioUrl
-        audio.play()
-      })
-      .catch((error) => {
-        console.error('[chat] queue requestSpeech failed', error)
-        this.isAudioGenerating = false
-        this.setData({
-          audioLoadingMessageId: '',
-        })
-        this.processAudioQueue()
-      })
+    this.playNextIfIdle()
   },
 
   handleSpeakMessage(event) {

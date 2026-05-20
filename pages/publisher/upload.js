@@ -7,6 +7,7 @@ Page({
     categoryIndex: 0,
     fileName: '',
     filePath: '',
+    coverPath: '',
     form: {
       title: '',
       author: '',
@@ -70,6 +71,25 @@ Page({
     this.setData({
       categoryIndex,
       form,
+    })
+  },
+
+  handleChooseCover() {
+    wx.chooseMedia({
+      count: 1,
+      mediaType: ['image'],
+      sourceType: ['album', 'camera'],
+      sizeType: ['compressed'],
+      success: (res) => {
+        const file = (res.tempFiles || [])[0]
+        if (!file) return
+        this.setData({ coverPath: file.tempFilePath })
+      },
+      fail: (err) => {
+        if (err && err.errMsg && err.errMsg.indexOf('cancel') > -1) return
+        console.error('[publisher] choose cover failed', err)
+        wx.showToast({ title: '选择图片失败', icon: 'none' })
+      },
     })
   },
 
@@ -138,6 +158,10 @@ Page({
         })
       },
       fail: (error) => {
+        // 用户取消选择不提示错误
+        if (error && error.errMsg && error.errMsg.indexOf('cancel') > -1) {
+          return
+        }
         console.error('[publisher] choose file failed', error)
         wx.showToast({
           title: (error && error.errMsg) || '选取文件失败',
@@ -150,47 +174,42 @@ Page({
   handleStopPropagation() {},
 
   handleSubmit() {
-    const { form, fileName, filePath } = this.data
+    const { form, fileName, filePath, coverPath } = this.data
     if (!form.title || !form.author || !form.publisher || !form.category || !form.description || !form.price || !form.copyright) {
-      wx.showToast({
-        title: '请填写完整信息',
-        icon: 'none',
-      })
+      wx.showToast({ title: '请填写完整信息', icon: 'none' })
       return
     }
 
     if (!fileName || !filePath) {
-      wx.showToast({
-        title: '请先选择文件',
-        icon: 'none',
-      })
+      wx.showToast({ title: '请先选择文件', icon: 'none' })
       return
     }
 
     wx.showLoading({ title: '上传中...' })
-    api.uploadBook(Object.assign({}, form, { filePath }))
+
+    // 如果有封面图片，先上传封面拿到 URL
+    const coverPromise = coverPath
+      ? api.uploadCover(coverPath)
+      : Promise.resolve('')
+
+    coverPromise
+      .then((coverUrl) => {
+        return api.uploadBook(Object.assign({}, form, { filePath, coverUrl }))
+      })
       .then((book) => {
         wx.hideLoading()
-        wx.showToast({
-          title: '上传成功',
-          icon: 'success',
-        })
+        wx.showToast({ title: '上传成功', icon: 'success' })
         setTimeout(() => {
           getApp().globalData.publisherBuildIntent = {
             bookId: book.id,
             autoStart: true,
           }
-          wx.switchTab({
-            url: '/pages/publisher/build',
-          })
+          wx.switchTab({ url: '/pages/publisher/build' })
         }, 500)
       })
       .catch((error) => {
         wx.hideLoading()
-        wx.showToast({
-          title: error.message || '上传失败',
-          icon: 'none',
-        })
+        wx.showToast({ title: error.message || '上传失败', icon: 'none' })
       })
   },
 

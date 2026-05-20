@@ -1,42 +1,28 @@
 <view class="page-shell">
-  <!-- Custom Navigation Bar -->
   <view class="custom-nav" style="height: {{navBarHeight}}px;">
     <view class="nav-inner" style="top: {{menuTop}}px; height: {{menuHeight}}px;">
       <view class="nav-left" bindtap="handleBack">
         <view class="chevron-left-black"></view>
       </view>
-      <text class="nav-title">新书录入</text>
+      <text class="nav-title">编辑书籍</text>
     </view>
   </view>
 
   <view class="content-wrap" style="padding-top: {{navBarHeight}}px;">
-    <view class="page-header">
-      <view class="header-intro">
-        <view class="intro-badge">
-          <text>录入流程</text>
-        </view>
-        <text class="header-title">图书资产上传</text>
-        <text class="header-desc">完善书籍信息并上传源文件，开启 AI 智能建库</text>
-      </view>
-    </view>
-
   <view class="upload-form">
     <view class="form-group card-base">
       <view class="form-item">
         <text class="form-label">书籍名称</text>
         <input class="form-input" value="{{form.title}}" data-field="title" bindinput="handleInput" placeholder="请输入书名" />
       </view>
-
       <view class="form-item">
         <text class="form-label">作者/编著者</text>
         <input class="form-input" value="{{form.author}}" data-field="author" bindinput="handleInput" placeholder="请输入作者" />
       </view>
-
       <view class="form-item">
         <text class="form-label">出版单位</text>
         <input class="form-input" value="{{form.publisher}}" data-field="publisher" bindinput="handleInput" placeholder="请输入出版社" />
       </view>
-
       <view class="form-item">
         <text class="form-label">内容分类</text>
         <picker class="form-picker" range="{{categories}}" value="{{categoryIndex}}" bindchange="handleCategoryChange">
@@ -53,21 +39,19 @@
         <text class="form-label">内容简介</text>
         <textarea class="form-textarea" value="{{form.description}}" data-field="description" bindinput="handleInput" placeholder="请输入书籍核心内容简介" />
       </view>
-
       <view class="form-item">
         <text class="form-label">定价 (元)</text>
         <input class="form-input" value="{{form.price}}" data-field="price" bindinput="handleInput" placeholder="0.00" type="digit" />
       </view>
-
       <view class="form-item no-border">
         <text class="form-label">版权及权利声明</text>
         <textarea class="form-textarea" value="{{form.copyright}}" data-field="copyright" bindinput="handleInput" placeholder="请输入版权归属及授权说明" />
       </view>
     </view>
 
-    <view class="file-upload-section card-base {{coverPath ? 'file-ready' : ''}}" bindtap="handleChooseCover">
-      <block wx:if="{{coverPath}}">
-        <image class="cover-preview" src="{{coverPath}}" mode="aspectFill" />
+    <view class="file-upload-section card-base {{coverPath || form.cover_url ? 'file-ready' : ''}}" bindtap="handleChooseCover">
+      <block wx:if="{{coverPath || form.cover_url}}">
+        <image class="cover-preview" src="{{coverPath || form.cover_url}}" mode="aspectFill" />
         <view class="upload-info">
           <text class="upload-title">点击更换封面</text>
           <text class="upload-hint">支持 jpg / png / webp</text>
@@ -84,39 +68,9 @@
       </block>
     </view>
 
-    <view class="file-upload-section card-base {{fileName ? 'file-ready' : ''}}" bindtap="handleChooseFile">
-      <view class="upload-icon-box">
-        <view class="icon-svg {{fileName ? 'icon-file-ready' : 'icon-upload-cloud'}}"></view>
-      </view>
-      <view class="upload-info">
-        <text class="upload-title">{{fileName || '点击上传源文件'}}</text>
-        <text class="upload-hint">支持 .txt / .docx / .pdf 格式</text>
-      </view>
-    </view>
-
     <view class="submit-section">
-      <button class="btn-submit" bindtap="handleSubmit">提交并开启建库</button>
+      <button class="btn-submit" bindtap="handleSubmit">保存修改</button>
     </view>
   </view>
-
-  <view wx:if="{{showUploadPrivacyModal}}" class="privacy-overlay" catchtap="handleDisagreeUploadPrivacy">
-    <view class="privacy-sheet" catchtap="handleStopPropagation">
-      <view class="privacy-header">
-        <text class="privacy-title">文件上传说明</text>
-      </view>
-      <view class="privacy-content">
-        <text class="privacy-text">上传源文件需要读取您主动选择的本地文件。文件将用于书籍内容建库、解析和后续阅读服务，不会读取未选择的其他文件。</text>
-      </view>
-      <view class="privacy-actions">
-        <button class="btn-secondary" bindtap="handleDisagreeUploadPrivacy">取消</button>
-        <button
-          id="upload-file-privacy-agree"
-          class="btn-primary"
-          open-type="agreePrivacyAuthorization"
-          bindagreeprivacyauthorization="handleAgreeUploadPrivacy"
-        >同意并选择</button>
-      </view>
-    </view>
   </view>
-</view>
 </view>

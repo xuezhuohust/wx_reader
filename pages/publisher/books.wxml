@@ -87,6 +87,11 @@
         </view>
         <view class="action-buttons">
           <button
+            class="btn-action btn-outline-default"
+            catchtap="handleEditBook"
+            data-id="{{item.id}}"
+          >编辑</button>
+          <button
             class="btn-action {{item.onlineStatus === 'online' ? 'btn-outline-danger' : 'btn-outline-primary'}}"
             catchtap="handleToggleStatus"
             data-id="{{item.id}}"

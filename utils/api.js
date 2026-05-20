@@ -123,7 +123,7 @@ function requestSpeech(text, speaker) {
 /** 语音转文字（STT） */
 function speechToText(filePath) {
   return uploadFile('/api/stt', filePath, {
-    filename: 'audio.pcm',
+    filename: 'audio.mp3',
     language: 'zh_cn',
   }).then((data) => {
     if (data && data.text) {
@@ -383,6 +383,16 @@ function getPublisherBooks() {
   }).then((data) => data.books || [])
 }
 
+/** 上传封面图片，返回图片 URL */
+function uploadCover(filePath) {
+  return uploadFile('/api/publisher/cover/upload', filePath, {}).then((data) => {
+    if (data && data.cover_url) {
+      return data.cover_url
+    }
+    throw new Error('封面上传失败')
+  })
+}
+
 /** 上传新书籍（出版方功能） */
 function uploadBook(formData) {
   return uploadFile('/api/publisher/books/upload', formData.filePath, {
@@ -393,6 +403,7 @@ function uploadBook(formData) {
     description: formData.description,
     price: String(formData.price),
     copyright: formData.copyright,
+    cover_url: formData.coverUrl || '',
   }).then((data) => data.book)
 }
 
@@ -402,6 +413,15 @@ function updateBookOnlineStatus(id, status) {
     url: `/api/publisher/books/${id}/online_status`,
     method: 'PATCH',
     data: { status },
+  }).then((data) => data.book)
+}
+
+/** 更新书籍信息 */
+function updateBookMetadata(id, metadata) {
+  return request({
+    url: `/api/publisher/books/${id}`,
+    method: 'PATCH',
+    data: metadata,
   }).then((data) => data.book)
 }
 
@@ -439,10 +459,12 @@ module.exports = {
   requestSpeech,
   speechToText,
   reportVoicePlay,
+  uploadCover,
   getPublisherStats,
   getPublisherBooks,
   uploadBook,
   updateBookOnlineStatus,
+  updateBookMetadata,
   startBuildBook,
   switchUserRole,
   toAbsoluteUrl,
