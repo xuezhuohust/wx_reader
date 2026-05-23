@@ -81,18 +81,20 @@ function purchaseBook(id) {
 }
 
 /** 向书籍发送单次问答消息（非流式） */
-function sendBookChatMessage(bookId, message) {
+function sendBookChatMessage(bookId, message, conversationId) {
   return request({
-    url: '/api/ask',
+    url: '/novelindex/api/chat',
     method: 'POST',
     data: {
-      book: bookId,
-      question: message,
+      doc_id: bookId,
+      message,
+      session_id: conversationId || '',
     },
   }).then((data) => {
     return {
-      reply: data.reply,
-      book: data.book,
+      reply: data.answer || data.reply || '',
+      sessionId: data.session_id || conversationId || '',
+      docId: data.doc_id || bookId,
     }
   })
 }
@@ -195,7 +197,7 @@ function getStreamEvent(payload) {
   const data = payload.data && typeof payload.data === 'object' ? payload.data : {}
   return {
     event: payload.type || payload.event || data.event || '',
-    content: payload.content || data.content || '',
+    content: payload.content || payload.answer || data.content || data.answer || '',
     success: typeof payload.success === 'boolean' ? payload.success : true,
     message: payload.message || payload.error || '',
   }
@@ -237,6 +239,47 @@ function getConversationMessages(conversationId) {
   }).then((data) => data.messages || [])
 }
 
+function appendConversationMessages(conversationId, messages) {
+  /* 将外部 Agent 的问答结果回写到本地对话历史 */
+  if (!conversationId || !Array.isArray(messages) || !messages.length) {
+    return Promise.resolve([])
+  }
+  return ensureUserIdentity().then((identity) => {
+    if (!identity || !identity.openid || !identity.token) {
+      return []
+    }
+    return new Promise((resolve, reject) => {
+      wx.request({
+        url: `${BASE_URL}/api/chat/conversations/${conversationId}/messages`,
+        method: 'POST',
+        data: { messages },
+        header: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${identity.token}`,
+          'X-Openid': identity.openid,
+        },
+        success: (res) => {
+          if (res.statusCode === 404 || res.statusCode === 405 || res.statusCode === 501) {
+            resolve([])
+            return
+          }
+          if (res.statusCode < 200 || res.statusCode >= 300) {
+            reject(normalizeError(res, '消息保存失败'))
+            return
+          }
+          try {
+            const data = unwrapApiResponse(res.data || {}, '消息保存失败')
+            resolve(data.messages || [])
+          } catch (error) {
+            reject(error)
+          }
+        },
+        fail: reject,
+      })
+    })
+  }).catch(() => [])
+}
+
 // ====================================================================
 // 流式问答
 // ====================================================================
@@ -254,6 +297,7 @@ function sendBookChatMessageStream(bookId, message, handlers) {
       const decoder = typeof TextDecoder !== 'undefined' ? new TextDecoder('utf-8') : null
       let buffer = ''
       let reply = ''
+      let tokenReceived = false
       let settled = false
 
       const finishResolve = () => {
@@ -302,15 +346,28 @@ function sendBookChatMessageStream(bookId, message, handlers) {
             return
           }
 
-          if (streamEvent.event === 'segment') {
+          if (streamEvent.event === 'token' || streamEvent.event === 'segment') {
             const segment = String(streamEvent.content || '')
             if (!segment) {
               return
             }
+            tokenReceived = true
             reply += segment
             if (typeof callbacks.onSegment === 'function') {
               callbacks.onSegment(segment, reply)
             }
+            return
+          }
+
+          if (streamEvent.event === 'result') {
+            const finalAnswer = String(streamEvent.content || '')
+            if (finalAnswer && !tokenReceived) {
+              reply = finalAnswer
+              if (typeof callbacks.onSegment === 'function') {
+                callbacks.onSegment(finalAnswer, reply)
+              }
+            }
+            finishResolve()
             return
           }
 
@@ -321,14 +378,15 @@ function sendBookChatMessageStream(bookId, message, handlers) {
       }
 
       const requestTask = wx.request({
-        url: `${BASE_URL}/api/ask/segments`,
+        url: `${BASE_URL}/novelindex/api/chat/stream`,
         method: 'POST',
         enableChunked: true,
         responseType: 'arraybuffer',
         data: {
-          book: bookId,
-          question: message,
-          conversationId: callbacks.conversationId || '',
+          doc_id: bookId,
+          message,
+          session_id: callbacks.conversationId || '',
+          user_id: identity.userId || identity.openid || 'default',
         },
         header: {
           'Content-Type': 'application/json',
@@ -456,6 +514,7 @@ module.exports = {
   createConversation,
   deleteConversation,
   getConversationMessages,
+  appendConversationMessages,
   requestSpeech,
   speechToText,
   reportVoicePlay,

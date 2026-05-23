@@ -741,7 +741,8 @@ Page({
     })
 
     const convId = this.data.currentConversationId
-    api.sendBookChatMessageStream(this.bookId, message, {
+    const chatBookId = (this.data.book && (this.data.book.bookKey || this.data.book.id)) || this.bookId
+    api.sendBookChatMessageStream(chatBookId, message, {
       conversationId: convId,
       onSegment: (segment, fullReply) => {
         const nextMessages = this.data.messages.map((item) => {
@@ -762,17 +763,20 @@ Page({
           this.scrollToBottom()
         })
 
-        this.appendSpeechSegment(loadingMessage.id, segment, false)
+        // 自动 TTS 暂时关闭：保留文字流式输出，避免回复过程中并发请求 /api/tts。
+        // this.appendSpeechSegment(loadingMessage.id, segment, false)
       },
-    })
+      })
       .then((result) => {
-        this.flushSpeechBuffer(loadingMessage.id)
+        // 自动 TTS 暂时关闭：不在回答结束时补发剩余语音片段。
+        // this.flushSpeechBuffer(loadingMessage.id)
+        const finalReply = result.reply || ''
         const nextMessages = this.data.messages.map((item) => {
           if (item.id === loadingMessage.id) {
             return {
               id: item.id,
               role: 'ai',
-              content: result.reply,
+              content: finalReply,
               loading: false,
             }
           }
@@ -785,6 +789,15 @@ Page({
         }, () => {
           this.scrollToBottom()
         })
+
+        if (convId && finalReply) {
+          api.appendConversationMessages(convId, [
+            { role: 'user', content: message },
+            { role: 'ai', content: finalReply },
+          ]).catch((error) => {
+            console.warn('appendConversationMessages failed:', error)
+          })
+        }
       })
       .catch(() => {
         this.streamSpeechBuffer = ''
