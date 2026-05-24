@@ -87,6 +87,7 @@
 
     <view class="main-content-refined">
       <!-- Section: Activity Grid (Reader) -->
+      <!-- 常用功能：暂未实现，微信审核要求注释
       <block wx:if="{{currentRole === 'reader'}}">
         <view class="menu-label-sub">常用功能</view>
         <view class="menu-grid-refined card-base">
@@ -116,9 +117,10 @@
           </view>
         </view>
       </block>
+      -->
 
       <!-- Section: Activity Grid (Publisher) -->
-      <block wx:else>
+      <block wx:if="{{currentRole === 'publisher'}}">
         <view class="menu-label-sub">管理工具</view>
         <view class="menu-grid-refined card-base">
           <view class="menu-grid-item" bindtap="handleDeveloping">
@@ -165,7 +167,7 @@
           </view>
           <text class="menu-title">关于我们</text>
           <view class="menu-suffix">
-            <text class="suffix-text">v1.0.0</text>
+            <text class="suffix-text">v{{appVersion}}</text>
             <view class="chevron-right-mini"></view>
           </view>
         </view>

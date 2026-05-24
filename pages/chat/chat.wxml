@@ -17,9 +17,14 @@
   <view class="conv-panel {{showConversationList ? 'conv-panel--open' : ''}}" style="padding-top: {{navBarHeight}}px;">
     <view class="conv-panel-header">
       <text class="conv-panel-title">对话列表</text>
+    </view>
+    <view class="conv-panel-actions">
       <view class="conv-panel-new" bindtap="handleNewConversation">
         <text class="conv-panel-new-icon">+</text>
         <text>新建对话</text>
+      </view>
+      <view class="conv-panel-clear" bindtap="handleClearConversations">
+        <text>清空全部对话</text>
       </view>
     </view>
     <scroll-view class="conv-panel-list" scroll-y>
@@ -93,6 +98,16 @@
       <view class="bottom-space" style="height: {{keyboardHeight + 200}}rpx;"></view>
     </view>
   </scroll-view>
+
+  <!-- 回到底部按钮 -->
+  <view
+    wx:if="{{showScrollDownBtn}}"
+    class="scroll-down-btn"
+    bindtap="handleScrollDownTap"
+  >
+    <view class="scroll-down-icon"></view>
+    <text class="scroll-down-text">新内容</text>
+  </view>
 
   <!-- Input Area -->
   <view class="chat-footer" style="bottom: {{keyboardHeight}}px;">

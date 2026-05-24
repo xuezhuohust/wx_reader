@@ -232,6 +232,15 @@ function deleteConversation(conversationId) {
   }).then((data) => data.deleted)
 }
 
+function clearConversations(bookId) {
+  /* 清空某本书的全部对话和对应 NovelIndex sessions */
+  return request({
+    url: '/api/chat/conversations',
+    method: 'DELETE',
+    data: { book: bookId },
+  }).then((data) => data)
+}
+
 function getConversationMessages(conversationId) {
   /* 获取某个对话的全部消息 */
   return request({
@@ -513,6 +522,7 @@ module.exports = {
   listConversations,
   createConversation,
   deleteConversation,
+  clearConversations,
   getConversationMessages,
   appendConversationMessages,
   requestSpeech,

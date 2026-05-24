@@ -3,6 +3,7 @@ const { ensureRole } = require('../../utils/role')
 const { syncRoleTabBar } = require('../../utils/tab-bar')
 const { bootstrapUserIdentity, syncProfileIdentity } = require('../../services/user')
 const { saveIdentity } = require('../../utils/storage')
+const { appVersion } = require('../../utils/version')
 
 function shouldShowProfileModal(identity) {
   if (!identity) {
@@ -25,6 +26,7 @@ Page({
     showProfileModal: false,
     nicknameDraft: '',
     profileSaving: false,
+    appVersion,
     navBarHeight: 0,
     statusBarHeight: 0,
     menuTop: 0,
@@ -204,7 +206,7 @@ Page({
   },
 
   handleOpenSettings() {
-    wx.showToast({ title: '设置功能开发中', icon: 'none' })
+    wx.navigateTo({ url: '/pages/settings/settings' })
   },
 
   handleFeedback() {
@@ -214,7 +216,7 @@ Page({
   handleAbout() {
     wx.showModal({
       title: '关于我们',
-      content: 'AI 伴读小程序 v1.0.0\n专注于为您提供沉浸式的阅读体验。',
+      content: `AI 伴读小程序 v${appVersion}\n专注于为您提供沉浸式的阅读体验。`,
       showCancel: false
     })
   },

@@ -21,6 +21,8 @@ Page({
     menuHeight: 0,
     scrolled: false,
     showPrivacyModal: false,
+    userHasScrolledUp: false,
+    showScrollDownBtn: false,
     // 2026-05-19 新增：对话列表支持
     conversations: [],
     currentConversationId: '',
@@ -49,6 +51,8 @@ Page({
     this.generatingCount = 0
     this.streamSpeechBuffer = ''
     this.pendingPrivacyAction = null
+    this.lastScrollToBottomTime = 0
+    this._scrollTailTimer = null
     this.initRecorder()
     // 2026-05-19: 改为加载书籍 + 对话列表 + 历史消息
     this.initialized = false
@@ -155,6 +159,7 @@ Page({
   },
 
   onUnload() {
+    clearTimeout(this._scrollTailTimer)
     this.destroyAudioContext()
   },
 
@@ -321,6 +326,39 @@ Page({
       })
   },
 
+  handleClearConversations() {
+    if (this.data.loadingReply) {
+      return
+    }
+    wx.showModal({
+      title: '清空对话',
+      content: '将删除这本书的全部对话记录，并重置对应的 AI 会话。此操作不可恢复。',
+      confirmText: '清空',
+      confirmColor: '#d64545',
+      success: (res) => {
+        if (!res.confirm) {
+          return
+        }
+        const book = this.data.book
+        const bookTitle = book && book.title ? book.title : ''
+        this.resetAudioPlayback()
+        wx.showLoading({ title: '清空中...', mask: true })
+        api.clearConversations(this.bookId)
+          .then(() => this.createAndSelectConversation(bookTitle))
+          .then(() => {
+            wx.hideLoading()
+            this.setData({ showConversationList: false })
+            wx.showToast({ title: '已清空', icon: 'success' })
+          })
+          .catch((err) => {
+            wx.hideLoading()
+            console.error('handleClearConversations failed:', err)
+            wx.showToast({ title: err.message || '清空失败', icon: 'none' })
+          })
+      },
+    })
+  },
+
   handleSwitchConversation(event) {
     /* 切换到指定的对话 */
     if (this.data.loadingReply) {
@@ -378,7 +416,18 @@ Page({
   },
 
   handleScroll(e) {
-    const isScrolled = e.detail.scrollTop > 20
+    const { scrollTop, scrollHeight, clientHeight } = e.detail
+    const isScrolled = scrollTop > 20
+
+    // 判断 user 是否主动上滑离开了底部（阈值 80rpx）
+    const distanceFromBottom = scrollHeight - scrollTop - clientHeight
+    const userScrolledUp = distanceFromBottom > 80
+    if (userScrolledUp !== this.data.userHasScrolledUp) {
+      this.setData({
+        userHasScrolledUp: userScrolledUp,
+        showScrollDownBtn: userScrolledUp && this.data.loadingReply,
+      })
+    }
     if (isScrolled !== this.data.scrolled) {
       this.setData({ scrolled: isScrolled })
     }
@@ -737,7 +786,7 @@ Page({
       inputValue: '',
       inputLineCount: 1,
     })), () => {
-      this.scrollToBottom()
+      this.scrollToBottom(true)
     })
 
     const convId = this.data.currentConversationId
@@ -761,6 +810,15 @@ Page({
           messages: nextMessages,
         }, () => {
           this.scrollToBottom()
+          // 节流兜底：如果本次被跳过了，150ms 后补发一次
+          if (this.data.loadingReply && !this.data.userHasScrolledUp) {
+            clearTimeout(this._scrollTailTimer)
+            this._scrollTailTimer = setTimeout(() => {
+              if (!this.data.userHasScrolledUp) {
+                this.scrollToBottom(true)
+              }
+            }, 150)
+          }
         })
 
         // 自动 TTS 暂时关闭：保留文字流式输出，避免回复过程中并发请求 /api/tts。
@@ -787,7 +845,8 @@ Page({
           messages: nextMessages,
           loadingReply: false,
         }, () => {
-          this.scrollToBottom()
+          this._resetScrollState()
+          this.scrollToBottom(true)
         })
 
         if (convId && finalReply) {
@@ -818,18 +877,50 @@ Page({
           loadingReply: false,
           audioLoadingMessageId: '',
         }, () => {
-          this.scrollToBottom()
+          this._resetScrollState()
+          this.scrollToBottom(true)
         })
       })
   },
 
-  scrollToBottom() {
+  scrollToBottom(force = false) {
+    // force: 强制滚动（用户点击按钮、流式结束）
+    // 非强制时，用户正在上滑查看则不打断
+    if (!force && this.data.userHasScrolledUp) {
+      return
+    }
+
+    // 流式期间节流：最多 120ms 滚一次
+    const now = Date.now()
+    if (!force && this.data.loadingReply && now - this.lastScrollToBottomTime < 120) {
+      return
+    }
+    this.lastScrollToBottomTime = now
+
     const last = this.data.messages[this.data.messages.length - 1]
     if (!last) {
       return
     }
     this.setData({
       scrollIntoView: last.id,
+    })
+  },
+
+  handleScrollDownTap() {
+    this.setData({
+      userHasScrolledUp: false,
+      showScrollDownBtn: false,
+    })
+    this.scrollToBottom(true)
+  },
+
+  _resetScrollState() {
+    clearTimeout(this._scrollTailTimer)
+    this._scrollTailTimer = null
+    this.lastScrollToBottomTime = 0
+    this.setData({
+      userHasScrolledUp: false,
+      showScrollDownBtn: false,
     })
   },
 })
