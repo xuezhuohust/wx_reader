@@ -59,6 +59,7 @@
   padding: 0 48rpx;
   position: relative;
   z-index: 1;
+  /* 底部只剩一个主按钮，留白相应收紧，避免详情页末尾空白过大。 */
   padding-bottom: calc(240rpx + env(safe-area-inset-bottom));
 }
 
@@ -86,6 +87,21 @@
 .cover-image {
   width: 100%;
   height: 100%;
+}
+
+.cover-empty {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24rpx;
+  background: var(--bg-surface-soft);
+  color: var(--stone);
+  font-size: 24rpx;
+  font-weight: 700;
+  text-align: center;
+  line-height: 1.4;
 }
 
 .hero-right {

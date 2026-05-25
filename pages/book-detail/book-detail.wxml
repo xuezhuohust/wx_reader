@@ -14,7 +14,10 @@
     <view class="book-hero">
       <view class="hero-left">
         <view class="detail-cover-box">
-          <image class="cover-image" src="{{book.coverUrl || 'https://mp-8bdc7c18-cba4-4488-8c57-e587ac252b55.cdn.bspapp.com/fengmian.png'}}" mode="aspectFit" />
+          <image wx:if="{{book.coverUrl}}" class="cover-image" src="{{book.coverUrl}}" mode="aspectFit" />
+          <view wx:else class="cover-empty">
+            <text>暂无封面</text>
+          </view>
         </view>
       </view>
       <view class="hero-right">
@@ -79,6 +82,7 @@
   <!-- Bottom Actions -->
   <view class="bottom-action-bar">
     <block wx:if="{{!isPublisherScene}}">
+      <!-- 小说介绍页只保留主行动按钮；清除历史对话统一放到聊天页内部处理。 -->
       <view class="reader-action-stack">
         <button class="btn-primary-full" bindtap="handleAction">
           {{book.purchased ? '进入 AI 沉浸导读' : '立即解锁导读'}}

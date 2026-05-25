@@ -60,11 +60,11 @@ Page({
     this.setData({ loading: true })
     api.getPurchasedBooks()
       .then((books) => {
-        // 确保封面 URL 是绝对路径
+        // 确保封面 URL 是绝对路径；后端没有返回封面时保持为空，不再使用默认封面图。
         const processedBooks = (books || []).map(book => {
           const rawCover = book.coverUrl || book.cover
           return Object.assign({}, book, {
-            coverUrl: rawCover ? api.toAbsoluteUrl(rawCover) : 'https://mp-8bdc7c18-cba4-4488-8c57-e587ac252b55.cdn.bspapp.com/fengmian.png'
+            coverUrl: rawCover ? api.toAbsoluteUrl(rawCover) : ''
           })
         })
         this.setData({
@@ -137,12 +137,11 @@ Page({
   handleImageError(e) {
     const { index } = e.currentTarget.dataset
     const { books } = this.data
-    const defaultCover = 'https://mp-8bdc7c18-cba4-4488-8c57-e587ac252b55.cdn.bspapp.com/fengmian.png'
     
-    if (books[index] && books[index].coverUrl !== defaultCover) {
+    if (books[index] && books[index].coverUrl) {
       const key = `books[${index}].coverUrl`
       this.setData({
-        [key]: defaultCover
+        [key]: ''
       })
     }
   },

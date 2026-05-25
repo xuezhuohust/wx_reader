@@ -1,7 +1,10 @@
 <view class="book-card {{mode}}-mode">
   <!-- Cover Section -->
   <view class="book-cover" bindtap="handleTap">
-    <image class="cover-image" src="{{book.coverUrl || 'https://mp-8bdc7c18-cba4-4488-8c57-e587ac252b55.cdn.bspapp.com/fengmian.png'}}" mode="aspectFill" />
+    <image wx:if="{{book.coverUrl}}" class="cover-image" src="{{book.coverUrl}}" mode="aspectFill" />
+    <view wx:else class="cover-empty">
+      <text>{{coverInitial}}</text>
+    </view>
     <view class="cover-overlay"></view>
     <!-- Floating Tag -->
     <view class="floating-category" wx:if="{{book.category}}">{{book.category}}</view>

@@ -68,7 +68,10 @@
                 bindtap="handleRecommendTap"
               >
                 <view class="book-cover-wrapper">
-                  <image class="cover-image" src="{{item.coverUrl || 'https://mp-8bdc7c18-cba4-4488-8c57-e587ac252b55.cdn.bspapp.com/fengmian.png'}}" mode="aspectFill" />
+                  <image wx:if="{{item.coverUrl}}" class="cover-image" src="{{item.coverUrl}}" mode="aspectFill" />
+                  <view wx:else class="cover-empty">
+                    <text>暂无封面</text>
+                  </view>
                   <view class="cover-shadow"></view>
                 </view>
                 <view class="book-info-minimal">

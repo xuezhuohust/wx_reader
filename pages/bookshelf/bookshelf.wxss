@@ -97,6 +97,23 @@
   box-shadow: 0 12rpx 32rpx rgba(0, 0, 0, 0.4);
 }
 
+.resume-cover-empty {
+  width: 100%;
+  height: 100%;
+  border-radius: 6rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12rpx;
+  background: var(--bg-surface-soft);
+  color: var(--stone);
+  font-size: 18rpx;
+  font-weight: 700;
+  line-height: 1.3;
+  text-align: center;
+  box-shadow: 0 12rpx 32rpx rgba(0, 0, 0, 0.4);
+}
+
 .resume-play-tag {
   position: absolute;
   bottom: -10rpx;
@@ -320,6 +337,21 @@
   width: 100%;
   height: 100%;
   background: var(--bg-surface);
+}
+
+.book-cover-empty {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18rpx;
+  background: var(--bg-surface-soft);
+  color: var(--stone);
+  font-size: 22rpx;
+  font-weight: 700;
+  line-height: 1.4;
+  text-align: center;
 }
 
 .book-badge {

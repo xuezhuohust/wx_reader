@@ -22,7 +22,10 @@
         <view wx:if="{{books.length > 0}}" class="recent-resume-card" bindtap="handleBookTap" data-book="{{books[0]}}">
           <view class="resume-content">
             <view class="resume-cover-box">
-              <image class="resume-cover" src="{{books[0].coverUrl}}" mode="aspectFill" />
+              <image wx:if="{{books[0].coverUrl}}" class="resume-cover" src="{{books[0].coverUrl}}" mode="aspectFill" />
+              <view wx:else class="resume-cover-empty">
+                <text>暂无封面</text>
+              </view>
               <view class="resume-play-tag">
                 <view class="play-icon-mini-white"></view>
               </view>
@@ -72,12 +75,16 @@
             <view class="book-spine-box">
               <view class="book-cover-wrap">
                 <image 
+                  wx:if="{{item.coverUrl}}"
                   class="book-cover" 
                   src="{{item.coverUrl}}" 
                   mode="aspectFill" 
                   binderror="handleImageError"
                   data-index="{{index}}"
                 />
+                <view wx:else class="book-cover-empty">
+                  <text>暂无封面</text>
+                </view>
                 <view class="book-glare"></view>
                 <view class="book-badge" wx:if="{{item.category}}">{{item.category}}</view>
               </view>
