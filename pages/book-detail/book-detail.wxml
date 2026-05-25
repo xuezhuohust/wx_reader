@@ -83,9 +83,6 @@
         <button class="btn-primary-full" bindtap="handleAction">
           {{book.purchased ? '进入 AI 沉浸导读' : '立即解锁导读'}}
         </button>
-        <button wx:if="{{book.purchased}}" class="btn-clear-sessions" bindtap="handleClearConversations">
-          清空历史对话
-        </button>
       </view>
     </block>
     <block wx:else>

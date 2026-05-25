@@ -9,7 +9,8 @@ Page({
     isInputExpanded: false,
     composerPlaceholderRpx: 240,
     loadingReply: false,
-    scrollIntoView: '',
+    scrollTop: 0,
+    scrollWithAnimation: true,
     quickQuestions: ['总结这本书', '这本书适合谁读', '提炼三个核心观点', '帮我解释第一章'],
     playingMessageId: '',
     audioLoadingMessageId: '',
@@ -53,6 +54,16 @@ Page({
     this.pendingPrivacyAction = null
     this.lastScrollToBottomTime = 0
     this._scrollTailTimer = null
+    // 流式输出过快时，先把回复暂存在实例变量中，再定时批量刷新视图层。
+    this._streamFlushTimer = null
+    this._autoScrollTimer = null
+    this._pendingStreamReply = ''
+    this._lastFlushedStreamReply = ''
+    this._streamingMessageIndex = -1
+    this._streamingMessageId = ''
+    // 使用 scroll-top 累加触发到底部，避免高频 scroll-into-view 抢占用户手势。
+    this._scrollTop = 0
+    this._userTouchingChat = false
     this.initRecorder()
     // 2026-05-19: 改为加载书籍 + 对话列表 + 历史消息
     this.initialized = false
@@ -160,6 +171,8 @@ Page({
 
   onUnload() {
     clearTimeout(this._scrollTailTimer)
+    clearTimeout(this._streamFlushTimer)
+    clearTimeout(this._autoScrollTimer)
     this.destroyAudioContext()
   },
 
@@ -220,7 +233,8 @@ Page({
         )
         this.setData({
           messages: [welcomeMessage],
-          scrollIntoView: welcomeMessage.id,
+        }, () => {
+          this.scrollToBottom(true)
         })
       })
   },
@@ -245,7 +259,8 @@ Page({
         }
         this.setData({
           messages: formatted,
-          scrollIntoView: formatted[formatted.length - 1].id,
+        }, () => {
+          this.scrollToBottom(true)
         })
         this.initialized = true
       })
@@ -257,7 +272,8 @@ Page({
         )
         this.setData({
           messages: [welcomeMessage],
-          scrollIntoView: welcomeMessage.id,
+        }, () => {
+          this.scrollToBottom(true)
         })
         this.initialized = true
       })
@@ -278,7 +294,8 @@ Page({
         )
         this.setData({
           messages: [welcomeMessage],
-          scrollIntoView: welcomeMessage.id,
+        }, () => {
+          this.scrollToBottom(true)
         })
         this.initialized = true
       })
@@ -399,7 +416,8 @@ Page({
         }
         this.setData({
           messages: formatted,
-          scrollIntoView: formatted[formatted.length - 1].id,
+        }, () => {
+          this.scrollToBottom(true)
         })
       })
       .catch((error) => {
@@ -410,7 +428,8 @@ Page({
         )
         this.setData({
           messages: [welcomeMessage],
-          scrollIntoView: welcomeMessage.id,
+        }, () => {
+          this.scrollToBottom(true)
         })
       })
   },
@@ -422,7 +441,9 @@ Page({
     // 判断 user 是否主动上滑离开了底部（阈值 80rpx）
     const distanceFromBottom = scrollHeight - scrollTop - clientHeight
     const userScrolledUp = distanceFromBottom > 80
-    if (userScrolledUp !== this.data.userHasScrolledUp) {
+    // 流式输出造成的程序滚动也会触发 bindscroll，这里只在用户触摸或非流式状态下更新用户滚动状态。
+    const shouldTrackUserScroll = this._userTouchingChat || !this.data.loadingReply
+    if (shouldTrackUserScroll && userScrolledUp !== this.data.userHasScrolledUp) {
       this.setData({
         userHasScrolledUp: userScrolledUp,
         showScrollDownBtn: userScrolledUp && this.data.loadingReply,
@@ -431,6 +452,21 @@ Page({
     if (isScrolled !== this.data.scrolled) {
       this.setData({ scrolled: isScrolled })
     }
+  },
+
+  handleChatTouchStart() {
+    // 用户开始拖动消息区时暂停自动跟随，避免新 token 把页面强行拉回底部。
+    this._userTouchingChat = true
+  },
+
+  handleChatTouchEnd() {
+    // 等滚动惯性基本结束后再恢复自动跟随判断，减少触摸结束瞬间的误判。
+    setTimeout(() => {
+      this._userTouchingChat = false
+      if (this.data.loadingReply && !this.data.userHasScrolledUp) {
+        this.scheduleAutoScroll()
+      }
+    }, 160)
   },
 
   handleInput(event) {
@@ -775,13 +811,26 @@ Page({
 
     this.resetAudioPlayback()
 
+    // 文本输入和语音识别最终都走此入口；仅给 AI 请求附加精简要求，不改变用户看到和保存的问题原文。
+    const aiMessage = `${message}\n回复精简`
     const userMessage = this.createMessage('user', message)
     const loadingMessage = this.createMessage('ai', 'AI 正在思考...', true)
     const messages = this.data.messages.concat([userMessage, loadingMessage])
+    // 记录本轮流式回复所在的消息，后续只更新这一条，避免每个 token 重建整个 messages 数组。
+    this._streamingMessageIndex = messages.length - 1
+    this._streamingMessageId = loadingMessage.id
+    this._pendingStreamReply = ''
+    this._lastFlushedStreamReply = ''
+    clearTimeout(this._streamFlushTimer)
+    clearTimeout(this._autoScrollTimer)
 
     this.setData(Object.assign({
       messages,
       loadingReply: true,
+      // 流式期间关闭滚动动画，防止动画被高频重启导致页面卡住或抢滚动。
+      scrollWithAnimation: false,
+      userHasScrolledUp: false,
+      showScrollDownBtn: false,
     }, this.buildComposerState({
       inputValue: '',
       inputLineCount: 1,
@@ -791,62 +840,31 @@ Page({
 
     const convId = this.data.currentConversationId
     const chatBookId = (this.data.book && (this.data.book.bookKey || this.data.book.id)) || this.bookId
-    api.sendBookChatMessageStream(chatBookId, message, {
+    api.sendBookChatMessageStream(chatBookId, aiMessage, {
       conversationId: convId,
       onSegment: (segment, fullReply) => {
-        const nextMessages = this.data.messages.map((item) => {
-          if (item.id === loadingMessage.id) {
-            return {
-              id: item.id,
-              role: 'ai',
-              content: fullReply,
-              loading: false,
-            }
-          }
-          return item
-        })
-
-        this.setData({
-          messages: nextMessages,
-        }, () => {
-          this.scrollToBottom()
-          // 节流兜底：如果本次被跳过了，150ms 后补发一次
-          if (this.data.loadingReply && !this.data.userHasScrolledUp) {
-            clearTimeout(this._scrollTailTimer)
-            this._scrollTailTimer = setTimeout(() => {
-              if (!this.data.userHasScrolledUp) {
-                this.scrollToBottom(true)
-              }
-            }, 150)
-          }
-        })
+        // onChunkReceived 可能一次解析出很多 token，这里只保留最新完整回复，交给定时器合并刷新。
+        this._pendingStreamReply = fullReply
+        this.scheduleStreamFlush()
 
         // 自动 TTS 暂时关闭：保留文字流式输出，避免回复过程中并发请求 /api/tts。
         // this.appendSpeechSegment(loadingMessage.id, segment, false)
       },
-      })
+    })
       .then((result) => {
         // 自动 TTS 暂时关闭：不在回答结束时补发剩余语音片段。
         // this.flushSpeechBuffer(loadingMessage.id)
         const finalReply = result.reply || ''
-        const nextMessages = this.data.messages.map((item) => {
-          if (item.id === loadingMessage.id) {
-            return {
-              id: item.id,
-              role: 'ai',
-              content: finalReply,
-              loading: false,
-            }
-          }
-          return item
-        })
-
+        this._pendingStreamReply = finalReply
+        this.flushStreamReply(true)
         this.setData({
-          messages: nextMessages,
           loadingReply: false,
+          scrollWithAnimation: true,
         }, () => {
-          this._resetScrollState()
-          this.scrollToBottom(true)
+          this.clearStreamState()
+          if (!this.data.userHasScrolledUp) {
+            this.scrollToBottom()
+          }
         })
 
         if (convId && finalReply) {
@@ -860,33 +878,93 @@ Page({
       })
       .catch(() => {
         this.streamSpeechBuffer = ''
-        const nextMessages = this.data.messages.map((item) => {
-          if (item.id === loadingMessage.id) {
-            return {
-              id: item.id,
-              role: 'ai',
-              content: item.content || '暂时无法获取回答，请稍后重试。',
-              loading: false,
-            }
-          }
-          return item
-        })
-
+        const failedContent = this._pendingStreamReply || '暂时无法获取回答，请稍后重试。'
+        this._pendingStreamReply = failedContent
+        this.flushStreamReply(true)
         this.setData({
-          messages: nextMessages,
           loadingReply: false,
+          scrollWithAnimation: true,
           audioLoadingMessageId: '',
         }, () => {
-          this._resetScrollState()
-          this.scrollToBottom(true)
+          this.clearStreamState()
+          if (!this.data.userHasScrolledUp) {
+            this.scrollToBottom()
+          }
         })
       })
+  },
+
+  scheduleStreamFlush() {
+    // 同一时间只允许一个刷新定时器，把多个 token 合并成一次 setData。
+    if (this._streamFlushTimer) {
+      return
+    }
+    this._streamFlushTimer = setTimeout(() => {
+      this.flushStreamReply()
+    }, 80)
+  },
+
+  flushStreamReply(force = false) {
+    clearTimeout(this._streamFlushTimer)
+    this._streamFlushTimer = null
+
+    const content = String(this._pendingStreamReply || '')
+    if (!force && content === this._lastFlushedStreamReply) {
+      return
+    }
+
+    let messageIndex = this._streamingMessageIndex
+    const target = this.data.messages[messageIndex]
+    if (!target || target.id !== this._streamingMessageId) {
+      messageIndex = this.data.messages.findIndex((item) => item.id === this._streamingMessageId)
+      this._streamingMessageIndex = messageIndex
+    }
+    if (messageIndex < 0) {
+      return
+    }
+
+    this._lastFlushedStreamReply = content
+    // 只更新最后一条 AI 消息的字段，降低小程序 JS 层到视图层的数据传输量。
+    this.setData({
+      [`messages[${messageIndex}].content`]: content,
+      [`messages[${messageIndex}].loading`]: false,
+    }, () => {
+      this.scheduleAutoScroll()
+    })
+  },
+
+  clearStreamState() {
+    // 本轮回答结束后清掉所有流式定时器和临时状态，避免影响下一轮提问。
+    clearTimeout(this._streamFlushTimer)
+    clearTimeout(this._autoScrollTimer)
+    clearTimeout(this._scrollTailTimer)
+    this._streamFlushTimer = null
+    this._autoScrollTimer = null
+    this._scrollTailTimer = null
+    this._pendingStreamReply = ''
+    this._lastFlushedStreamReply = ''
+    this._streamingMessageIndex = -1
+    this._streamingMessageId = ''
+  },
+
+  scheduleAutoScroll() {
+    // 用户正在查看上方内容时不自动跟随，只显示“新内容”按钮。
+    if (this.data.userHasScrolledUp || this._userTouchingChat) {
+      return
+    }
+    if (this._autoScrollTimer) {
+      return
+    }
+    this._autoScrollTimer = setTimeout(() => {
+      this._autoScrollTimer = null
+      this.scrollToBottom()
+    }, 160)
   },
 
   scrollToBottom(force = false) {
     // force: 强制滚动（用户点击按钮、流式结束）
     // 非强制时，用户正在上滑查看则不打断
-    if (!force && this.data.userHasScrolledUp) {
+    if (!force && (this.data.userHasScrolledUp || this._userTouchingChat)) {
       return
     }
 
@@ -897,12 +975,13 @@ Page({
     }
     this.lastScrollToBottomTime = now
 
-    const last = this.data.messages[this.data.messages.length - 1]
-    if (!last) {
+    if (!this.data.messages.length) {
       return
     }
+    // scroll-top 绑定相同值时不会触发滚动，递增一个足够大的值来稳定滚到底部。
+    this._scrollTop += 100000
     this.setData({
-      scrollIntoView: last.id,
+      scrollTop: this._scrollTop,
     })
   },
 
@@ -916,7 +995,9 @@ Page({
 
   _resetScrollState() {
     clearTimeout(this._scrollTailTimer)
+    clearTimeout(this._autoScrollTimer)
     this._scrollTailTimer = null
+    this._autoScrollTimer = null
     this.lastScrollToBottomTime = 0
     this.setData({
       userHasScrolledUp: false,

@@ -23,9 +23,6 @@
         <text class="conv-panel-new-icon">+</text>
         <text>新建对话</text>
       </view>
-      <view class="conv-panel-clear" bindtap="handleClearConversations">
-        <text>清空全部对话</text>
-      </view>
     </view>
     <scroll-view class="conv-panel-list" scroll-y>
       <view
@@ -46,14 +43,19 @@
   </view>
 
   <!-- Messages -->
+  <!-- 流式输出时关闭滚动动画，并用 scroll-top 到底部，减少高频输出时的滚动抢占。 -->
+  <!-- 触摸消息区时会暂停自动跟随，让用户可以在 AI 输出时向上滚动查看内容。 -->
   <scroll-view
     class="chat-body"
     scroll-y
     enhanced
-    scroll-with-animation
-    scroll-into-view="{{scrollIntoView}}"
+    scroll-with-animation="{{scrollWithAnimation}}"
+    scroll-top="{{scrollTop}}"
     enable-back-to-top
     bindscroll="handleScroll"
+    bindtouchstart="handleChatTouchStart"
+    bindtouchend="handleChatTouchEnd"
+    bindtouchcancel="handleChatTouchEnd"
     style="padding-top: {{navBarHeight}}px;"
   >
     <view class="message-list">
@@ -61,6 +63,12 @@
         <view class="welcome-icon">AI</view>
         <text class="welcome-title">与《{{book.title}}》对话</text>
         <text class="welcome-desc">我是您的智能阅读助手，您可以针对书中的内容向我提问。</text>
+        <view class="welcome-actions">
+          <view class="welcome-clear-btn {{loadingReply ? 'welcome-clear-btn--disabled' : ''}}" bindtap="handleClearConversations">
+            <view class="welcome-clear-icon"></view>
+            <text>清除记录</text>
+          </view>
+        </view>
       </view>
 
       <view

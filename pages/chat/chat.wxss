@@ -158,6 +158,66 @@
   max-width: 480rpx;
 }
 
+.welcome-actions {
+  margin-top: 28rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.welcome-clear-btn {
+  height: 48rpx;
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 0 14rpx;
+  border-radius: 6rpx;
+  color: var(--stone);
+  font-size: 23rpx;
+  font-weight: 600;
+}
+
+.welcome-clear-btn:active {
+  color: #b43b3b;
+  background: rgba(214, 69, 69, 0.06);
+}
+
+.welcome-clear-btn--disabled {
+  opacity: 0.42;
+}
+
+.welcome-clear-icon {
+  position: relative;
+  width: 18rpx;
+  height: 20rpx;
+  border: 3rpx solid currentColor;
+  border-top: 0;
+  border-radius: 0 0 4rpx 4rpx;
+}
+
+.welcome-clear-icon::before {
+  content: '';
+  position: absolute;
+  top: -7rpx;
+  left: -5rpx;
+  width: 22rpx;
+  height: 3rpx;
+  border-radius: 3rpx;
+  background: currentColor;
+}
+
+.welcome-clear-icon::after {
+  content: '';
+  position: absolute;
+  top: -12rpx;
+  left: 4rpx;
+  width: 7rpx;
+  height: 5rpx;
+  border: 3rpx solid currentColor;
+  border-bottom: 0;
+  border-radius: 4rpx 4rpx 0 0;
+}
+
 /* Message Rows */
 .message-row {
   display: flex;
@@ -716,7 +776,7 @@
   display: flex;
   align-items: center;
   gap: 6rpx;
-  flex: 1;
+  width: 100%;
   min-width: 0;
   height: 72rpx;
   justify-content: center;
@@ -727,23 +787,7 @@
   font-weight: 700;
 }
 
-.conv-panel-clear {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex: 1;
-  min-width: 0;
-  height: 72rpx;
-  border-radius: 16rpx;
-  border: 1rpx solid rgba(214, 69, 69, 0.35);
-  color: #d64545;
-  background: rgba(214, 69, 69, 0.06);
-  font-size: 26rpx;
-  font-weight: 700;
-}
-
-.conv-panel-new:active,
-.conv-panel-clear:active {
+.conv-panel-new:active {
   transform: scale(0.96);
 }
 

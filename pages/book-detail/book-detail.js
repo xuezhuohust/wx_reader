@@ -204,41 +204,6 @@ Page({
     })
   },
 
-  handleClearConversations() {
-    const { book } = this.data
-    if (!book || !book.purchased) {
-      return
-    }
-
-    wx.showModal({
-      title: '清空对话',
-      content: `将删除《${book.title}》的全部对话记录，并重置 AI 会话。此操作不可恢复。`,
-      confirmText: '清空',
-      confirmColor: '#d64545',
-      success: (res) => {
-        if (!res.confirm) {
-          return
-        }
-        wx.showLoading({ title: '清空中...', mask: true })
-        api.clearConversations(book.id)
-          .then(() => {
-            wx.hideLoading()
-            wx.showToast({
-              title: '已清空',
-              icon: 'success',
-            })
-          })
-          .catch((error) => {
-            wx.hideLoading()
-            wx.showToast({
-              title: error.message || '清空失败',
-              icon: 'none',
-            })
-          })
-      },
-    })
-  },
-
   handleGotoBuild() {
     const { book } = this.data
 
