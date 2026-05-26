@@ -304,6 +304,7 @@
   border: 1rpx solid var(--outline-variant);
   border-radius: 4rpx 24rpx 24rpx 24rpx;
   padding: 28rpx 32rpx;
+  box-sizing: border-box;
 }
 
 .bubble-user {
@@ -326,11 +327,105 @@
 
 .bubble-ai .message-text {
   color: var(--ink);
+  display: block;
+  align-items: stretch;
 }
 
 .bubble-user .message-text {
   color: #fff;
   font-weight: 500;
+}
+
+.structured-reply {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 18rpx;
+}
+
+.reply-heading {
+  font-size: 32rpx;
+  line-height: 1.45;
+  font-weight: 800;
+  color: var(--ink);
+  padding-bottom: 16rpx;
+  border-bottom: 1rpx solid var(--outline-variant);
+}
+
+.reply-section-label {
+  width: fit-content;
+  padding: 8rpx 18rpx;
+  border-radius: var(--radius-full);
+  background: rgba(60, 105, 43, 0.1);
+  color: var(--primary);
+  font-size: 23rpx;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.reply-paragraph {
+  display: block;
+  font-size: 29rpx;
+  line-height: 1.72;
+  color: var(--charcoal);
+  word-break: break-word;
+}
+
+.reply-strong {
+  font-weight: 800;
+  color: var(--primary);
+}
+
+.reply-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14rpx;
+}
+
+.reply-list-item {
+  display: flex;
+  gap: 16rpx;
+  padding: 18rpx 18rpx 18rpx 16rpx;
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.72);
+  border: 1rpx solid var(--outline-variant);
+}
+
+.reply-list-index {
+  width: 40rpx;
+  height: 40rpx;
+  border-radius: var(--radius-sm);
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 22rpx;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.reply-list-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.reply-list-title {
+  font-size: 28rpx;
+  line-height: 1.45;
+  color: var(--ink);
+  font-weight: 800;
+}
+
+.reply-list-text {
+  font-size: 27rpx;
+  line-height: 1.62;
+  color: var(--charcoal);
+  word-break: break-word;
 }
 
 /* Typewriter Cursor */

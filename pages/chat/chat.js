@@ -286,8 +286,154 @@ Page({
       id: `msg-${this.messageSeed}`,
       role,
       content,
+      renderBlocks: this.buildMessageBlocks(role, content),
       loading: !!loading,
     }
+  },
+
+  stripSimpleMarkdown(text) {
+    return String(text || '')
+      .replace(/\*\*([^*]+)\*\*/g, '$1')
+      .replace(/^\s{0,3}#{1,4}\s+/gm, '')
+      .trim()
+  },
+
+  buildInlineSegments(text) {
+    const source = String(text || '')
+    const segments = []
+    const pattern = /\*\*([^*]+)\*\*/g
+    let lastIndex = 0
+    let match = pattern.exec(source)
+
+    while (match) {
+      if (match.index > lastIndex) {
+        const plain = source.slice(lastIndex, match.index)
+        if (plain) {
+          segments.push({ text: plain, strong: false })
+        }
+      }
+      if (match[1]) {
+        segments.push({ text: match[1], strong: true })
+      }
+      lastIndex = pattern.lastIndex
+      match = pattern.exec(source)
+    }
+
+    const tail = source.slice(lastIndex)
+    if (tail) {
+      segments.push({ text: tail, strong: false })
+    }
+
+    const nextSegments = segments.length ? segments : [{ text: source, strong: false }]
+    return nextSegments.map((segment, index) => Object.assign({ key: `seg-${index}` }, segment))
+  },
+
+  parseStructuredList(text) {
+    const source = String(text || '').replace(/\n+/g, ' ')
+    const pattern = /(^|[\s。；;])(\d+)[.、]\s*/g
+    const matches = []
+    let match = pattern.exec(source)
+
+    while (match) {
+      matches.push({
+        order: match[2],
+        start: match.index + match[1].length,
+        contentStart: pattern.lastIndex,
+      })
+      match = pattern.exec(source)
+    }
+
+    if (!matches.length) {
+      return null
+    }
+
+    const items = matches.map((item, index) => {
+      const end = index + 1 < matches.length ? matches[index + 1].start : source.length
+      const raw = source.slice(item.contentStart, end).trim()
+      const titleMatch = raw.match(/^\*\*([^*]+)\*\*\s*(?:——|--|[-—–:：])?\s*(.*)$/)
+      const splitMatch = titleMatch ? null : raw.match(/^(.{2,18}?)(?:——|--|：|:)\s*(.+)$/)
+      const title = titleMatch
+        ? titleMatch[1].trim()
+        : (splitMatch ? this.stripSimpleMarkdown(splitMatch[1]) : '')
+      const body = titleMatch
+        ? this.stripSimpleMarkdown(titleMatch[2])
+        : this.stripSimpleMarkdown(splitMatch ? splitMatch[2] : raw)
+
+      return {
+        key: `list-${item.order}-${index}`,
+        order: item.order,
+        title,
+        body,
+      }
+    })
+
+    return {
+      prefix: source.slice(0, matches[0].start).trim(),
+      items,
+    }
+  },
+
+  pushParagraphBlock(blocks, text) {
+    const content = String(text || '').trim()
+    if (!content) {
+      return
+    }
+    blocks.push({
+      key: `p-${blocks.length}`,
+      type: 'paragraph',
+      segments: this.buildInlineSegments(content),
+    })
+  },
+
+  buildMessageBlocks(role, content) {
+    if (role !== 'ai') {
+      return []
+    }
+
+    let source = String(content || '').trim()
+    if (!source) {
+      return []
+    }
+
+    source = source.replace(/\r\n/g, '\n').replace(/\t/g, ' ')
+    const blocks = []
+    const headingMatch = source.match(/^\s*(?:#{1,4}\s*)?\*\*([^*]+)\*\*\s*/)
+      || source.match(/^\s*#{1,4}\s+([^\n]+)\n?/)
+
+    if (headingMatch) {
+      blocks.push({
+        key: 'heading-0',
+        type: 'heading',
+        text: this.stripSimpleMarkdown(headingMatch[1]),
+      })
+      source = source.slice(headingMatch[0].length).trim()
+    }
+
+    const sectionMatch = source.match(/^(主要内容|核心内容|章节要点|简要回答|回答)[:：]\s*/)
+    if (sectionMatch) {
+      blocks.push({
+        key: `section-${blocks.length}`,
+        type: 'section',
+        text: sectionMatch[1],
+      })
+      source = source.slice(sectionMatch[0].length).trim()
+    }
+
+    const list = this.parseStructuredList(source)
+    if (list && list.items.length) {
+      this.pushParagraphBlock(blocks, list.prefix)
+      blocks.push({
+        key: `list-${blocks.length}`,
+        type: 'list',
+        items: list.items,
+      })
+      return blocks
+    }
+
+    source.split(/\n{2,}|\n(?=\S)/).forEach((paragraph) => {
+      this.pushParagraphBlock(blocks, paragraph)
+    })
+    return blocks
   },
 
   // ====================================================================
@@ -351,6 +497,7 @@ Page({
           id: m.id,
           role: m.role,
           content: m.content,
+          renderBlocks: this.buildMessageBlocks(m.role, m.content),
           loading: false,
         }))
         if (formatted.length === 0) {
@@ -509,6 +656,7 @@ Page({
           id: m.id,
           role: m.role,
           content: m.content,
+          renderBlocks: this.buildMessageBlocks(m.role, m.content),
           loading: false,
         }))
         if (formatted.length === 0) {
@@ -1162,6 +1310,7 @@ Page({
     // 只更新最后一条助手消息的字段，降低小程序 JS 层到视图层的数据传输量。
     this.setData({
       [`messages[${messageIndex}].content`]: content,
+      [`messages[${messageIndex}].renderBlocks`]: this.buildMessageBlocks('ai', content),
       [`messages[${messageIndex}].loading`]: false,
     }, () => {
       this.scheduleAutoScroll()

@@ -105,7 +105,32 @@
           <text wx:if="{{item.role === 'ai'}}" class="ai-name">伴读助手</text>
           <view class="message-bubble {{item.role === 'user' ? 'bubble-user' : 'bubble-ai'}}">
             <view class="message-text">
-              <text user-select>{{item.content}}</text>
+              <block wx:if="{{item.role === 'ai' && item.renderBlocks && item.renderBlocks.length}}">
+                <view class="structured-reply">
+                  <block wx:for="{{item.renderBlocks}}" wx:for-item="block" wx:key="key">
+                    <view wx:if="{{block.type === 'heading'}}" class="reply-heading" user-select>{{block.text}}</view>
+                    <view wx:elif="{{block.type === 'section'}}" class="reply-section-label" user-select>{{block.text}}</view>
+                    <view wx:elif="{{block.type === 'list'}}" class="reply-list">
+                      <view wx:for="{{block.items}}" wx:for-item="listItem" wx:key="key" class="reply-list-item">
+                        <view class="reply-list-index">{{listItem.order}}</view>
+                        <view class="reply-list-body">
+                          <text wx:if="{{listItem.title}}" class="reply-list-title" user-select>{{listItem.title}}</text>
+                          <text wx:if="{{listItem.body}}" class="reply-list-text" user-select>{{listItem.body}}</text>
+                        </view>
+                      </view>
+                    </view>
+                    <view wx:else class="reply-paragraph" user-select>
+                      <text
+                        wx:for="{{block.segments}}"
+                        wx:for-item="segment"
+                        wx:key="key"
+                        class="{{segment.strong ? 'reply-strong' : ''}}"
+                      >{{segment.text}}</text>
+                    </view>
+                  </block>
+                </view>
+              </block>
+              <text wx:else user-select>{{item.content}}</text>
               <view wx:if="{{item.loading || (item.role === 'ai' && loadingReply && index === messages.length - 1)}}" class="typing-cursor"></view>
             </view>
           </view>
