@@ -150,6 +150,10 @@
             <text class="voice-status-text">{{(playingMessageId === item.id || audioLoadingMessageId === item.id) ? '停止' : '朗读'}}</text>
           </view>
         </view>
+        <view wx:if="{{item.role === 'user'}}" class="user-avatar">
+          <image wx:if="{{identity && identity.avatarUrl}}" src="{{identity.avatarUrl}}" mode="aspectFill" />
+          <text wx:else>{{userAvatarText}}</text>
+        </view>
       </view>
 
       <view class="bottom-space" style="height: {{keyboardHeight + 200}}rpx;"></view>

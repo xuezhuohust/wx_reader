@@ -1,8 +1,11 @@
 const api = require('../../utils/api')
+const { loadIdentity } = require('../../utils/storage')
 
 Page({
   data: {
     book: null,
+    identity: null,
+    userAvatarText: '我',
     messages: [],
     inputValue: '',
     inputLineCount: 1,
@@ -73,9 +76,26 @@ Page({
     this._scrollTop = 0
     this._userTouchingChat = false
     this.initRecorder()
+    this.syncChatIdentity()
     // 2026-05-19: 改为加载书籍 + 对话列表 + 历史消息
     this.initialized = false
     this.loadBookAndConversations()
+  },
+
+  syncChatIdentity() {
+    const identity = loadIdentity()
+    const displayName = identity ? String(identity.displayName || '').trim() : ''
+    const avatarText = displayName && displayName !== '微信用户'
+      ? (Array.from(displayName)[0] || '我')
+      : '我'
+    this.setData({
+      identity,
+      userAvatarText: avatarText,
+    })
+  },
+
+  onShow() {
+    this.syncChatIdentity()
   },
 
   showPrivacyPopup() {
@@ -291,6 +311,14 @@ Page({
     }
   },
 
+  getDisplayMessageContent(role, content) {
+    const rawContent = String(content || '')
+    if (role !== 'user') {
+      return rawContent
+    }
+    return rawContent.replace(/\s*回复精简\s*$/, '').trim()
+  },
+
   stripSimpleMarkdown(text) {
     return String(text || '')
       .replace(/\*\*([^*]+)\*\*/g, '$1')
@@ -496,7 +524,7 @@ Page({
         const formatted = messages.map((m) => ({
           id: m.id,
           role: m.role,
-          content: m.content,
+          content: this.getDisplayMessageContent(m.role, m.content),
           renderBlocks: this.buildMessageBlocks(m.role, m.content),
           loading: false,
         }))
@@ -655,7 +683,7 @@ Page({
         const formatted = messages.map((m) => ({
           id: m.id,
           role: m.role,
-          content: m.content,
+          content: this.getDisplayMessageContent(m.role, m.content),
           renderBlocks: this.buildMessageBlocks(m.role, m.content),
           loading: false,
         }))
@@ -1203,8 +1231,8 @@ Page({
     this.resetAudioPlayback()
     this.ensureAudioContext()
 
-    // 文本输入和语音识别最终都走此入口；仅给智能回复附加精简要求，不改变用户看到和保存的问题原文。
-    const aiMessage = `${message}\n回复精简`
+    // 文本输入和语音识别最终都走此入口；精简要求只作为服务端提示，不进入当前展示消息。
+    const serverQuestion = `${message}\n回复精简`
     const userMessage = this.createMessage('user', message)
     const loadingMessage = this.createMessage('ai', '伴读助手正在思考……', true)
     const messages = this.data.messages.concat([userMessage, loadingMessage])
@@ -1232,7 +1260,7 @@ Page({
 
     const convId = this.data.currentConversationId
     const chatBookId = (this.data.book && (this.data.book.bookKey || this.data.book.id)) || this.bookId
-    api.sendBookChatMessageStream(chatBookId, aiMessage, {
+    api.sendBookChatMessageStream(chatBookId, serverQuestion, {
       conversationId: convId,
       onSegment: (segment, fullReply, audioUrl) => {
         this._pendingStreamReply = fullReply
