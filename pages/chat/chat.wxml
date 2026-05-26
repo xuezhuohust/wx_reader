@@ -21,7 +21,7 @@
         <text>新建对话</text>
       </view>
     </view>
-    <scroll-view class="conv-panel-list" scroll-y>
+    <scroll-view class="conv-panel-list" scroll-y enhanced show-scrollbar="{{false}}">
       <view
         wx:for="{{conversations}}"
         wx:key="id"
@@ -55,6 +55,7 @@
     class="chat-body"
     scroll-y
     enhanced
+    show-scrollbar="{{false}}"
     scroll-with-animation="{{scrollWithAnimation}}"
     scroll-top="{{scrollTop}}"
     enable-back-to-top
@@ -103,34 +104,39 @@
         </view>
         <view class="message-container {{item.role === 'user' ? 'container-user' : 'container-ai'}}">
           <text wx:if="{{item.role === 'ai'}}" class="ai-name">伴读助手</text>
-          <view class="message-bubble {{item.role === 'user' ? 'bubble-user' : 'bubble-ai'}}">
+          <view
+            class="message-bubble {{item.role === 'user' ? 'bubble-user' : 'bubble-ai'}}"
+            data-id="{{item.id}}"
+            bindlongpress="handleCopyMessage"
+          >
             <view class="message-text">
               <block wx:if="{{item.role === 'ai' && item.renderBlocks && item.renderBlocks.length}}">
                 <view class="structured-reply">
                   <block wx:for="{{item.renderBlocks}}" wx:for-item="block" wx:key="key">
-                    <view wx:if="{{block.type === 'heading'}}" class="reply-heading" user-select>{{block.text}}</view>
-                    <view wx:elif="{{block.type === 'section'}}" class="reply-section-label" user-select>{{block.text}}</view>
+                    <text wx:if="{{block.type === 'heading'}}" class="reply-heading" user-select="{{true}}">{{block.text}}</text>
+                    <text wx:elif="{{block.type === 'section'}}" class="reply-section-label" user-select="{{true}}">{{block.text}}</text>
                     <view wx:elif="{{block.type === 'list'}}" class="reply-list">
                       <view wx:for="{{block.items}}" wx:for-item="listItem" wx:key="key" class="reply-list-item">
                         <view class="reply-list-index">{{listItem.order}}</view>
                         <view class="reply-list-body">
-                          <text wx:if="{{listItem.title}}" class="reply-list-title" user-select>{{listItem.title}}</text>
-                          <text wx:if="{{listItem.body}}" class="reply-list-text" user-select>{{listItem.body}}</text>
+                          <text wx:if="{{listItem.title}}" class="reply-list-title" user-select="{{true}}">{{listItem.title}}</text>
+                          <text wx:if="{{listItem.body}}" class="reply-list-text" user-select="{{true}}">{{listItem.body}}</text>
                         </view>
                       </view>
                     </view>
-                    <view wx:else class="reply-paragraph" user-select>
+                    <view wx:else class="reply-paragraph">
                       <text
                         wx:for="{{block.segments}}"
                         wx:for-item="segment"
                         wx:key="key"
                         class="{{segment.strong ? 'reply-strong' : ''}}"
+                        user-select="{{true}}"
                       >{{segment.text}}</text>
                     </view>
                   </block>
                 </view>
               </block>
-              <text wx:else user-select>{{item.content}}</text>
+              <text wx:else user-select="{{true}}">{{item.content}}</text>
               <view wx:if="{{item.loading || (item.role === 'ai' && loadingReply && index === messages.length - 1)}}" class="typing-cursor"></view>
             </view>
           </view>
@@ -152,7 +158,7 @@
             </view>
             <view
               class="copy-control"
-              data-content="{{item.content}}"
+              data-id="{{item.id}}"
               bindtap="handleCopyMessage"
             >
               <view class="copy-icon"></view>
@@ -250,10 +256,10 @@
   <view wx:if="{{showPrivacyModal}}" class="profile-overlay" catchtap="handleDisagreePrivacy">
     <view class="profile-sheet" catchtap="handleStopPropagation">
       <view class="profile-header">
-        <text class="profile-sheet-title">隐私授权说明</text>
+        <text class="profile-sheet-title">{{privacyModalTitle}}</text>
       </view>
       <view class="permission-content">
-        <text class="permission-text">语音对话需要使用录音权限。请先同意隐私授权，再点击录音。</text>
+        <text class="permission-text">{{privacyModalText}}</text>
       </view>
       <view class="privacy-actions">
         <button id="chat-privacy-disagree" class="btn-secondary" bindtap="handleDisagreePrivacy">拒绝</button>

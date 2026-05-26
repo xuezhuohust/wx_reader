@@ -17,7 +17,7 @@ const ICONS = {
 const READER_TAB_ITEMS = [
   {
     pagePath: 'pages/bookshelf/bookshelf',
-    text: '书架',
+    text: '书库',
     iconPath: ICONS.bookshelf,
     selectedIconPath: ICONS.bookshelf,
   },

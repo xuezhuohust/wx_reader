@@ -6,7 +6,7 @@
     </view>
   </view>
 
-  <view class="content-body" style="padding-top: {{navBarHeight + 16}}px;">
+  <scroll-view class="content-body" scroll-y enhanced show-scrollbar="{{false}}" style="padding-top: {{navBarHeight + 16}}px;">
     <!-- Profile Card -->
     <view class="profile-card levitating-paper" bindtap="handleOpenProfile">
       <view class="profile-row">
@@ -151,7 +151,7 @@
         <view class="menu-arrow"></view>
       </view>
     </view>
-  </view>
+  </scroll-view>
 
   <!-- Profile Modal -->
   <view wx:if="{{showProfileModal}}" class="profile-overlay" bindtap="handleCloseProfile">

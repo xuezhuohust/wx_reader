@@ -2,6 +2,7 @@
 
 /** 本地存储中用户身份信息对应的 key */
 const IDENTITY_STORAGE_KEY = 'user_identity'
+const DEFAULT_DISPLAY_NAME = 'AI伴读助手'
 
 /** 获取全局 App 实例 */
 function getAppInstance() {
@@ -18,7 +19,7 @@ function loadIdentity() {
   if (!identity || typeof identity !== 'object') {
     return null
   }
-  return identity
+  return normalizeIdentity(identity)
 }
 
 /** 保存用户身份信息到本地存储，并同步到全局数据 */
@@ -27,9 +28,9 @@ function saveIdentity(identity) {
     return null
   }
 
-  const nextIdentity = Object.assign({}, identity, {
+  const nextIdentity = normalizeIdentity(Object.assign({}, identity, {
     updatedAt: Date.now(),
-  })
+  }))
 
   wx.setStorageSync(IDENTITY_STORAGE_KEY, nextIdentity)
 
@@ -51,8 +52,34 @@ function clearIdentity() {
   }
 }
 
+function shouldUseDefaultDisplayName(displayName) {
+  const normalizedName = String(displayName || '').trim()
+  return (
+    !normalizedName
+    || normalizedName === '微信用户'
+    || normalizedName.startsWith('微信用户 ')
+    || normalizedName === '测试用户'
+    || normalizedName.startsWith('测试用户 ')
+  )
+}
+
+function normalizeIdentity(identity) {
+  if (!identity || typeof identity !== 'object') {
+    return identity
+  }
+
+  if (!shouldUseDefaultDisplayName(identity.displayName)) {
+    return identity
+  }
+
+  return Object.assign({}, identity, {
+    displayName: DEFAULT_DISPLAY_NAME,
+  })
+}
+
 module.exports = {
   clearIdentity,
+  DEFAULT_DISPLAY_NAME,
   loadIdentity,
   saveIdentity,
 }

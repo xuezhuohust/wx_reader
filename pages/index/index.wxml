@@ -6,10 +6,17 @@
     </view>
   </view>
 
-  <view class="content-body" style="padding-top: {{navBarHeight + 16}}px;">
+  <scroll-view
+    class="content-body"
+    scroll-y
+    enhanced
+    show-scrollbar="{{false}}"
+    style="padding-top: {{navBarHeight + 16}}px;"
+    bindscroll="onPageScroll"
+  >
     <!-- Greeting -->
     <view class="greeting-section">
-      <text class="greeting-title">你好，研究者</text>
+      <text class="greeting-title">你好，读者</text>
       <text class="greeting-desc">今天是一个适合深度思考的好日子。</text>
     </view>
 
@@ -47,12 +54,10 @@
         <view class="continue-info">
           <text class="continue-title">{{recommendBooks[0].title}}</text>
           <text class="continue-author">{{recommendBooks[0].author || '未知作者'}}</text>
-          <view class="progress-wrap">
-            <view class="progress-bar">
-              <view class="progress-fill" style="width: 45%;"></view>
-            </view>
-            <text class="progress-text">进度: 45%</text>
+          <view class="continue-meta">
+            <text class="continue-category">{{recommendBooks[0].category || '综合'}}</text>
           </view>
+          <text class="continue-desc">{{recommendBooks[0].description || '暂无简介'}}</text>
         </view>
       </view>
       <view class="ai-summary-box">
@@ -150,5 +155,25 @@
       title="暂无书籍"
       description="当前分类还没有可阅读的书籍"
     />
+  </scroll-view>
+
+  <view wx:if="{{showPrivacyModal}}" class="privacy-overlay" catchtap="handleDisagreePrivacy">
+    <view class="privacy-sheet" catchtap="handleStopPropagation">
+      <view class="privacy-header">
+        <text class="privacy-title">{{privacyModalTitle}}</text>
+      </view>
+      <view class="privacy-content">
+        <text class="privacy-text">{{privacyModalText}}</text>
+      </view>
+      <view class="privacy-actions">
+        <button class="btn-secondary" bindtap="handleDisagreePrivacy">暂不同意</button>
+        <button
+          id="home-privacy-agree"
+          class="btn-primary"
+          open-type="agreePrivacyAuthorization"
+          bindagreeprivacyauthorization="handleAgreePrivacy"
+        >同意并继续</button>
+      </view>
+    </view>
   </view>
 </view>

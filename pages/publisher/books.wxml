@@ -6,7 +6,7 @@
     </view>
   </view>
 
-  <view class="content-wrap" style="padding-top: {{navBarHeight}}px;">
+  <scroll-view class="content-wrap" scroll-y enhanced show-scrollbar="{{false}}" style="padding-top: {{navBarHeight}}px;">
     <view class="page-header">
       <view class="header-intro">
         <view class="intro-badge">
@@ -109,5 +109,5 @@
       title="暂时没有书目"
       description="上传一本书后，这里会显示你的出版社书单"
     />
-  </view>
+  </scroll-view>
 </view>

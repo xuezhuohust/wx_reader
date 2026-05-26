@@ -1,5 +1,6 @@
 {
   "navigationStyle": "custom",
+  "disableScroll": true,
   "enablePullDownRefresh": true,
   "usingComponents": {
     "book-card": "/components/book-card/book-card",

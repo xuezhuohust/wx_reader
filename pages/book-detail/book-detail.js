@@ -9,7 +9,7 @@ Page({
     scrolled: false,
     scene: 'user',
     isPublisherScene: false,
-    pageTitle: '书籍详情',
+    pageTitle: '书本详情',
     chaptersExpanded: false,
     visibleChapters: [],
     chapterCount: 0,
@@ -32,7 +32,7 @@ Page({
       return
     }
     const isPublisherScene = scene === 'publisher'
-    const pageTitle = isPublisherScene ? '书目详情' : '书籍详情'
+    const pageTitle = '书本详情'
     
     const app = getApp()
     this.setData({
@@ -61,7 +61,8 @@ Page({
   },
 
   onPageScroll(e) {
-    const isScrolled = e.scrollTop > 50
+    const scrollTop = (e.detail && e.detail.scrollTop) || e.scrollTop || 0
+    const isScrolled = scrollTop > 50
     if (isScrolled !== this.data.scrolled) {
       this.setData({
         scrolled: isScrolled,

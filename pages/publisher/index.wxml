@@ -6,39 +6,40 @@
     </view>
   </view>
 
-  <!-- Hero Band Section -->
-  <view class="hero-band-dark" style="padding-top: {{navBarHeight + 10}}px;">
-    <view class="hero-content">
-      <view class="hero-title-wrap">
-        <text class="hero-title">{{publisher.name || '运营数据概览'}}</text>
+  <scroll-view class="content-wrap" scroll-y enhanced show-scrollbar="{{false}}" style="padding-top: {{navBarHeight + 10}}px;">
+    <!-- Hero Band Section -->
+    <view class="hero-band-dark">
+      <view class="hero-content">
+        <view class="hero-title-wrap">
+          <text class="hero-title">{{publisher.name || '运营数据概览'}}</text>
+        </view>
+        <text class="hero-desc">实时掌控书籍资产动态，深度洞察读者交互趋势。</text>
       </view>
-      <text class="hero-desc">实时掌控书籍资产动态，深度洞察读者交互趋势。</text>
+
+      <!-- Floating Metrics: Positioned on the edge -->
+      <view class="floating-metrics">
+        <view class="metric-item">
+          <text class="m-label">管理规模</text>
+          <view class="m-value-row">
+            <text class="m-value">{{stats.totalBooks || 0}}</text>
+            <text class="m-unit">册</text>
+          </view>
+          <text class="m-sub">已上架 {{stats.totalBooks || 0}}</text>
+        </view>
+        <view class="m-divider"></view>
+        <view class="metric-item">
+          <text class="m-label">AI 对话量</text>
+          <view class="m-value-row">
+            <text class="m-value">{{stats.totalChatCount || 0}}</text>
+            <text class="m-unit">次</text>
+          </view>
+          <text class="m-sub">活跃度 100%</text>
+        </view>
+      </view>
     </view>
 
-    <!-- Floating Metrics: Positioned on the edge -->
-    <view class="floating-metrics">
-      <view class="metric-item">
-        <text class="m-label">管理规模</text>
-        <view class="m-value-row">
-          <text class="m-value">{{stats.totalBooks || 0}}</text>
-          <text class="m-unit">册</text>
-        </view>
-        <text class="m-sub">已上架 {{stats.totalBooks || 0}}</text>
-      </view>
-      <view class="m-divider"></view>
-      <view class="metric-item">
-        <text class="m-label">AI 对话量</text>
-        <view class="m-value-row">
-          <text class="m-value">{{stats.totalChatCount || 0}}</text>
-          <text class="m-unit">次</text>
-        </view>
-        <text class="m-sub">活跃度 100%</text>
-      </view>
-    </view>
-  </view>
-
-  <view class="content-wrap main-content">
     <!-- Charts and other content -->
+    <view class="main-content">
 
     <!-- Chart Section: Activity Trend -->
     <view class="chart-section card-base">
@@ -128,5 +129,6 @@
         退出管理模式
       </button>
     </view>
-  </view>
+    </view>
+  </scroll-view>
 </view>

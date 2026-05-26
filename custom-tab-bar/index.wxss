@@ -3,9 +3,8 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(248, 249, 250, 0.9);
-  backdrop-filter: blur(20px);
-  border-top: 1rpx solid var(--outline-variant);
+  background: var(--bg-canvas);
+  border-top: 1rpx solid var(--hairline);
   z-index: 99;
   padding-bottom: env(safe-area-inset-bottom);
 }

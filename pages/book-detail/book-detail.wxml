@@ -5,11 +5,11 @@
       <view class="nav-back" bindtap="handleBack" style="width: {{menuHeight}}px; height: {{menuHeight}}px;">
         <view class="back-arrow"></view>
       </view>
-      <view class="nav-title" wx:if="{{scrolled}}">{{book.title}}</view>
+      <view class="nav-title">{{pageTitle}}</view>
     </view>
   </view>
 
-  <view class="content-body" style="padding-top: {{navBarHeight + 20}}px;">
+  <scroll-view class="content-body" scroll-y enhanced show-scrollbar="{{false}}" style="padding-top: {{navBarHeight + 20}}px;" bindscroll="onPageScroll">
     <!-- Book Hero Section -->
     <view class="book-hero">
       <view class="hero-left">
@@ -86,7 +86,7 @@
     <view class="section-container copyright-area">
       <text class="copyright-text">{{book.copyright || '© 2026 读书系统。保留所有权利。'}}</text>
     </view>
-  </view>
+  </scroll-view>
 
   <!-- Bottom Actions -->
   <view class="bottom-action-bar">

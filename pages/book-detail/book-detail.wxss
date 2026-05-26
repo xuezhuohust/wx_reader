@@ -1,8 +1,8 @@
 .detail-page {
   position: relative;
-  overflow-x: hidden;
+  overflow: hidden;
   background: var(--bg-canvas);
-  min-height: 100vh;
+  height: 100vh;
 }
 
 /* Custom Navigation Bar */
@@ -28,13 +28,17 @@
   right: 0;
   display: flex;
   align-items: center;
+  justify-content: center;
 }
 
 .nav-back {
+  position: absolute;
+  left: 16rpx;
+  top: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-left: 10rpx;
+  z-index: 2;
 }
 
 .back-arrow {
@@ -47,18 +51,27 @@
 }
 
 .nav-title {
-  flex: 1;
+  position: absolute;
+  left: 50%;
+  width: 320rpx;
+  transform: translateX(-50%);
   text-align: center;
-  font-size: 32rpx;
-  font-weight: 600;
-  color: var(--ink);
-  margin-right: calc(10rpx + 32px);
+  font-size: 40rpx;
+  font-weight: 700;
+  color: var(--primary);
+  font-family: "Noto Serif SC", "Source Han Serif SC", serif;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  pointer-events: none;
 }
 
 .content-body {
   padding: 0 48rpx;
   position: relative;
   z-index: 1;
+  height: 100vh;
+  box-sizing: border-box;
   /* 底部只剩一个主按钮，留白相应收紧，避免详情页末尾空白过大。 */
   padding-bottom: calc(240rpx + env(safe-area-inset-bottom));
 }

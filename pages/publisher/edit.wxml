@@ -8,7 +8,7 @@
     </view>
   </view>
 
-  <view class="content-wrap" style="padding-top: {{navBarHeight}}px;">
+  <scroll-view class="content-wrap" scroll-y enhanced show-scrollbar="{{false}}" style="padding-top: {{navBarHeight}}px;">
   <view class="upload-form">
     <view class="form-group card-base">
       <view class="form-item">
@@ -72,5 +72,5 @@
       <button class="btn-submit" bindtap="handleSubmit">保存修改</button>
     </view>
   </view>
-  </view>
+  </scroll-view>
 </view>

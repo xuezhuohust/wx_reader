@@ -1,7 +1,7 @@
 // 用户身份服务模块 - 处理微信登录、身份缓存、角色切换
 
 const { BASE_URL, unwrapApiResponse } = require('../utils/request')
-const { loadIdentity, saveIdentity } = require('../utils/storage')
+const { DEFAULT_DISPLAY_NAME, loadIdentity, saveIdentity } = require('../utils/storage')
 
 /** 引导登录过程中缓存的 Promise，防止重复发起 */
 let bootstrapPromise = null
@@ -35,8 +35,7 @@ function hasValidIdentity(identity) {
 
 /** 根据 openid 生成默认显示名称 */
 function getDefaultDisplayName(openid) {
-  const suffix = String(openid || '').slice(-4) || '用户'
-  return `微信用户 ${suffix}`
+  return DEFAULT_DISPLAY_NAME
 }
 
 /** 调用 wx.login 获取临时 code */

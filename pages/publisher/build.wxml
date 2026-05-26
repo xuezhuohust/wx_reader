@@ -9,7 +9,7 @@
     </view>
   </view>
 
-  <view class="content-wrap" style="padding-top: {{navBarHeight}}px;">
+  <scroll-view class="content-wrap" scroll-y enhanced show-scrollbar="{{false}}" style="padding-top: {{navBarHeight}}px;">
     <view class="page-header">
       <view class="header-intro">
         <view class="intro-badge">
@@ -80,5 +80,5 @@
     title="暂无建库任务"
     description="上传书籍后，任务将在此处显示"
   />
-  </view>
+  </scroll-view>
 </view>

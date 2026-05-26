@@ -15,6 +15,8 @@ Page({
     currentRoleLabel: '读者',
     showPermissionModal: false,
     showPrivacyModal: false,
+    privacyModalTitle: '隐私授权说明',
+    privacyModalText: '为提供完整伴读体验，小程序需要在您主动使用相关功能时调用录音、剪贴板、文件选择与图片选择能力，用于语音提问、复制消息、上传书籍和设置封面。请先阅读并同意隐私授权。',
     navBarHeight: getApp().globalData.navBarHeight,
     statusBarHeight: getApp().globalData.statusBarHeight,
     menuRight: getApp().globalData.menuRight,
@@ -64,11 +66,27 @@ Page({
       menuWidth: app.globalData.menuWidth,
     })
 
+    this.showInitialPrivacyAgreement()
+
     // Check for publisher build intent
   },
 
+  showInitialPrivacyAgreement() {
+    if (wx.getStorageSync('privacy_agreed')) {
+      return
+    }
+    const tabBar = this.getTabBar && this.getTabBar()
+    if (tabBar) tabBar.setHidden(true)
+    this.setData({
+      showPrivacyModal: true,
+      privacyModalTitle: '隐私授权说明',
+      privacyModalText: '为提供完整伴读体验，小程序需要在您主动使用相关功能时调用录音、剪贴板、文件选择与图片选择能力，用于语音提问、复制消息、上传书籍和设置封面。请先阅读并同意隐私授权。',
+    })
+  },
+
   onPageScroll(e) {
-    const isScrolled = e.scrollTop > 50
+    const scrollTop = (e.detail && e.detail.scrollTop) || e.scrollTop || 0
+    const isScrolled = scrollTop > 50
     if (isScrolled !== this.data.scrolled) {
       this.setData({
         scrolled: isScrolled,
@@ -229,12 +247,7 @@ Page({
         
         // Enhance with mock AI reasons if missing
         const reasons = [
-          '这本书情节跌宕，适合深度思考',
-          '文笔细腻，带你领略不一样的世界',
-          'AI 认为这本书的逻辑架构非常严谨',
-          '这本书在社交媒体上引发了广泛讨论',
-          '适合在安静的午后阅读，启发灵感',
-          '深度剖析人性，值得反复品味'
+          '讲述英国青年鲁滨逊因海难流落荒岛28年，凭智慧与劳动自建家园、驯养动物、救下土著"星期五"，最终助船长平叛重返文明，歌颂人类在绝境中顽强求生与自我救赎的精神。',
         ]
         
         const enhancedBooks = (recommendBooks || []).map((book, index) => ({
@@ -462,14 +475,23 @@ Page({
   handleAgreePrivacy(event) {
     wx.setStorageSync('privacy_agreed', true)
     wx.setStorageSync('privacy_authorized_by_button', true)
+    wx.setStorageSync('upload_file_privacy_agreed', true)
+    wx.setStorageSync('upload_file_privacy_authorized_by_button', true)
+    wx.setStorageSync('clipboard_privacy_agreed', true)
     this.setData({ showPrivacyModal: false })
+    const tabBar = this.getTabBar && this.getTabBar()
+    if (tabBar) tabBar.setHidden(false)
     getApp().resolvePrivacy(true, event)
   },
 
   handleDisagreePrivacy(event) {
     this.setData({ showPrivacyModal: false })
+    const tabBar = this.getTabBar && this.getTabBar()
+    if (tabBar) tabBar.setHidden(false)
     getApp().resolvePrivacy(false, event)
   },
+
+  handleStopPropagation() {},
 
   handleClosePermission() {
     this.setData({

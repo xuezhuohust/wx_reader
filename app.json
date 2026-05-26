@@ -22,6 +22,9 @@
   },
   "style": "v2",
   "__usePrivacyCheck__": true,
+  "permission": {
+    "scope.writeClipboard": true
+  },
   "sitemapLocation": "sitemap.json",
   "lazyCodeLoading": "requiredComponents",
   "tabBar": {
@@ -33,7 +36,7 @@
     "list": [
       {
         "pagePath": "pages/bookshelf/bookshelf",
-        "text": "书架",
+        "text": "书库",
         "iconPath": "app-assets/tab-default.png",
         "selectedIconPath": "app-assets/tab-active.png"
       },

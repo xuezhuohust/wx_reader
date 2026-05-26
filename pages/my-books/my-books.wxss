@@ -1,11 +1,11 @@
-.my-page { background: var(--bg-canvas); }
+.my-page { background: var(--bg-canvas); height: 100vh; overflow: hidden; }
 
 /* Navigation */
 .custom-nav { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background: var(--bg-canvas); }
 .nav-inner { position: absolute; left: 0; right: 0; display: flex; align-items: center; justify-content: center; }
 .nav-title { font-size: 36rpx; font-weight: 700; color: var(--primary); }
 
-.content-body { padding: 0 32rpx; padding-bottom: calc(200rpx + env(safe-area-inset-bottom)); }
+.content-body { padding: 0 32rpx; padding-bottom: calc(124rpx + env(safe-area-inset-bottom)); height: 100vh; }
 
 /* Profile Card */
 .profile-card { padding: 32rpx; margin-bottom: 32rpx; }

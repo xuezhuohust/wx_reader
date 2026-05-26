@@ -46,6 +46,7 @@
 
 .content-wrap {
   padding: 0 32rpx 40rpx;
+  height: 100vh;
 }
 
 .page-header {

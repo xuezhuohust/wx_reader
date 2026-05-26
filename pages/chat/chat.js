@@ -26,6 +26,8 @@ Page({
     menuHeight: 0,
     scrolled: false,
     showPrivacyModal: false,
+    privacyModalTitle: '隐私授权说明',
+    privacyModalText: '语音对话需要使用录音权限。请先同意隐私授权，再点击录音。',
     userHasScrolledUp: false,
     showScrollDownBtn: false,
     // 2026-05-19 新增：对话列表支持
@@ -42,6 +44,16 @@ Page({
       menuTop: app.globalData.menuTop,
       menuHeight: app.globalData.menuHeight,
     })
+    if (typeof wx.onNeedPrivacyAuthorization === 'function') {
+      wx.onNeedPrivacyAuthorization((resolve) => {
+        app.globalData._privacyResolve = resolve
+        this.setData({
+          privacyModalTitle: '隐私授权说明',
+          privacyModalText: '该功能需要您同意隐私授权后才能使用。',
+        })
+        this.showPrivacyPopup()
+      })
+    }
     this.bookId = options.bookId
     this.messageSeed = 0
     this.audioContext = null
@@ -255,8 +267,12 @@ Page({
     this.recorderManager.stop()
   },
 
-  requestPrivacyAuthorization(next) {
+  requestPrivacyAuthorization(next, options) {
     this.pendingPrivacyAction = next
+    this.setData({
+      privacyModalTitle: (options && options.title) || '隐私授权说明',
+      privacyModalText: (options && options.text) || '语音对话需要使用录音权限。请先同意隐私授权，再点击录音。',
+    })
     this.showPrivacyPopup()
   },
 
@@ -1216,16 +1232,61 @@ Page({
   },
 
   handleCopyMessage(event) {
-    const content = String((event.currentTarget.dataset || {}).content || '').trim()
+    const dataset = event.currentTarget.dataset || {}
+    const messageId = dataset.id
+    const message = this.data.messages.find((item) => item.id === messageId)
+    const content = String((message && message.content) || dataset.content || '').trim()
     if (!content) {
+      wx.showToast({
+        title: '暂无可复制内容',
+        icon: 'none',
+      })
       return
     }
-    wx.setClipboardData({
-      data: content,
-      success: () => {
-        wx.showToast({
-          title: '已复制',
-          icon: 'success',
+    this.copyMessageContent(content)
+  },
+
+  copyMessageContent(content) {
+    const doCopy = () => {
+      wx.setClipboardData({
+        data: content,
+        success: () => {
+          wx.showToast({
+            title: '已复制',
+            icon: 'success',
+          })
+        },
+        fail: (error) => {
+          console.error('[chat] copy message failed', error)
+          wx.showToast({
+            title: error && error.errno === 112
+              ? '请先在隐私指引声明剪贴板用途'
+              : '复制失败',
+            icon: 'none',
+          })
+        },
+      })
+    }
+
+    if (typeof wx.requirePrivacyAuthorize !== 'function') {
+      doCopy()
+      return
+    }
+
+    wx.requirePrivacyAuthorize({
+      success: doCopy,
+      fail: (error) => {
+        console.error('[chat] clipboard privacy authorize failed', error)
+        if (error && error.errno === 112) {
+          wx.showToast({
+            title: '请先在隐私指引声明剪贴板用途',
+            icon: 'none',
+          })
+          return
+        }
+        this.requestPrivacyAuthorization(doCopy, {
+          title: '复制授权说明',
+          text: '复制消息需要写入系统剪贴板。请先同意隐私授权，再点击复制。',
         })
       },
     })
@@ -1278,17 +1339,15 @@ Page({
     const chatBookId = (this.data.book && (this.data.book.bookKey || this.data.book.id)) || this.bookId
     api.sendBookChatMessageStream(chatBookId, serverQuestion, {
       conversationId: convId,
-      onSegment: (segment, fullReply, audioUrl) => {
+      onSegment: (segment, fullReply) => {
         this._pendingStreamReply = fullReply
         this.scheduleStreamFlush()
 
-        // 服务端已完成分段 + TTS 生成，直接入队播放
-        if (audioUrl) {
-          this.enqueueReadyAudio(loadingMessage.id, audioUrl)
-        }
+        this.appendSpeechSegment(loadingMessage.id, segment, false)
       },
     })
       .then((result) => {
+        this.flushSpeechBuffer(loadingMessage.id)
         const finalReply = result.reply || ''
         this._pendingStreamReply = finalReply
         this.flushStreamReply(true)
@@ -1301,7 +1360,14 @@ Page({
             this.scrollToBottom()
           }
         })
-        // 消息持久化已在后端 /api/ask/segments 中完成，无需前端再调用
+        if (convId && finalReply) {
+          api.appendConversationMessages(convId, [
+            { role: 'user', content: message },
+            { role: 'ai', content: finalReply },
+          ]).catch((error) => {
+            console.warn('appendConversationMessages failed:', error)
+          })
+        }
       })
       .catch(() => {
         this.streamSpeechBuffer = ''

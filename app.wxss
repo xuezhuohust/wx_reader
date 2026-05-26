@@ -1,5 +1,15 @@
 /** Academic Immersive Reading Design System **/
+
+/* Hide scrollbars - 微信小程序不应显示滚动条 */
+::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+  color: transparent;
+}
+
 page {
+  overflow-x: hidden;
   /* Primary - Sage Green */
   --primary: #3c692b;
   --primary-pressed: #255015;
@@ -142,7 +152,8 @@ view, text, button, input, textarea, picker, scroll-view {
 /* Page Shell */
 .page-shell {
   min-height: 100vh;
-  padding-bottom: calc(200rpx + env(safe-area-inset-bottom));
+  height: 100vh;
+  overflow: hidden;
 }
 
 /* Animations */

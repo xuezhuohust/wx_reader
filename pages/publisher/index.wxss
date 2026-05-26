@@ -2,6 +2,10 @@
   background: var(--bg-canvas);
 }
 
+.content-wrap {
+  height: 100vh;
+}
+
 /* Custom Navigation Bar */
 .custom-nav {
   position: fixed;

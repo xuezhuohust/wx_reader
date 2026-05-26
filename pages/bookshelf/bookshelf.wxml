@@ -6,7 +6,7 @@
     </view>
   </view>
 
-  <view class="content-body" style="padding-top: {{navBarHeight + 16}}px;">
+  <scroll-view class="content-body" scroll-y enhanced show-scrollbar="{{false}}" style="padding-top: {{navBarHeight + 16}}px;" bindscroll="onPageScroll">
     <!-- Search -->
     <view class="search-bar">
       <input
@@ -52,16 +52,11 @@
     <view wx:elif="{{!loading}}" class="empty-state">
       <text class="empty-icon">书</text>
       <text class="empty-title">书架空空如也</text>
-      <text class="empty-desc">快去探索库看看吧</text>
+      <text class="empty-desc">快去看看新书吧</text>
       <view class="btn-primary" bindtap="handleExplore">
-        <text>前往探索</text>
+        <text>前往</text>
       </view>
     </view>
-  </view>
+  </scroll-view>
 
-  <!-- FAB -->
-  <view class="fab-btn" bindtap="handleExplore">
-    <text class="fab-icon">+</text>
-    <text class="fab-text">探索</text>
-  </view>
 </view>

@@ -3,9 +3,14 @@ Component({
     currentRole: 'reader',
     items: [],
     selectedPath: '',
+    hidden: false,
   },
 
   methods: {
+    setHidden(hidden) {
+      this.setData({ hidden: !!hidden })
+    },
+
     handleTabTap(event) {
       const path = String(event.currentTarget.dataset.path || '')
       const normalizedPath = path.replace(/^\//, '')

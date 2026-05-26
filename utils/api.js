@@ -385,8 +385,7 @@ function sendBookChatMessageStream(bookId, message, handlers) {
             tokenReceived = true
             reply += segment
             if (typeof callbacks.onSegment === 'function') {
-              const audioUrl = streamEvent.audioUrl ? toAbsoluteUrl(streamEvent.audioUrl) : ''
-              callbacks.onSegment(segment, reply, audioUrl)
+              callbacks.onSegment(segment, reply)
             }
             return
           }
@@ -396,7 +395,7 @@ function sendBookChatMessageStream(bookId, message, handlers) {
             if (finalAnswer && !tokenReceived) {
               reply = finalAnswer
               if (typeof callbacks.onSegment === 'function') {
-                callbacks.onSegment(finalAnswer, reply, '')
+                callbacks.onSegment(finalAnswer, reply)
               }
             }
             finishResolve()
@@ -410,15 +409,15 @@ function sendBookChatMessageStream(bookId, message, handlers) {
       }
 
       const requestTask = wx.request({
-        url: `${BASE_URL}/api/ask/segments`,
+        url: `${BASE_URL}/novelindex/api/chat/stream`,
         method: 'POST',
         enableChunked: true,
         responseType: 'arraybuffer',
         data: {
-          book: bookId,
-          question: message,
-          conversationId: callbacks.conversationId || '',
-          tts: true,
+          doc_id: bookId,
+          message,
+          session_id: callbacks.conversationId || '',
+          user_id: identity.userId || identity.openid || 'default',
         },
         header: {
           'Content-Type': 'application/json',

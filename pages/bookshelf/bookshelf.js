@@ -25,7 +25,8 @@ Page({
   },
 
   onPageScroll(e) {
-    const isScrolled = e.scrollTop > 50
+    const scrollTop = (e.detail && e.detail.scrollTop) || e.scrollTop || 0
+    const isScrolled = scrollTop > 50
     if (isScrolled !== this.data.scrolled) {
       this.setData({
         scrolled: isScrolled,
