@@ -14,10 +14,10 @@
   ],
   "window": {
     "navigationStyle": "custom",
-    "navigationBarBackgroundColor": "#f9f7f2",
-    "navigationBarTitleText": "读书助手",
+    "navigationBarBackgroundColor": "#f8f9fa",
+    "navigationBarTitleText": "AI 伴读",
     "navigationBarTextStyle": "black",
-    "backgroundColor": "#f9f7f2",
+    "backgroundColor": "#f8f9fa",
     "backgroundTextStyle": "light"
   },
   "style": "v2",
@@ -26,9 +26,9 @@
   "lazyCodeLoading": "requiredComponents",
   "tabBar": {
     "custom": true,
-    "color": "#6b7280",
-    "selectedColor": "#c2410c",
-    "backgroundColor": "#ffffff",
+    "color": "#9a9e95",
+    "selectedColor": "#3c692b",
+    "backgroundColor": "#f8f9fa",
     "borderStyle": "white",
     "list": [
       {

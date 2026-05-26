@@ -10,6 +10,10 @@ Page({
     scene: 'user',
     isPublisherScene: false,
     pageTitle: '书籍详情',
+    chaptersExpanded: false,
+    visibleChapters: [],
+    chapterCount: 0,
+    hasHiddenChapters: false,
   },
 
   onLoad(options) {
@@ -91,9 +95,15 @@ Page({
           })
           return
         }
+        const chapters = Array.isArray(book.chapters) ? book.chapters : []
+        const chaptersExpanded = false
         this.setData({
           book,
           priceText: formatPrice(book.price),
+          chaptersExpanded,
+          visibleChapters: this.getVisibleChapters(chapters, chaptersExpanded),
+          chapterCount: chapters.length,
+          hasHiddenChapters: chapters.length > this.getChapterPreviewCount(),
         })
       })
       .catch((error) => {
@@ -108,6 +118,28 @@ Page({
           done()
         }
       })
+  },
+
+  getChapterPreviewCount() {
+    return 6
+  },
+
+  getVisibleChapters(chapters, expanded) {
+    const safeChapters = Array.isArray(chapters) ? chapters : []
+    if (expanded) {
+      return safeChapters
+    }
+    return safeChapters.slice(0, this.getChapterPreviewCount())
+  },
+
+  handleToggleChapters() {
+    const book = this.data.book
+    const chapters = book && Array.isArray(book.chapters) ? book.chapters : []
+    const chaptersExpanded = !this.data.chaptersExpanded
+    this.setData({
+      chaptersExpanded,
+      visibleChapters: this.getVisibleChapters(chapters, chaptersExpanded),
+    })
   },
 
   handleAction() {
@@ -134,7 +166,7 @@ Page({
       content: `确定要删除《${book.title}》吗？`,
       success: (res) => {
         if (res.confirm) {
-          wx.showLoading({ title: '删除中...' })
+          wx.showLoading({ title: '删除中……' })
           api.deleteBook(book.id)
             .then(() => {
               wx.hideLoading()
@@ -168,7 +200,7 @@ Page({
       return
     }
 
-    wx.showLoading({ title: '购买中...' })
+    wx.showLoading({ title: '购买中……' })
     api.purchaseBook(book.id)
       .then(() => {
         wx.hideLoading()

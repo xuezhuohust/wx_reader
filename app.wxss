@@ -1,104 +1,97 @@
-/** Notion-inspired Design System **/
+/** Academic Immersive Reading Design System **/
 page {
-  /* Brand & Primary */
-  --notion-primary: rgb(19, 30, 56);
-  --notion-primary-pressed: rgb(10, 15, 30);
-  --notion-brand-navy: rgb(19, 30, 56);
-  
-  /* UI Surface & Backgrounds */
-  --bg-canvas: #ffffff;
-  --bg-surface: #f6f5f4;
-  --bg-surface-soft: #fafaf9;
-  
-  /* Ink & Text */
-  --ink-deep: #000000;
-  --ink: #1a1a1a;
-  --charcoal: #37352f;
-  --slate: #5d5b54;
-  --steel: #787671;
-  --stone: #a4a097;
-  --muted: #bbb8b1;
-  
-  /* Borders & Hairlines */
-  --hairline: #e5e3df;
-  --hairline-soft: #ede9e4;
-  --hairline-strong: #c8c4be;
-  
-  /* Semantic */
-  --semantic-success: #1aae39;
-  --semantic-warning: #dd5b00;
-  --semantic-error: #e03131;
+  /* Primary - Sage Green */
+  --primary: #3c692b;
+  --primary-pressed: #255015;
+  --primary-container: #7fb069;
+  --on-primary: #ffffff;
+  --on-primary-container: #174207;
 
-  /* Theme Colors */
-  --theme-reader: #131e38;
-  --theme-publisher: rgb(10, 120, 105); /* Updated to exact color requested */
-  --theme-active: var(--theme-reader); /* Default */
-  
+  /* Surface & Backgrounds */
+  --bg-canvas: #f8f9fa;
+  --bg-surface: #edeeef;
+  --bg-surface-soft: #f3f4f5;
+  --surface-container-low: #f3f4f5;
+  --surface-container: #edeeef;
+  --surface-container-high: #e7e8e9;
+  --surface-lowest: #ffffff;
+
+  /* Ink & Text */
+  --ink: #191c1d;
+  --charcoal: #191c1d;
+  --on-surface-variant: #42493d;
+  --slate: #42493d;
+  --steel: #72796c;
+  --stone: #9a9e95;
+  --muted: #c2c9ba;
+
+  /* Borders */
+  --outline: #72796c;
+  --outline-variant: #c2c9ba;
+  --hairline: #e1e3e4;
+  --hairline-soft: #edeeef;
+  --hairline-strong: #c2c9ba;
+
+  /* Semantic */
+  --semantic-success: #3c692b;
+  --semantic-warning: #dd5b00;
+  --semantic-error: #ba1a1a;
+  --error-container: #ffdad6;
+
+  /* Secondary - Deep Navy */
+  --secondary: #485f84;
+  --secondary-container: #bbd3fd;
+
+  /* Legacy compat aliases */
+  --notion-primary: var(--primary);
+  --notion-primary-pressed: var(--primary-pressed);
+  --ink-deep: #191c1d;
+
   /* Card Tints */
   --tint-peach: #ffe8d4;
-  --tint-rose: #fde0ec;
-  --tint-mint: #d9f3e1;
-  --tint-lavender: #e6e0f5;
-  --tint-sky: #dcecfa;
-  --tint-yellow: #fef7d6;
-  --tint-yellow-bold: #f9e79f;
-  --tint-cream: #f8f5e8;
-  --tint-gray: #f0eeec;
-
-  /* Chart Colors */
-  --chart-1: #5645d4; /* Purple */
-  --chart-2: #2a9d99; /* Teal */
-  --chart-3: #dd5b00; /* Orange */
-  --chart-4: #ff64c8; /* Pink */
-  --chart-5: #1aae39; /* Green */
+  --tint-rose: #ffdad8;
+  --tint-mint: #bdf1a3;
+  --tint-lavender: #d5e3ff;
+  --tint-sky: #bbece8;
+  --tint-cream: #f3f4f5;
+  --tint-gray: #e7e8e9;
 
   /* Radius */
   --radius-xs: 4rpx;
-  --radius-sm: 6rpx;
-  --radius-md: 8rpx;
-  --radius-lg: 12rpx;
-  --radius-xl: 16rpx;
+  --radius-sm: 8rpx;
+  --radius-md: 12rpx;
+  --radius-lg: 16rpx;
+  --radius-xl: 24rpx;
   --radius-full: 9999rpx;
 
   background: var(--bg-canvas);
   color: var(--ink);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-family: "Noto Serif SC", "Source Han Serif SC", "STSong", "Songti SC", serif;
   -webkit-font-smoothing: antialiased;
   line-height: 1.55;
 }
 
-view,
-text,
-button,
-input,
-textarea,
-picker,
-scroll-view {
+view, text, button, input, textarea, picker, scroll-view {
   box-sizing: border-box;
 }
 
 /* Typography */
-.text-hero {
-  font-size: 64rpx;
-  font-weight: 600;
-  line-height: 1.1;
-  letter-spacing: -1rpx;
-}
-
+.text-hero { font-size: 64rpx; font-weight: 700; line-height: 1.2; letter-spacing: -1rpx; }
 .text-h1 { font-size: 48rpx; font-weight: 600; line-height: 1.2; }
-.text-h2 { font-size: 36rpx; font-weight: 600; line-height: 1.2; }
-.text-h3 { font-size: 32rpx; font-weight: 600; line-height: 1.3; }
-.text-body { font-size: 30rpx; line-height: 1.55; color: var(--charcoal); }
-.text-sm { font-size: 26rpx; line-height: 1.5; color: var(--slate); }
+.text-h2 { font-size: 36rpx; font-weight: 600; line-height: 1.3; }
+.text-h3 { font-size: 32rpx; font-weight: 500; line-height: 1.3; }
+.text-body { font-size: 30rpx; line-height: 1.55; color: var(--ink); }
+.text-sm { font-size: 26rpx; line-height: 1.5; color: var(--on-surface-variant); }
 .text-caption { font-size: 24rpx; line-height: 1.4; color: var(--steel); }
+.text-label { font-size: 22rpx; line-height: 1.4; color: var(--stone); letter-spacing: 0.5rpx; }
 
-/* Common Components */
+/* Buttons */
 .btn-primary {
-  background: var(--notion-primary);
-  color: #ffffff;
+  background: var(--primary-container);
+  color: var(--on-primary);
   font-size: 28rpx;
-  font-weight: 500;
-  padding: 20rpx 36rpx;
+  font-weight: 600;
+  padding: 24rpx 40rpx;
   border-radius: var(--radius-md);
   display: flex;
   align-items: center;
@@ -107,7 +100,8 @@ scroll-view {
 }
 
 .btn-primary:active {
-  background: var(--notion-primary-pressed);
+  background: var(--primary);
+  transform: scale(0.98);
 }
 
 .btn-secondary {
@@ -117,7 +111,7 @@ scroll-view {
   font-weight: 500;
   padding: 20rpx 36rpx;
   border-radius: var(--radius-md);
-  border: 1rpx solid var(--hairline-strong);
+  border: 1rpx solid var(--outline-variant);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -125,27 +119,30 @@ scroll-view {
 
 .btn-ghost {
   background: transparent;
-  color: var(--ink);
-  font-size: 28rpx;
+  color: var(--primary);
+  font-size: 26rpx;
   padding: 16rpx 24rpx;
   border-radius: var(--radius-sm);
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
+/* Cards */
 .card-base {
-  background: var(--bg-canvas);
+  background: var(--surface-lowest);
   border-radius: var(--radius-lg);
   border: 1rpx solid var(--hairline);
   padding: 32rpx;
+}
+
+.levitating-paper {
+  background: var(--surface-lowest);
+  box-shadow: 0 4rpx 20rpx rgba(0, 27, 60, 0.05);
+  border-radius: var(--radius-xl);
 }
 
 /* Page Shell */
 .page-shell {
   min-height: 100vh;
   padding-bottom: calc(200rpx + env(safe-area-inset-bottom));
-  animation: fadeIn 0.4s ease-out;
 }
 
 /* Animations */
@@ -159,13 +156,10 @@ scroll-view {
   to { transform: translateY(0); opacity: 1; }
 }
 
-/* Animations */
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+@keyframes skeletonPulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.8; }
 }
 
-@keyframes slideUp {
-  from { transform: translateY(20rpx); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
-}
+.skeleton-pulse { animation: skeletonPulse 1.5s ease-in-out infinite; }
+.skeleton-bg { background: var(--hairline-soft); border-radius: var(--radius-sm); }

@@ -226,11 +226,27 @@ Page({
     return api.getRecommendBooks()
       .then((recommendBooks) => {
         const app = getApp()
-        app.globalData.homeCache.recommendBooks = recommendBooks
+        
+        // Enhance with mock AI reasons if missing
+        const reasons = [
+          '这本书情节跌宕，适合深度思考',
+          '文笔细腻，带你领略不一样的世界',
+          'AI 认为这本书的逻辑架构非常严谨',
+          '这本书在社交媒体上引发了广泛讨论',
+          '适合在安静的午后阅读，启发灵感',
+          '深度剖析人性，值得反复品味'
+        ]
+        
+        const enhancedBooks = (recommendBooks || []).map((book, index) => ({
+          ...book,
+          recommendReason: book.recommendReason || reasons[index % reasons.length]
+        }))
+
+        app.globalData.homeCache.recommendBooks = enhancedBooks
         app.globalData.homeCache.lastUpdated = Date.now()
         
         this.setData({
-          recommendBooks,
+          recommendBooks: enhancedBooks,
           loadError: false,
         })
       })

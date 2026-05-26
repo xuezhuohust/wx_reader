@@ -10,14 +10,14 @@
   position: fixed;
   top: 0; left: 0; right: 0;
   z-index: 1000;
-  background: var(--bg-canvas);
-  transition: all 0.3s ease;
-  border-bottom: 1rpx solid transparent;
+  background: rgba(248, 249, 250, 0.95);
+  backdrop-filter: blur(12px);
+  border-bottom: 1rpx solid var(--outline-variant);
 }
 
 .nav--scrolled {
   border-bottom: 1rpx solid var(--hairline);
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(248, 249, 250, 0.95);
   backdrop-filter: blur(10px);
 }
 
@@ -43,6 +43,13 @@
   border-bottom: 4rpx solid var(--ink);
   transform: rotate(45deg);
   margin-left: 12rpx;
+}
+
+.nav-title {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: var(--primary);
+  margin-left: 16rpx;
 }
 
 /* 2026-05-19 新增：对话切换按钮 */
@@ -114,87 +121,124 @@
 }
 
 .message-list {
-  padding: 40rpx;
+  padding: 32rpx;
   display: flex;
   flex-direction: column;
 }
 
-.welcome-section {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  padding: 80rpx 40rpx 120rpx;
-  opacity: 0.9;
-}
-
-.welcome-icon {
-  width: 112rpx;
-  height: 112rpx;
-  background: var(--notion-primary);
-  color: #fff;
-  border-radius: 32rpx;
+/* Fixed Book Tag Bar */
+.book-tag-bar {
+  position: fixed;
+  left: 0; right: 0;
+  z-index: 900;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 44rpx;
-  font-weight: 800;
-  margin-bottom: 40rpx;
-  box-shadow: 0 12rpx 32rpx rgba(19, 30, 56, 0.2);
+  padding: 12rpx 32rpx;
+  background: rgba(248, 249, 250, 0.95);
+  backdrop-filter: blur(12px);
 }
 
-.welcome-title {
-  font-size: 38rpx;
-  font-weight: 800;
-  color: var(--ink);
-  margin-bottom: 20rpx;
-  letter-spacing: -0.01em;
+.book-tag-left {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  background: var(--surface-container);
+  border-radius: var(--radius-md);
+  border: 1rpx solid var(--outline-variant);
+  padding: 12rpx 24rpx;
 }
 
-.welcome-desc {
-  font-size: 26rpx;
-  color: var(--slate);
-  line-height: 1.7;
-  max-width: 480rpx;
+.book-tag-icon {
+  width: 28rpx;
+  height: 28rpx;
+  background-image: url('data:image/svg+xml,<svg viewBox="0 0 24 24" fill="none" stroke="%233c692b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>');
+  background-size: contain;
+  background-repeat: no-repeat;
 }
 
-/* 清除记录是低频危险操作，弱化为欢迎区里的辅助入口，避免抢主对话流程。 */
-.welcome-actions {
-  margin-top: 28rpx;
+.book-tag-text { font-size: 24rpx; color: var(--on-surface-variant); font-weight: 500; }
+
+.clear-btn {
+  width: 40rpx;
+  height: 40rpx;
   display: flex;
   align-items: center;
   justify-content: center;
+  margin-left: 12rpx;
+  border-radius: var(--radius-sm);
 }
 
-.welcome-clear-btn {
-  height: 48rpx;
+.clear-btn:active {
+  background: rgba(186, 26, 26, 0.08);
+}
+
+.clear-btn--disabled {
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+.clear-icon {
+  width: 28rpx;
+  height: 28rpx;
+  background-image: url('data:image/svg+xml,<svg viewBox="0 0 24 24" fill="none" stroke="%23ba1a1a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>');
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+/* AI Avatar */
+.ai-avatar {
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: var(--radius-md);
+  background: var(--primary-container);
   display: flex;
   align-items: center;
-  gap: 8rpx;
-  padding: 0 14rpx;
-  border-radius: 6rpx;
-  color: var(--stone);
-  font-size: 23rpx;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4rpx 12rpx rgba(60, 105, 43, 0.1);
+  border: 1rpx solid rgba(60, 105, 43, 0.1);
+}
+
+.ai-avatar text {
+  font-size: 24rpx;
+  font-weight: 800;
+  color: var(--on-primary-container);
+}
+
+.ai-name {
+  font-size: 22rpx;
+  color: var(--on-surface-variant);
   font-weight: 600;
+  margin-bottom: 8rpx;
+  margin-left: 4rpx;
 }
 
-.welcome-clear-btn:active {
-  color: #b43b3b;
-  background: rgba(214, 69, 69, 0.06);
+/* Suggestion Chips */
+.suggestion-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+  margin-top: 16rpx;
 }
 
-.welcome-clear-btn--disabled {
-  opacity: 0.42;
+.chip-item {
+  padding: 14rpx 24rpx;
+  border-radius: var(--radius-md);
+  background: var(--surface-lowest);
+  border: 1rpx solid var(--outline-variant);
+  font-size: 24rpx;
+  color: var(--on-surface-variant);
+  font-weight: 500;
 }
 
-.welcome-clear-icon {
-  position: relative;
-  width: 18rpx;
-  height: 20rpx;
-  border: 3rpx solid currentColor;
-  border-top: 0;
-  border-radius: 0 0 4rpx 4rpx;
+.chip-item:active {
+  background: rgba(127, 176, 105, 0.1);
+  border-color: rgba(60, 105, 43, 0.3);
+  color: var(--primary);
 }
+
+/* (Legacy welcome styles removed) */
 
 .welcome-clear-icon::before {
   content: '';
@@ -222,8 +266,9 @@
 /* Message Rows */
 .message-row {
   display: flex;
-  margin-bottom: 48rpx;
+  margin-bottom: 40rpx;
   width: 100%;
+  gap: 16rpx;
 }
 
 .row-user {
@@ -255,18 +300,18 @@
 }
 
 .bubble-ai {
-  background: var(--bg-surface-soft);
-  border: 1rpx solid var(--hairline-soft);
-  border-radius: 4rpx 32rpx 32rpx 32rpx;
+  background: var(--surface-container-high);
+  border: 1rpx solid var(--outline-variant);
+  border-radius: 4rpx 24rpx 24rpx 24rpx;
   padding: 28rpx 32rpx;
 }
 
 .bubble-user {
-  background: var(--notion-primary);
+  background: var(--primary);
   color: #fff;
-  border-radius: 32rpx 32rpx 4rpx 32rpx;
+  border-radius: 24rpx 24rpx 4rpx 24rpx;
   padding: 24rpx 32rpx;
-  box-shadow: 0 4rpx 12rpx rgba(19, 30, 56, 0.1);
+  box-shadow: 0 4rpx 12rpx rgba(60, 105, 43, 0.15);
 }
 
 .message-text {
@@ -396,38 +441,14 @@
 .chat-footer {
   position: fixed;
   left: 0; right: 0;
-  background: var(--bg-canvas);
-  border-top: 1rpx solid var(--hairline);
-  padding: 24rpx 32rpx calc(32rpx + env(safe-area-inset-bottom));
+  background: rgba(248, 249, 250, 0.95);
+  backdrop-filter: blur(12px);
+  border-top: 1rpx solid var(--outline-variant);
+  padding: 20rpx 24rpx calc(24rpx + env(safe-area-inset-bottom));
   z-index: 100;
 }
 
-.quick-tips {
-  margin-bottom: 24rpx;
-}
-
-.tips-row {
-  display: flex;
-  gap: 16rpx;
-  padding: 0 4rpx;
-}
-
-.tip-pill {
-  white-space: nowrap;
-  padding: 14rpx 32rpx;
-  background: var(--bg-surface-soft);
-  border: 1rpx solid var(--hairline-soft);
-  border-radius: var(--radius-full);
-  font-size: 24rpx;
-  color: var(--slate);
-  font-weight: 600;
-  transition: all 0.2s;
-}
-
-.tip-pill:active {
-  background: var(--bg-surface);
-  transform: scale(0.96);
-}
+/* (Quick tips moved to suggestion chips in message area) */
 
 .input-area {
   display: flex;
@@ -436,12 +457,17 @@
 }
 
 .mode-toggle-btn {
-  width: 72rpx;
-  height: 80rpx; /* Match voice bar height */
+  width: 80rpx;
+  height: 80rpx;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  border-radius: var(--radius-md);
+}
+
+.mode-toggle-btn:active {
+  background: var(--bg-surface);
 }
 
 .icon-keyboard {
@@ -465,10 +491,16 @@
   min-height: 80rpx;
   display: flex;
   align-items: center;
-  background: var(--bg-surface-soft);
-  border-radius: 40rpx;
-  border: 1rpx solid var(--hairline-soft);
+  background: var(--surface-container-low);
+  border-radius: var(--radius-md);
+  border: 1rpx solid var(--outline-variant);
   box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+
+.chat-input-wrap:focus-within {
+  border-color: rgba(60, 105, 43, 0.5);
+  background: var(--surface-lowest);
 }
 
 .chat-input {
@@ -501,8 +533,14 @@
 }
 
 .voice-bar--active {
-  background: var(--hairline-soft);
+  background: rgba(60, 105, 43, 0.08);
+  color: var(--primary);
   transform: scale(0.98);
+}
+
+.voice-bar--cancel {
+  background: rgba(186, 26, 26, 0.08);
+  color: #ba1a1a;
 }
 
 /* Recording Overlay */
@@ -514,6 +552,7 @@
   align-items: center;
   justify-content: center;
   z-index: 2000;
+  pointer-events: none;
 }
 
 .recording-card {
@@ -531,7 +570,7 @@
 }
 
 .recording-card--cancel {
-  background: rgba(212, 48, 48, 0.8);
+  background: rgba(186, 26, 26, 0.86);
 }
 
 .recording-wave {
@@ -602,9 +641,9 @@
 }
 
 .send-btn {
-  width: 72rpx;
-  height: 72rpx;
-  border-radius: var(--radius-full);
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: var(--radius-md);
   background: var(--stone);
   display: flex;
   align-items: center;
@@ -614,22 +653,18 @@
 }
 
 .send-btn--active {
-  background: var(--notion-primary);
-  box-shadow: 0 4rpx 12rpx rgba(19, 30, 56, 0.2);
+  background: var(--primary);
+  box-shadow: 0 4rpx 12rpx rgba(60, 105, 43, 0.2);
 }
 
 .send-btn:active {
   transform: scale(0.9);
 }
 
-.send-icon {
-  width: 24rpx;
-  height: 24rpx;
-  border-top: 4rpx solid #fff;
-  border-right: 4rpx solid #fff;
-  transform: rotate(45deg);
-  margin-top: 4rpx;
-  margin-left: -4rpx;
+.send-icon-text {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #ffffff;
 }
 
 .bottom-space {
@@ -648,7 +683,7 @@
   padding: 16rpx 28rpx;
   background: var(--notion-primary);
   border-radius: 40rpx;
-  box-shadow: 0 8rpx 24rpx rgba(19, 30, 56, 0.25);
+  box-shadow: 0 8rpx 24rpx rgba(60, 105, 43, 0.25);
   animation: slideUp 0.3s ease;
 }
 

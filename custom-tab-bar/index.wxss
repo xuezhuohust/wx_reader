@@ -3,17 +3,16 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(248, 249, 250, 0.9);
   backdrop-filter: blur(20px);
-  border-top: 1rpx solid rgba(0, 0, 0, 0.05);
+  border-top: 1rpx solid var(--outline-variant);
   z-index: 99;
   padding-bottom: env(safe-area-inset-bottom);
-  box-shadow: 0 -4rpx 16rpx rgba(0, 0, 0, 0.02);
 }
 
 .tab-inner {
   display: flex;
-  height: 100rpx; /* Slightly reduced height */
+  height: 100rpx;
   align-items: center;
 }
 
@@ -29,20 +28,13 @@
 .tab-icon {
   width: 44rpx;
   height: 44rpx;
-  opacity: 0.3;
+  opacity: 0.4;
   transition: all 0.2s ease;
 }
 
-.tab-item--active.tab-item--reader .tab-icon {
+.tab-item--active .tab-icon {
   opacity: 1;
-  /* Filter for #131e38 (Navy) */
-  filter: brightness(0) saturate(100%) invert(9%) sepia(35%) saturate(1142%) hue-rotate(185deg) brightness(95%) contrast(96%);
-}
-
-.tab-item--active.tab-item--publisher .tab-icon {
-  opacity: 1;
-  /* Filter for rgb(10, 120, 105) */
-  filter: brightness(0) saturate(100%) invert(35%) sepia(87%) saturate(415%) hue-rotate(125deg) brightness(93%) contrast(96%);
+  filter: brightness(0) saturate(100%) invert(35%) sepia(20%) saturate(1200%) hue-rotate(70deg) brightness(90%) contrast(90%);
 }
 
 .tab-label {
@@ -52,12 +44,7 @@
   font-weight: 500;
 }
 
-.tab-item--active.tab-item--reader .tab-label {
-  color: var(--theme-reader);
-  font-weight: 600;
-}
-
-.tab-item--active.tab-item--publisher .tab-label {
-  color: rgb(10, 120, 105);
+.tab-item--active .tab-label {
+  color: var(--primary);
   font-weight: 600;
 }

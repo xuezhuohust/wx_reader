@@ -15,6 +15,7 @@ Page({
     playingMessageId: '',
     audioLoadingMessageId: '',
     isRecording: false,
+    voiceCancel: false,
     inputMode: 'keyboard', // 'keyboard' or 'voice'
     keyboardHeight: 0,
     navBarHeight: 0,
@@ -51,7 +52,14 @@ Page({
     this.nextGenSeq = 0        // 下一个生成的序号
     this.generatingCount = 0
     this.streamSpeechBuffer = ''
+    this.speechSegmentCount = 0
     this.pendingPrivacyAction = null
+    this.voiceStartY = 0
+    this.voiceStartAt = 0
+    this.voiceRecordingCancelled = false
+    this.voiceRecordingTooShort = false
+    this.voiceRecordStarting = false
+    this.pendingVoiceStop = null
     this.lastScrollToBottomTime = 0
     this._scrollTailTimer = null
     // 流式输出过快时，先把回复暂存在实例变量中，再定时批量刷新视图层。
@@ -96,17 +104,44 @@ Page({
     this.recorderManager = wx.getRecorderManager()
     this.recorderManager.onStart(() => {
       console.log('recorder start')
-      this.setData({ isRecording: true })
+      this.voiceRecordStarting = false
+      this.setData({ isRecording: true, voiceCancel: false })
+      if (this.pendingVoiceStop) {
+        const pending = this.pendingVoiceStop
+        this.pendingVoiceStop = null
+        this.voiceRecordingCancelled = pending.cancelled
+        this.voiceRecordingTooShort = pending.tooShort
+        this.recorderManager.stop()
+      }
     })
     this.recorderManager.onStop((res) => {
       console.log('recorder stop', res)
-      this.setData({ isRecording: false })
+      this.voiceRecordStarting = false
+      this.pendingVoiceStop = null
+      const cancelled = this.voiceRecordingCancelled || this.data.voiceCancel
+      const tooShort = this.voiceRecordingTooShort
+      this.voiceRecordingCancelled = false
+      this.voiceRecordingTooShort = false
+      this.voiceRecordStarting = false
+      this.pendingVoiceStop = null
+      this.setData({ isRecording: false, voiceCancel: false })
+      if (cancelled) {
+        wx.showToast({
+          title: tooShort ? '说话时间太短' : '已取消发送',
+          icon: 'none',
+        })
+        return
+      }
       const { tempFilePath } = res
       this.handleVoiceUpload(tempFilePath)
     })
     this.recorderManager.onError((err) => {
       console.error('recorder error', err)
-      this.setData({ isRecording: false })
+      this.voiceRecordingCancelled = false
+      this.voiceRecordingTooShort = false
+      this.voiceRecordStarting = false
+      this.pendingVoiceStop = null
+      this.setData({ isRecording: false, voiceCancel: false })
       wx.showToast({ title: '录音失败', icon: 'none' })
     })
   },
@@ -133,13 +168,82 @@ Page({
     this.startRecording()
   },
 
+  handleVoiceStart(event) {
+    if (this.data.inputMode !== 'voice' || this.data.loadingReply || this.data.isRecording) {
+      return
+    }
+
+    if (!wx.getStorageSync('privacy_authorized_by_button')) {
+      this.requestPrivacyAuthorization(() => {
+        wx.showToast({ title: '请再次按住说话', icon: 'none' })
+      })
+      return
+    }
+
+    const touch = event.touches && event.touches[0]
+    this.voiceStartY = touch ? touch.clientY : 0
+    this.voiceStartAt = Date.now()
+    this.voiceRecordingCancelled = false
+    this.voiceRecordingTooShort = false
+    wx.vibrateShort()
+    this.setData({ voiceCancel: false })
+    this.startRecording()
+  },
+
+  handleVoiceMove(event) {
+    if (!this.data.isRecording && !this.voiceRecordStarting) {
+      return
+    }
+    const touch = event.touches && event.touches[0]
+    if (!touch) {
+      return
+    }
+    const isCancel = this.voiceStartY - touch.clientY > 50
+    if (isCancel !== this.data.voiceCancel) {
+      if (isCancel) {
+        wx.vibrateShort()
+      }
+      this.setData({ voiceCancel: isCancel })
+    }
+  },
+
+  handleVoiceEnd() {
+    if (!this.data.isRecording && !this.voiceRecordStarting) {
+      return
+    }
+    const duration = Date.now() - this.voiceStartAt
+    const tooShort = duration > 0 && duration < 500 && !this.data.voiceCancel
+    const cancelled = this.data.voiceCancel || tooShort
+    if (this.voiceRecordStarting) {
+      this.pendingVoiceStop = { cancelled, tooShort }
+      return
+    }
+    this.voiceRecordingTooShort = tooShort
+    this.voiceRecordingCancelled = cancelled
+    this.recorderManager.stop()
+  },
+
+  handleVoiceCancel() {
+    if (!this.data.isRecording && !this.voiceRecordStarting) {
+      return
+    }
+    if (this.voiceRecordStarting) {
+      this.pendingVoiceStop = { cancelled: true, tooShort: false }
+      return
+    }
+    this.voiceRecordingCancelled = true
+    this.recorderManager.stop()
+  },
+
   requestPrivacyAuthorization(next) {
     this.pendingPrivacyAction = next
     this.showPrivacyPopup()
   },
 
   startRecording() {
-    this.setData({ isRecording: true })
+    this.voiceRecordStarting = true
+    this.pendingVoiceStop = null
+    this.setData({ isRecording: true, voiceCancel: false })
     this.recorderManager.start({
       duration: 60000,
       sampleRate: 16000,
@@ -152,7 +256,7 @@ Page({
   handleStopPropagation() {},
 
   handleVoiceUpload(filePath) {
-    wx.showLoading({ title: '正在识别...', mask: true })
+    wx.showLoading({ title: '正在识别……', mask: true })
     api.speechToText(filePath)
       .then((text) => {
         wx.hideLoading()
@@ -330,7 +434,7 @@ Page({
     this.resetAudioPlayback()
     const book = this.data.book
     const bookTitle = book && book.title ? book.title : ''
-    wx.showLoading({ title: '创建中...', mask: true })
+    wx.showLoading({ title: '创建中……', mask: true })
     this.createAndSelectConversation(bookTitle)
       .then(() => {
         wx.hideLoading()
@@ -349,7 +453,7 @@ Page({
     }
     wx.showModal({
       title: '清空对话',
-      content: '将删除这本书的全部对话记录，并重置对应的 AI 会话。此操作不可恢复。',
+      content: '将删除这本书的全部对话记录，并重置对应的智能会话。此操作不可恢复。',
       confirmText: '清空',
       confirmColor: '#d64545',
       success: (res) => {
@@ -359,7 +463,7 @@ Page({
         const book = this.data.book
         const bookTitle = book && book.title ? book.title : ''
         this.resetAudioPlayback()
-        wx.showLoading({ title: '清空中...', mask: true })
+        wx.showLoading({ title: '清空中……', mask: true })
         api.clearConversations(this.bookId)
           .then(() => this.createAndSelectConversation(bookTitle))
           .then(() => {
@@ -555,8 +659,14 @@ Page({
     audio.autoplay = false
     audio.obeyMuteSwitch = false
 
+    audio.onCanplay(() => {
+      audio.play()
+    })
+
     audio.onPlay(() => {
       this.isAudioPlaying = true
+      this.isAudioLoading = false
+      clearTimeout(this._audioLoadTimeout)
       this.currentAudioStartedAt = Date.now()
       this.setData({
         playingMessageId: this.currentAudioMessageId,
@@ -582,11 +692,17 @@ Page({
 
     audio.onError((error) => {
       console.error('[chat] audio error', error)
-      this.finishCurrentAudio(false)
-      wx.showToast({
-        title: '语音播放失败',
-        icon: 'none',
-      })
+      // 出错后销毁当前实例，下次播放时重建，避免复用损坏的 context
+      this.audioContext.destroy()
+      this.audioContext = null
+      this.isAudioPlaying = false
+      this.isAudioLoading = false
+      this.currentAudioMessageId = ''
+      this.currentAudioStartedAt = 0
+      // 延迟重试下一段，给系统时间回收资源
+      setTimeout(() => {
+        this.playNextIfIdle()
+      }, 300)
     })
 
     this.audioContext = audio
@@ -600,9 +716,11 @@ Page({
     this.currentAudioMessageId = ''
     this.currentAudioStartedAt = 0
     this.isAudioPlaying = false
+    this.isAudioLoading = false
 
     // 如果还有待播放的段或正在生成的段，保持 loading 状态不变
-    const hasMore = this.generatingCount > 0 || this.readyMap.hasOwnProperty(this.nextPlaySeq)
+    const pendingCount = (this.pendingTTSQueue && this.pendingTTSQueue.length) || 0
+    const hasMore = this.generatingCount > 0 || pendingCount > 0 || this.readyMap.hasOwnProperty(this.nextPlaySeq)
     if (!hasMore) {
       this.setData({ playingMessageId: '', audioLoadingMessageId: '' })
     }
@@ -633,12 +751,15 @@ Page({
     this.currentAudioMessageId = ''
     this.currentAudioStartedAt = 0
     this.isAudioPlaying = false
+    this.isAudioLoading = false
     this.audioQueue = []
     this.readyMap = {}
+    this.pendingTTSQueue = []
     this.nextPlaySeq = 0
     this.nextGenSeq = 0
     this.generatingCount = 0
     this.streamSpeechBuffer = ''
+    this.speechSegmentCount = 0
     this.setData({
       playingMessageId: '',
       audioLoadingMessageId: '',
@@ -648,10 +769,12 @@ Page({
   resetAudioPlayback() {
     this.audioQueue = []
     this.readyMap = {}
+    this.pendingTTSQueue = []
     this.nextPlaySeq = 0
     this.nextGenSeq = 0
     this.generatingCount = 0
     this.streamSpeechBuffer = ''
+    this.speechSegmentCount = 0
     if (this.audioContext && (this.isAudioPlaying || this.currentAudioMessageId)) {
       this.ignoreNextStopEvent = true
       this.audioContext.stop()
@@ -674,6 +797,11 @@ Page({
       return true
     }
 
+    // 首段尽早切出，优先降低“点发送到听见声音”的等待时间。
+    if (this.speechSegmentCount === 0 && content.length >= 12) {
+      return true
+    }
+
     const punctuationCount = (content.match(/[。！？!?]/g) || []).length
     // 遇到句末标点就切（一句一段，更流畅）
     if (punctuationCount >= 1 && content.length >= 10) {
@@ -687,29 +815,108 @@ Page({
   },
 
   appendSpeechSegment(messageId, segment, force) {
-    const content = String(segment || '').trim()
+    const content = String(segment || '')
     if (!content) {
       return
     }
 
     this.streamSpeechBuffer = `${this.streamSpeechBuffer}${content}`
-    if (!this.shouldFlushSpeechBuffer(this.streamSpeechBuffer, !!force)) {
+    if (!this.shouldFlushSpeechBuffer(this.streamSpeechBuffer.trim(), !!force)) {
       return
     }
 
-    const nextChunk = this.streamSpeechBuffer.trim()
+    // 按句子边界切分 buffer，避免一次性把几百字当一个 chunk 发给 TTS
+    const fullText = this.streamSpeechBuffer.trim()
     this.streamSpeechBuffer = ''
-    if (nextChunk) {
-      this.enqueueAudioChunk(messageId, nextChunk)
+    if (!fullText) {
+      return
+    }
+
+    const chunks = this._splitIntoSpeechChunks(fullText)
+    for (let i = 0; i < chunks.length; i += 1) {
+      this.speechSegmentCount += 1
+      this.enqueueAudioChunk(messageId, chunks[i])
     }
   },
 
-  flushSpeechBuffer(messageId) {
-    const nextChunk = String(this.streamSpeechBuffer || '').trim()
-    this.streamSpeechBuffer = ''
-    if (nextChunk) {
-      this.enqueueAudioChunk(messageId, nextChunk)
+  /**
+   * 将文本按句子边界切分为适合 TTS 的 chunk（每段不超过 80 字）。
+   * 优先在句末标点处切分；超长无标点段按逗号或硬上限切。
+   */
+  _splitIntoSpeechChunks(text) {
+    const maxLen = 80
+    if (text.length <= maxLen) {
+      return [text]
     }
+
+    const chunks = []
+    // 先按句末标点切分
+    const sentences = text.split(/(?<=[。！？!?\n])/)
+    let current = ''
+
+    for (let i = 0; i < sentences.length; i += 1) {
+      const s = sentences[i]
+      if (!s) continue
+      if ((current + s).length <= maxLen) {
+        current += s
+      } else {
+        if (current) chunks.push(current)
+        // 单句超长时按逗号或硬上限再切
+        if (s.length > maxLen) {
+          const sub = s.split(/(?<=[，,；;：:])/)
+          let buf = ''
+          for (let j = 0; j < sub.length; j += 1) {
+            if ((buf + sub[j]).length <= maxLen) {
+              buf += sub[j]
+            } else {
+              if (buf) chunks.push(buf)
+              buf = sub[j].length > maxLen ? sub[j].slice(0, maxLen) : sub[j]
+              // 如果单个子句仍超长，硬切
+              if (sub[j].length > maxLen) {
+                chunks.push(buf)
+                let rest = sub[j].slice(maxLen)
+                while (rest.length > maxLen) {
+                  chunks.push(rest.slice(0, maxLen))
+                  rest = rest.slice(maxLen)
+                }
+                buf = rest
+              }
+            }
+          }
+          current = buf
+        } else {
+          current = s
+        }
+      }
+    }
+    if (current) chunks.push(current)
+    return chunks.filter(Boolean)
+  },
+
+  flushSpeechBuffer(messageId) {
+    const remaining = String(this.streamSpeechBuffer || '').trim()
+    this.streamSpeechBuffer = ''
+    if (!remaining) {
+      return
+    }
+    const chunks = this._splitIntoSpeechChunks(remaining)
+    for (let i = 0; i < chunks.length; i += 1) {
+      this.speechSegmentCount += 1
+      this.enqueueAudioChunk(messageId, chunks[i])
+    }
+  },
+
+  /**
+   * 直接将已生成的音频 URL 入队播放（服务端 TTS 模式）。
+   * 跳过前端 TTS 请求，直接放入 readyMap。
+   */
+  enqueueReadyAudio(messageId, audioUrl) {
+    if (!audioUrl) return
+    const seq = this.nextGenSeq
+    this.nextGenSeq += 1
+    this.readyMap[seq] = { messageId, audioUrl }
+    this.setData({ audioLoadingMessageId: messageId })
+    this.playNextIfIdle()
   },
 
   enqueueAudioChunk(messageId, text) {
@@ -718,21 +925,45 @@ Page({
       return
     }
 
-    // 分配序号，立即开始生成
+    // 分配序号，放入待生成队列
     const seq = this.nextGenSeq
     this.nextGenSeq += 1
-    this.generateAudio(seq, messageId, content)
+    if (!this.pendingTTSQueue) this.pendingTTSQueue = []
+    this.pendingTTSQueue.push({ seq, messageId, text: content })
+    this.drainTTSQueue()
+  },
+
+  /** 限制并发 TTS 请求数量，避免后端串行排队导致超时 */
+  drainTTSQueue() {
+    const maxConcurrent = 2
+    if (!this.pendingTTSQueue || !this.pendingTTSQueue.length) {
+      return
+    }
+    if (this.generatingCount >= maxConcurrent) {
+      return
+    }
+    const item = this.pendingTTSQueue.shift()
+    this.generateAudio(item.seq, item.messageId, item.text)
   },
 
   generateAudio(seq, messageId, text) {
     this.generatingCount += 1
     this.setData({ audioLoadingMessageId: messageId })
 
+    const startedAt = Date.now()
     api.requestSpeech(text)
-      .then(({ audioUrl }) => {
+      .then(({ audioUrl, cached, size }) => {
         this.generatingCount -= 1
+        console.info('[chat] tts ready', {
+          seq,
+          chars: String(text || '').length,
+          cached,
+          size,
+          duration: Date.now() - startedAt,
+        })
         // 按序号存入 readyMap
         this.readyMap[seq] = { messageId, audioUrl }
+        this.drainTTSQueue()
         this.playNextIfIdle()
       })
       .catch((error) => {
@@ -740,12 +971,13 @@ Page({
         this.generatingCount -= 1
         // 跳过失败的段，推进序号
         this.readyMap[seq] = null
+        this.drainTTSQueue()
         this.playNextIfIdle()
       })
   },
 
   playNextIfIdle() {
-    if (this.isAudioPlaying) {
+    if (this.isAudioPlaying || this.isAudioLoading) {
       return
     }
 
@@ -758,7 +990,8 @@ Page({
     const next = this.readyMap[this.nextPlaySeq]
     if (!next) {
       // 下一段还没生成好，等它回来再播
-      if (this.generatingCount === 0) {
+      const pendingCount = (this.pendingTTSQueue && this.pendingTTSQueue.length) || 0
+      if (this.generatingCount === 0 && pendingCount === 0) {
         this.setData({ audioLoadingMessageId: '' })
       }
       return
@@ -767,14 +1000,24 @@ Page({
     delete this.readyMap[this.nextPlaySeq]
     this.nextPlaySeq += 1
 
+    this.isAudioLoading = true
     const audio = this.ensureAudioContext()
     this.currentAudioMessageId = next.messageId
     this.setData({
       playingMessageId: next.messageId,
       audioLoadingMessageId: this.generatingCount > 0 ? next.messageId : '',
     })
+    // 设置 src，等 onCanplay 再 play
     audio.src = next.audioUrl
-    audio.play()
+    // 超时保护：如果 5s 内 onCanplay/onPlay 都没触发，强制跳过
+    clearTimeout(this._audioLoadTimeout)
+    this._audioLoadTimeout = setTimeout(() => {
+      if (this.isAudioLoading) {
+        console.warn('[chat] audio load timeout, skipping')
+        this.isAudioLoading = false
+        this.playNextIfIdle()
+      }
+    }, 5000)
   },
 
   processAudioQueue() {
@@ -810,11 +1053,12 @@ Page({
     }
 
     this.resetAudioPlayback()
+    this.ensureAudioContext()
 
-    // 文本输入和语音识别最终都走此入口；仅给 AI 请求附加精简要求，不改变用户看到和保存的问题原文。
+    // 文本输入和语音识别最终都走此入口；仅给智能回复附加精简要求，不改变用户看到和保存的问题原文。
     const aiMessage = `${message}\n回复精简`
     const userMessage = this.createMessage('user', message)
-    const loadingMessage = this.createMessage('ai', 'AI 正在思考...', true)
+    const loadingMessage = this.createMessage('ai', '伴读助手正在思考……', true)
     const messages = this.data.messages.concat([userMessage, loadingMessage])
     // 记录本轮流式回复所在的消息，后续只更新这一条，避免每个 token 重建整个 messages 数组。
     this._streamingMessageIndex = messages.length - 1
@@ -842,18 +1086,17 @@ Page({
     const chatBookId = (this.data.book && (this.data.book.bookKey || this.data.book.id)) || this.bookId
     api.sendBookChatMessageStream(chatBookId, aiMessage, {
       conversationId: convId,
-      onSegment: (segment, fullReply) => {
-        // onChunkReceived 可能一次解析出很多 token，这里只保留最新完整回复，交给定时器合并刷新。
+      onSegment: (segment, fullReply, audioUrl) => {
         this._pendingStreamReply = fullReply
         this.scheduleStreamFlush()
 
-        // 自动 TTS 暂时关闭：保留文字流式输出，避免回复过程中并发请求 /api/tts。
-        // this.appendSpeechSegment(loadingMessage.id, segment, false)
+        // 服务端已完成分段 + TTS 生成，直接入队播放
+        if (audioUrl) {
+          this.enqueueReadyAudio(loadingMessage.id, audioUrl)
+        }
       },
     })
       .then((result) => {
-        // 自动 TTS 暂时关闭：不在回答结束时补发剩余语音片段。
-        // this.flushSpeechBuffer(loadingMessage.id)
         const finalReply = result.reply || ''
         this._pendingStreamReply = finalReply
         this.flushStreamReply(true)
@@ -866,15 +1109,7 @@ Page({
             this.scrollToBottom()
           }
         })
-
-        if (convId && finalReply) {
-          api.appendConversationMessages(convId, [
-            { role: 'user', content: message },
-            { role: 'ai', content: finalReply },
-          ]).catch((error) => {
-            console.warn('appendConversationMessages failed:', error)
-          })
-        }
+        // 消息持久化已在后端 /api/ask/segments 中完成，无需前端再调用
       })
       .catch(() => {
         this.streamSpeechBuffer = ''
@@ -924,7 +1159,7 @@ Page({
     }
 
     this._lastFlushedStreamReply = content
-    // 只更新最后一条 AI 消息的字段，降低小程序 JS 层到视图层的数据传输量。
+    // 只更新最后一条助手消息的字段，降低小程序 JS 层到视图层的数据传输量。
     this.setData({
       [`messages[${messageIndex}].content`]: content,
       [`messages[${messageIndex}].loading`]: false,

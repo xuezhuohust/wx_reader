@@ -1,14 +1,11 @@
 <view wx:if="{{book}}" class="page-shell chat-page">
-  <!-- Custom Navigation Bar -->
-  <view class="custom-nav {{scrolled ? 'nav--scrolled' : ''}}" style="height: {{navBarHeight}}px;">
+  <!-- Top App Bar -->
+  <view class="custom-nav" style="height: {{navBarHeight}}px;">
     <view class="nav-inner" style="top: {{menuTop}}px; height: {{menuHeight}}px;">
       <view class="nav-back" bindtap="handleBack" style="width: {{menuHeight}}px; height: {{menuHeight}}px;">
         <view class="back-arrow"></view>
       </view>
-      <view class="nav-book-meta">
-        <text class="nav-book-title">{{book.title}}</text>
-        <text class="nav-book-author">{{book.author}}</text>
-      </view>
+      <text class="nav-title">智能伴读</text>
     </view>
   </view>
 
@@ -42,9 +39,18 @@
     </scroll-view>
   </view>
 
-  <!-- Messages -->
-  <!-- 流式输出时关闭滚动动画，并用 scroll-top 到底部，减少高频输出时的滚动抢占。 -->
-  <!-- 触摸消息区时会暂停自动跟随，让用户可以在 AI 输出时向上滚动查看内容。 -->
+  <!-- Fixed Book Tag Bar -->
+  <view class="book-tag-bar" style="top: {{navBarHeight}}px;">
+    <view class="book-tag-left">
+      <view class="book-tag-icon"></view>
+      <text class="book-tag-text">当前伴读：《{{book.title}}》</text>
+      <view class="clear-btn {{loadingReply ? 'clear-btn--disabled' : ''}}" catchtap="handleClearConversations">
+        <view class="clear-icon"></view>
+      </view>
+    </view>
+  </view>
+
+  <!-- Chat Canvas -->
   <scroll-view
     class="chat-body"
     scroll-y
@@ -56,36 +62,53 @@
     bindtouchstart="handleChatTouchStart"
     bindtouchend="handleChatTouchEnd"
     bindtouchcancel="handleChatTouchEnd"
-    style="padding-top: {{navBarHeight}}px;"
+    style="padding-top: {{navBarHeight + 44}}px;"
   >
     <view class="message-list">
-      <view class="welcome-section">
-        <view class="welcome-icon">AI</view>
-        <text class="welcome-title">与《{{book.title}}》对话</text>
-        <text class="welcome-desc">我是您的智能阅读助手，您可以针对书中的内容向我提问。</text>
-        <!-- 清除记录入口放在欢迎区，避免悬浮在顶部时显得突兀，也避开右上角微信胶囊按钮。 -->
-        <view class="welcome-actions">
-          <view class="welcome-clear-btn {{loadingReply ? 'welcome-clear-btn--disabled' : ''}}" bindtap="handleClearConversations">
-            <view class="welcome-clear-icon"></view>
-            <text>清除记录</text>
+
+      <!-- 伴读欢迎消息 -->
+      <view class="message-row row-ai" wx:if="{{messages.length === 0}}">
+        <view class="ai-avatar">
+          <text>读</text>
+        </view>
+        <view class="message-container container-ai">
+          <text class="ai-name">伴读助手</text>
+          <view class="message-bubble bubble-ai">
+            <view class="message-text">
+              <text>你好！我是你的学术伴读助手。我已经为您研读了《{{book.title}}》。您可以就其核心论点、逻辑推演或特定概念提出问题，我将协助您进行深入探讨。</text>
+            </view>
+          </view>
+          <!-- Suggestion Chips -->
+          <view class="suggestion-chips">
+            <view
+              wx:for="{{quickQuestions}}"
+              wx:key="*this"
+              class="chip-item"
+              data-question="{{item}}"
+              bindtap="handleQuickQuestion"
+            >{{item}}</view>
           </view>
         </view>
       </view>
 
+      <!-- Messages -->
       <view
         wx:for="{{messages}}"
         wx:key="id"
         id="{{item.id}}"
         class="message-row {{item.role === 'user' ? 'row-user' : 'row-ai'}}"
       >
+        <view wx:if="{{item.role === 'ai'}}" class="ai-avatar">
+          <text>读</text>
+        </view>
         <view class="message-container {{item.role === 'user' ? 'container-user' : 'container-ai'}}">
+          <text wx:if="{{item.role === 'ai'}}" class="ai-name">伴读助手</text>
           <view class="message-bubble {{item.role === 'user' ? 'bubble-user' : 'bubble-ai'}}">
             <view class="message-text">
               <text user-select>{{item.content}}</text>
               <view wx:if="{{item.loading || (item.role === 'ai' && loadingReply && index === messages.length - 1)}}" class="typing-cursor"></view>
             </view>
           </view>
-          
           <view
             wx:if="{{item.role === 'ai' && !item.loading}}"
             class="voice-control {{(playingMessageId === item.id || audioLoadingMessageId === item.id) ? 'is-playing' : ''}}"
@@ -99,16 +122,16 @@
               <view class="wave-bar"></view>
             </view>
             <view class="voice-icon-new" wx:else></view>
-            <text class="voice-status-text">{{(playingMessageId === item.id || audioLoadingMessageId === item.id) ? '停止播放' : '朗读'}}</text>
+            <text class="voice-status-text">{{(playingMessageId === item.id || audioLoadingMessageId === item.id) ? '停止' : '朗读'}}</text>
           </view>
         </view>
       </view>
-      
+
       <view class="bottom-space" style="height: {{keyboardHeight + 200}}rpx;"></view>
     </view>
   </scroll-view>
 
-  <!-- 回到底部按钮 -->
+  <!-- Scroll Down Button -->
   <view
     wx:if="{{showScrollDownBtn}}"
     class="scroll-down-btn"
@@ -120,35 +143,17 @@
 
   <!-- Input Area -->
   <view class="chat-footer" style="bottom: {{keyboardHeight}}px;">
-    <view class="quick-tips" wx:if="{{!inputValue && keyboardHeight === 0}}">
-      <scroll-view scroll-x enhanced show-scrollbar="{{false}}">
-        <view class="tips-row">
-          <view
-            wx:for="{{quickQuestions}}"
-            wx:key="*this"
-            class="tip-pill"
-            data-question="{{item}}"
-            bindtap="handleQuickQuestion"
-          >
-            {{item}}
-          </view>
-        </view>
-      </scroll-view>
-    </view>
-
-    <view class="input-area {{isInputExpanded ? 'input-area--expanded' : ''}}">
-      <!-- Mode Toggle: Keyboard/Voice -->
+    <view class="input-area">
       <view class="mode-toggle-btn" bindtap="handleToggleInputMode">
         <view class="icon-svg {{inputMode === 'voice' ? 'icon-keyboard' : 'icon-voice'}}"></view>
       </view>
 
       <view class="chat-input-wrap">
-        <!-- Text Input Mode -->
         <textarea
           wx:if="{{inputMode === 'keyboard'}}"
           class="chat-input"
-          placeholder="向这本书提问..."
-          placeholder-style="color:#999;"
+          placeholder="向伴读助手提问……"
+          placeholder-style="color: var(--stone);"
           value="{{inputValue}}"
           bindinput="handleInput"
           bindblur="handleInputBlur"
@@ -161,37 +166,48 @@
           cursor-spacing="32"
           maxlength="500"
         />
-
-        <!-- Voice Input Mode: Tap to Toggle -->
         <view
           wx:else
-          class="voice-bar {{isRecording ? 'voice-bar--active' : ''}}"
-          bindtap="handleVoiceTap"
+          class="voice-bar {{isRecording ? 'voice-bar--active' : ''}} {{voiceCancel ? 'voice-bar--cancel' : ''}}"
+          bindtouchstart="handleVoiceStart"
+          bindtouchmove="handleVoiceMove"
+          bindtouchend="handleVoiceEnd"
+          bindtouchcancel="handleVoiceCancel"
         >
-          <text>{{isRecording ? '点击停止' : '点击录音'}}</text>
+          <text>{{isRecording ? (voiceCancel ? '松开取消' : '松开发送') : '按住说话'}}</text>
         </view>
       </view>
 
-      <view wx:if="{{inputMode === 'keyboard'}}" class="send-btn {{inputValue ? 'send-btn--active' : ''}} {{isInputExpanded ? 'send-btn--expanded' : ''}}" bindtap="handleSend">
-        <view class="send-icon"></view>
+      <view class="send-btn {{inputValue ? 'send-btn--active' : ''}}" bindtap="handleSend">
+        <text class="send-icon-text">↑</text>
       </view>
     </view>
   </view>
 
   <!-- Recording Overlay -->
-  <view class="recording-overlay" wx:if="{{isRecording}}" bindtap="handleVoiceTap">
-    <view class="recording-card">
-      <view class="recording-wave">
-        <view class="wave-item"></view>
-        <view class="wave-item"></view>
-        <view class="wave-item"></view>
-        <view class="wave-item"></view>
-      </view>
-      <text class="recording-text">正在录音...</text>
-      <text class="recording-tip">点击停止</text>
+  <view class="recording-overlay" wx:if="{{isRecording}}">
+    <view class="recording-card {{voiceCancel ? 'recording-card--cancel' : ''}}">
+      <block wx:if="{{!voiceCancel}}">
+        <view class="recording-wave">
+          <view class="wave-item"></view>
+          <view class="wave-item"></view>
+          <view class="wave-item"></view>
+          <view class="wave-item"></view>
+        </view>
+        <text class="recording-text">正在录音</text>
+        <text class="recording-tip">上滑取消，松开发送</text>
+      </block>
+      <block wx:else>
+        <view class="cancel-icon-wrap">
+          <view class="icon-undo-white"></view>
+        </view>
+        <text class="recording-text cancel-text">松开取消</text>
+        <text class="recording-tip">下滑回到发送</text>
+      </block>
     </view>
   </view>
 
+  <!-- Privacy Modal -->
   <view wx:if="{{showPrivacyModal}}" class="profile-overlay" catchtap="handleDisagreePrivacy">
     <view class="profile-sheet" catchtap="handleStopPropagation">
       <view class="profile-header">
@@ -211,5 +227,4 @@
       </view>
     </view>
   </view>
-
 </view>

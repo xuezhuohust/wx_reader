@@ -215,7 +215,7 @@
   padding: 28rpx 0;
   border-radius: var(--radius-xl);
   width: 100%;
-  box-shadow: 0 8rpx 24rpx rgba(19, 30, 56, 0.2);
+  box-shadow: 0 8rpx 24rpx rgba(60, 105, 43, 0.2);
 }
 
 .btn-submit:active {

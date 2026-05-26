@@ -80,25 +80,6 @@ function purchaseBook(id) {
   }).then((data) => data.book)
 }
 
-/** 向书籍发送单次问答消息（非流式） */
-function sendBookChatMessage(bookId, message, conversationId) {
-  return request({
-    url: '/novelindex/api/chat',
-    method: 'POST',
-    data: {
-      doc_id: bookId,
-      message,
-      session_id: conversationId || '',
-    },
-  }).then((data) => {
-    return {
-      reply: data.answer || data.reply || '',
-      sessionId: data.session_id || conversationId || '',
-      docId: data.doc_id || bookId,
-    }
-  })
-}
-
 /** 请求 TTS 语音合成，返回音频地址 */
 function requestSpeech(text, speaker) {
   return requestWithoutAuth({
@@ -147,21 +128,59 @@ function reportVoicePlay(duration) {
   }).catch(() => null)
 }
 
-/** 解码流式响应的二进制数据块 */
-function decodeChunk(decoder, arrayBuffer) {
-  if (decoder && typeof decoder.decode === 'function') {
-    return decoder.decode(arrayBuffer, { stream: true })
+/**
+ * 创建流式解码器，正确处理跨 chunk 的 UTF-8 多字节字符。
+ * 当 TextDecoder 可用时直接使用；否则用 fallback 实现，
+ * 将不完整的尾部字节保留到下一次调用，避免解码失败丢数据。
+ */
+function createStreamDecoder() {
+  if (typeof TextDecoder !== 'undefined') {
+    const td = new TextDecoder('utf-8')
+    return function decode(arrayBuffer) {
+      return td.decode(arrayBuffer, { stream: true })
+    }
   }
 
-  const bytes = new Uint8Array(arrayBuffer)
-  let result = ''
-  for (let i = 0; i < bytes.length; i += 1) {
-    result += String.fromCharCode(bytes[i])
-  }
-  try {
-    return decodeURIComponent(escape(result))
-  } catch (error) {
-    return result
+  // Fallback：手动处理 UTF-8，保留跨 chunk 的不完整尾部
+  let pending = []
+  return function decode(arrayBuffer) {
+    const incoming = new Uint8Array(arrayBuffer)
+    const bytes = pending.length
+      ? new Uint8Array(pending.length + incoming.length)
+      : incoming
+    if (pending.length) {
+      bytes.set(pending)
+      bytes.set(incoming, pending.length)
+      pending = []
+    }
+
+    // 从尾部检测不完整的 UTF-8 序列并保留
+    let end = bytes.length
+    for (let i = 1; i <= 3 && i <= end; i += 1) {
+      const b = bytes[end - i]
+      if ((b & 0xc0) === 0xc0) {
+        // 找到多字节起始字节，计算期望长度
+        let expected = 2
+        if ((b & 0xf0) === 0xe0) expected = 3
+        else if ((b & 0xf8) === 0xf0) expected = 4
+        if (end - (end - i) < expected) {
+          pending = Array.from(bytes.slice(end - i))
+          end = end - i
+        }
+        break
+      }
+      if ((b & 0xc0) !== 0x80) break
+    }
+
+    let raw = ''
+    for (let i = 0; i < end; i += 1) {
+      raw += String.fromCharCode(bytes[i])
+    }
+    try {
+      return decodeURIComponent(escape(raw))
+    } catch (e) {
+      return raw
+    }
   }
 }
 
@@ -172,7 +191,8 @@ function parseResponseData(data) {
   }
 
   if (typeof ArrayBuffer !== 'undefined' && data instanceof ArrayBuffer) {
-    const text = decodeChunk(null, data)
+    const decode = createStreamDecoder()
+    const text = decode(data)
     try {
       return JSON.parse(text || '{}')
     } catch (error) {
@@ -189,6 +209,7 @@ function getStreamEvent(payload) {
     return {
       event: '',
       content: '',
+      audioUrl: '',
       success: false,
       message: '',
     }
@@ -198,6 +219,7 @@ function getStreamEvent(payload) {
   return {
     event: payload.type || payload.event || data.event || '',
     content: payload.content || payload.answer || data.content || data.answer || '',
+    audioUrl: data.audio_url || payload.audio_url || '',
     success: typeof payload.success === 'boolean' ? payload.success : true,
     message: payload.message || payload.error || '',
   }
@@ -303,7 +325,7 @@ function sendBookChatMessageStream(bookId, message, handlers) {
     }
 
     return new Promise((resolve, reject) => {
-      const decoder = typeof TextDecoder !== 'undefined' ? new TextDecoder('utf-8') : null
+      const decode = createStreamDecoder()
       let buffer = ''
       let reply = ''
       let tokenReceived = false
@@ -363,7 +385,8 @@ function sendBookChatMessageStream(bookId, message, handlers) {
             tokenReceived = true
             reply += segment
             if (typeof callbacks.onSegment === 'function') {
-              callbacks.onSegment(segment, reply)
+              const audioUrl = streamEvent.audioUrl ? toAbsoluteUrl(streamEvent.audioUrl) : ''
+              callbacks.onSegment(segment, reply, audioUrl)
             }
             return
           }
@@ -373,7 +396,7 @@ function sendBookChatMessageStream(bookId, message, handlers) {
             if (finalAnswer && !tokenReceived) {
               reply = finalAnswer
               if (typeof callbacks.onSegment === 'function') {
-                callbacks.onSegment(finalAnswer, reply)
+                callbacks.onSegment(finalAnswer, reply, '')
               }
             }
             finishResolve()
@@ -387,15 +410,15 @@ function sendBookChatMessageStream(bookId, message, handlers) {
       }
 
       const requestTask = wx.request({
-        url: `${BASE_URL}/novelindex/api/chat/stream`,
+        url: `${BASE_URL}/api/ask/segments`,
         method: 'POST',
         enableChunked: true,
         responseType: 'arraybuffer',
         data: {
-          doc_id: bookId,
-          message,
-          session_id: callbacks.conversationId || '',
-          user_id: identity.userId || identity.openid || 'default',
+          book: bookId,
+          question: message,
+          conversationId: callbacks.conversationId || '',
+          tts: true,
         },
         header: {
           'Content-Type': 'application/json',
@@ -428,7 +451,7 @@ function sendBookChatMessageStream(bookId, message, handlers) {
 
       if (requestTask && typeof requestTask.onChunkReceived === 'function') {
         requestTask.onChunkReceived((chunk) => {
-          buffer += decodeChunk(decoder, chunk.data)
+          buffer += decode(chunk.data)
           processBuffer()
         })
       }
@@ -517,7 +540,6 @@ module.exports = {
   getPurchasedBooks,
   getBookById,
   purchaseBook,
-  sendBookChatMessage,
   sendBookChatMessageStream,
   listConversations,
   createConversation,

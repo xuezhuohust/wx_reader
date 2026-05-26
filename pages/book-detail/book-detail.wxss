@@ -196,7 +196,6 @@
   font-size: 28rpx;
   font-weight: 700;
   color: var(--ink);
-  margin-bottom: 20rpx;
   display: flex;
   align-items: center;
   gap: 12rpx;
@@ -211,11 +210,27 @@
 }
 
 .info-card-content {
+  margin-top: 20rpx;
   font-size: 28rpx;
   line-height: 1.7;
   color: var(--charcoal);
   text-align: justify;
   display: block;
+}
+
+.info-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20rpx;
+  margin-bottom: 20rpx;
+}
+
+.chapter-count {
+  flex-shrink: 0;
+  font-size: 23rpx;
+  color: var(--stone);
+  font-weight: 700;
 }
 
 .chapter-list {
@@ -249,6 +264,54 @@
   font-size: 28rpx;
   color: var(--ink);
   font-weight: 500;
+}
+
+.empty-chapters {
+  padding: 28rpx 0 8rpx;
+  color: var(--stone);
+  font-size: 26rpx;
+}
+
+.chapter-fade {
+  height: 28rpx;
+  margin-top: -28rpx;
+  position: relative;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0), var(--bg-surface-soft));
+  pointer-events: none;
+}
+
+.chapter-toggle {
+  margin-top: 20rpx;
+  height: 72rpx;
+  border-radius: var(--radius-md);
+  border: 1rpx solid var(--hairline-soft);
+  color: var(--notion-primary);
+  background: rgba(60, 105, 43, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12rpx;
+  font-size: 26rpx;
+  font-weight: 700;
+}
+
+.chapter-toggle:active {
+  background: rgba(60, 105, 43, 0.1);
+}
+
+.chapter-toggle-icon {
+  width: 14rpx;
+  height: 14rpx;
+  border-right: 3rpx solid currentColor;
+  border-bottom: 3rpx solid currentColor;
+  transform: rotate(45deg);
+  margin-top: -6rpx;
+  transition: transform 0.2s ease;
+}
+
+.chapter-toggle-icon--up {
+  transform: rotate(225deg);
+  margin-top: 6rpx;
 }
 
 /* Copyright Area */
@@ -294,7 +357,7 @@
   font-size: 30rpx;
   font-weight: 700;
   border: none;
-  box-shadow: 0 8rpx 20rpx rgba(19, 30, 56, 0.15);
+  box-shadow: 0 8rpx 20rpx rgba(60, 105, 43, 0.15);
   transition: all 0.2s;
 }
 

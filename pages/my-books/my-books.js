@@ -216,7 +216,7 @@ Page({
   handleAbout() {
     wx.showModal({
       title: '关于我们',
-      content: `AI 伴读小程序 v${appVersion}\n专注于为您提供沉浸式的阅读体验。`,
+      content: `智能伴读小程序 v${appVersion}\n专注于为您提供沉浸式的阅读体验。`,
       showCancel: false
     })
   },

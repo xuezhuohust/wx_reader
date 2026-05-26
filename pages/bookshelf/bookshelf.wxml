@@ -1,116 +1,67 @@
 <view class="page-shell bookshelf-page">
-  <view class="content-body">
-    <!-- Hero Band Section -->
-    <view class="hero-band" style="padding-top: {{statusBarHeight + 20}}px;">
-      <view class="hero-content">
-        <!-- Stats moved to top-left -->
-        <view class="hero-stats-minimal">
-          <view class="stat-item">
-            <text class="stat-num">{{books.length}}</text>
-            <text class="stat-lab">藏书</text>
-          </view>
-          <view class="stat-dot"></view>
-          <view class="stat-item">
-            <text class="stat-num">3</text>
-            <text class="stat-lab">阅读天数</text>
-          </view>
-        </view>
+  <!-- Navigation -->
+  <view class="custom-nav" style="height: {{navBarHeight}}px;">
+    <view class="nav-inner" style="top: {{menuTop}}px; height: {{menuHeight}}px; padding-left: 40rpx; padding-right: 40rpx;">
+      <text class="nav-title">书库</text>
+    </view>
+  </view>
 
-        <text class="hero-title">我的书架</text>
-
-        <!-- Refined: Recently Read Quick Access (Integrated look) -->
-        <view wx:if="{{books.length > 0}}" class="recent-resume-card" bindtap="handleBookTap" data-book="{{books[0]}}">
-          <view class="resume-content">
-            <view class="resume-cover-box">
-              <image wx:if="{{books[0].coverUrl}}" class="resume-cover" src="{{books[0].coverUrl}}" mode="aspectFill" />
-              <view wx:else class="resume-cover-empty">
-                <text>暂无封面</text>
-              </view>
-              <view class="resume-play-tag">
-                <view class="play-icon-mini-white"></view>
-              </view>
-            </view>
-            <view class="resume-info">
-              <view class="resume-tag">继续阅读</view>
-              <text class="resume-title">{{books[0].title}}</text>
-              <text class="resume-progress">上次读到：第 12 页</text>
-            </view>
-            <view class="resume-arrow"></view>
-          </view>
-        </view>
-      </view>
-      <!-- Decorative Elements -->
-      <view class="hero-dots"></view>
-      <view class="hero-glow"></view>
+  <view class="content-body" style="padding-top: {{navBarHeight + 16}}px;">
+    <!-- Search -->
+    <view class="search-bar">
+      <input
+        class="search-input"
+        placeholder="搜索书名或作者"
+        placeholder-style="color: var(--stone); font-size: 26rpx;"
+        bindinput="handleSearchInput"
+        value="{{searchValue}}"
+      />
     </view>
 
-    <!-- Search Bar in Content Area -->
-    <view class="content-search-section">
-      <view class="search-bar-box">
-        <icon type="search" size="16" color="var(--steel)"></icon>
-        <input
-          class="search-input"
-          placeholder="在书架中搜索..."
-          placeholder-style="color:var(--stone);"
-          confirm-type="search"
-          bindinput="handleSearchInput"
-        />
-        <view class="sort-trigger" bindtap="handleSortTap">
-          <text>最近阅读</text>
-          <view class="sort-arrow"></view>
+    <!-- Book Grid -->
+    <view class="book-grid" wx:if="{{books.length > 0}}">
+      <view
+        wx:for="{{books}}"
+        wx:key="id"
+        class="book-grid-item"
+        data-book="{{item}}"
+        bindtap="handleBookTap"
+      >
+        <view class="grid-cover">
+          <image wx:if="{{item.coverUrl}}" src="{{item.coverUrl}}" mode="aspectFill" />
+          <view wx:else class="grid-cover-empty"><text>暂无封面</text></view>
+          <view class="ai-ready-tag">
+            <text>AI-Ready</text>
+          </view>
         </view>
+        <text class="grid-book-title">{{item.title}}</text>
+        <text class="grid-book-author">{{item.author || '未知作者'}}</text>
       </view>
     </view>
 
-    <view class="main-content">
-      <view wx:if="{{books.length > 0}}" class="bookshelf-canvas">
-        <view class="bookshelf-grid">
-          <view 
-            wx:for="{{books}}" 
-            wx:key="id" 
-            class="shelf-item"
-            data-book="{{item}}"
-            bindtap="handleBookTap"
-          >
-            <view class="book-spine-box">
-              <view class="book-cover-wrap">
-                <image 
-                  wx:if="{{item.coverUrl}}"
-                  class="book-cover" 
-                  src="{{item.coverUrl}}" 
-                  mode="aspectFill" 
-                  binderror="handleImageError"
-                  data-index="{{index}}"
-                />
-                <view wx:else class="book-cover-empty">
-                  <text>暂无封面</text>
-                </view>
-                <view class="book-glare"></view>
-                <view class="book-badge" wx:if="{{item.category}}">{{item.category}}</view>
-              </view>
-              <view class="book-shadow"></view>
-              <view class="item-plank"></view>
-            </view>
-            
-            <view class="book-info">
-              <text class="book-name">{{item.title}}</text>
-              <view class="read-action-pill" catchtap="handleActionTap" data-book="{{item}}">
-                <view class="play-icon-mini"></view>
-                <text>对话</text>
-              </view>
-            </view>
-          </view>
-        </view>
-      </view>
-
-      <view wx:elif="{{!loading}}" class="empty-wrap">
-        <view class="empty-state">
-          <view class="empty-icon">📚</view>
-          <text class="empty-title">书架空空如也</text>
-          <text class="empty-desc">您还没有购买任何书籍，快去探索库看看吧。</text>
-          <button class="explore-btn" bindtap="handleExplore">前往探索库</button>
-        </view>
+    <!-- Loading -->
+    <view class="book-grid" wx:elif="{{loading}}">
+      <view wx:for="{{[1,2,3,4]}}" wx:key="*this" class="book-grid-item skeleton-pulse">
+        <view class="grid-cover skeleton-bg"></view>
+        <view class="skeleton-bg" style="width: 70%; height: 28rpx; margin-top: 12rpx;"></view>
+        <view class="skeleton-bg" style="width: 50%; height: 22rpx; margin-top: 8rpx;"></view>
       </view>
     </view>
+
+    <!-- Empty -->
+    <view wx:elif="{{!loading}}" class="empty-state">
+      <text class="empty-icon">书</text>
+      <text class="empty-title">书架空空如也</text>
+      <text class="empty-desc">快去探索库看看吧</text>
+      <view class="btn-primary" bindtap="handleExplore">
+        <text>前往探索</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- FAB -->
+  <view class="fab-btn" bindtap="handleExplore">
+    <text class="fab-icon">+</text>
+    <text class="fab-text">探索</text>
   </view>
 </view>

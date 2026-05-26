@@ -41,7 +41,7 @@
         </view>
         <view class="stat-divider"></view>
         <view class="stat-item">
-          <text class="stat-value">{{book.chapters.length || 0}}</text>
+          <text class="stat-value">{{chapterCount}}</text>
           <text class="stat-label">章节</text>
         </view>
         <view class="stat-divider"></view>
@@ -63,19 +63,28 @@
     <!-- Chapters List -->
     <view class="section-container">
       <view class="info-card">
-        <text class="info-card-title">目录</text>
-        <view class="chapter-list">
-          <view wx:for="{{book.chapters}}" wx:key="*this" class="chapter-item">
+        <view class="info-card-header">
+          <text class="info-card-title">目录</text>
+          <text wx:if="{{chapterCount}}" class="chapter-count">共 {{chapterCount}} 章</text>
+        </view>
+        <view wx:if="{{chapterCount}}" class="chapter-list">
+          <view wx:for="{{visibleChapters}}" wx:key="*this" class="chapter-item">
             <text class="chapter-index">{{index + 1}}</text>
             <text class="chapter-name">{{item}}</text>
           </view>
+        </view>
+        <view wx:else class="empty-chapters">暂无目录</view>
+        <view wx:if="{{hasHiddenChapters && !chaptersExpanded}}" class="chapter-fade"></view>
+        <view wx:if="{{hasHiddenChapters}}" class="chapter-toggle" bindtap="handleToggleChapters">
+          <text>{{chaptersExpanded ? '收起目录' : '展开全部章节'}}</text>
+          <view class="chapter-toggle-icon {{chaptersExpanded ? 'chapter-toggle-icon--up' : ''}}"></view>
         </view>
       </view>
     </view>
 
     <!-- Copyright -->
     <view class="section-container copyright-area">
-      <text class="copyright-text">{{book.copyright || '© 2026 读书系统. All rights reserved.'}}</text>
+      <text class="copyright-text">{{book.copyright || '© 2026 读书系统。保留所有权利。'}}</text>
     </view>
   </view>
 
@@ -85,7 +94,7 @@
       <!-- 小说介绍页只保留主行动按钮；清除历史对话统一放到聊天页内部处理。 -->
       <view class="reader-action-stack">
         <button class="btn-primary-full" bindtap="handleAction">
-          {{book.purchased ? '进入 AI 沉浸导读' : '立即解锁导读'}}
+          {{book.purchased ? '进入智能沉浸导读' : '立即解锁导读'}}
         </button>
       </view>
     </block>

@@ -4,6 +4,7 @@
 # Editors
 .idea/
 .vscode/
+.claude/
 
 # Node / package managers
 node_modules/
