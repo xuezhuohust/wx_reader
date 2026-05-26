@@ -358,7 +358,7 @@ Page({
 
   parseStructuredList(text) {
     const source = String(text || '').replace(/\n+/g, ' ')
-    const pattern = /(^|[\s。；;])(\d+)[.、]\s*/g
+    const pattern = /(^|[\s。；;：:])(\d+)[.、．]\s*/g
     const matches = []
     let match = pattern.exec(source)
 
@@ -1213,6 +1213,22 @@ Page({
 
     this.resetAudioPlayback()
     this.enqueueAudioChunk(id, content)
+  },
+
+  handleCopyMessage(event) {
+    const content = String((event.currentTarget.dataset || {}).content || '').trim()
+    if (!content) {
+      return
+    }
+    wx.setClipboardData({
+      data: content,
+      success: () => {
+        wx.showToast({
+          title: '已复制',
+          icon: 'success',
+        })
+      },
+    })
   },
 
   sendMessage(rawText) {

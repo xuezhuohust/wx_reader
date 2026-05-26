@@ -469,12 +469,22 @@
   50% { opacity: 0; }
 }
 
+.message-actions {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  margin-top: 16rpx;
+}
+
+.container-user .message-actions {
+  justify-content: flex-end;
+}
+
 /* Voice Control Optimized */
 .voice-control {
   display: flex;
   align-items: center;
   gap: 12rpx;
-  margin-top: 16rpx;
   padding: 8rpx 20rpx;
   background: var(--bg-surface-soft);
   border: 1rpx solid var(--hairline-soft);
@@ -500,6 +510,33 @@
 
 .is-playing .voice-status-text {
   color: var(--notion-primary);
+}
+
+.copy-control {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 8rpx 18rpx;
+  background: var(--bg-surface-soft);
+  border: 1rpx solid var(--hairline-soft);
+  border-radius: var(--radius-full);
+  color: var(--slate);
+  font-size: 22rpx;
+  font-weight: 700;
+}
+
+.copy-control:active {
+  transform: scale(0.96);
+  background: rgba(60, 105, 43, 0.08);
+  color: var(--notion-primary);
+}
+
+.copy-icon {
+  width: 22rpx;
+  height: 22rpx;
+  background: currentColor;
+  mask: url('data:image/svg+xml;utf8,<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>') no-repeat center;
+  mask-size: contain;
 }
 
 .voice-icon-new {

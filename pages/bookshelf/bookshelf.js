@@ -56,15 +56,46 @@ Page({
     })
   },
 
+  isImageCoverValue(value) {
+    const raw = String(value || '').trim()
+    if (!raw) {
+      return false
+    }
+    return /^(https?:\/\/|wxfile:\/\/|cloud:\/\/|data:image\/|\/)/.test(raw)
+      || /\.(png|jpe?g|webp|gif|svg)(\?|#|$)/i.test(raw)
+  },
+
+  resolveCoverUrl(book) {
+    const candidates = [
+      book && book.coverUrl,
+      book && book.cover_url,
+      book && book.imageUrl,
+      book && book.image_url,
+      book && book.coverImage,
+      book && book.cover_image,
+    ]
+
+    for (let i = 0; i < candidates.length; i += 1) {
+      if (this.isImageCoverValue(candidates[i])) {
+        return api.toAbsoluteUrl(candidates[i])
+      }
+    }
+
+    if (book && this.isImageCoverValue(book.cover)) {
+      return api.toAbsoluteUrl(book.cover)
+    }
+
+    return ''
+  },
+
   loadBookshelf(done) {
     this.setData({ loading: true })
     api.getPurchasedBooks()
       .then((books) => {
-        // 确保封面 URL 是绝对路径；后端没有返回封面时保持为空，不再使用默认封面图。
+        // 只把真实图片路径转成封面地址；cover-sunset 这类主题值不能当图片加载。
         const processedBooks = (books || []).map(book => {
-          const rawCover = book.coverUrl || book.cover
           return Object.assign({}, book, {
-            coverUrl: rawCover ? api.toAbsoluteUrl(rawCover) : ''
+            coverUrl: this.resolveCoverUrl(book),
           })
         })
         this.setData({
@@ -135,14 +166,18 @@ Page({
   },
 
   handleImageError(e) {
-    const { index } = e.currentTarget.dataset
-    const { books } = this.data
-    
-    if (books[index] && books[index].coverUrl) {
-      const key = `books[${index}].coverUrl`
-      this.setData({
-        [key]: ''
-      })
-    }
+    const { id } = e.currentTarget.dataset
+    const failedId = String(id || '')
+    const books = this.data.books.map((book) => (
+      String(book.id || '') === failedId ? Object.assign({}, book, { coverUrl: '' }) : book
+    ))
+    const allBooks = this.data.allBooks.map((book) => (
+      String(book.id || '') === failedId ? Object.assign({}, book, { coverUrl: '' }) : book
+    ))
+
+    this.setData({
+      books,
+      allBooks,
+    })
   },
 })

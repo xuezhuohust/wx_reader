@@ -134,20 +134,30 @@
               <view wx:if="{{item.loading || (item.role === 'ai' && loadingReply && index === messages.length - 1)}}" class="typing-cursor"></view>
             </view>
           </view>
-          <view
-            wx:if="{{item.role === 'ai' && !item.loading}}"
-            class="voice-control {{(playingMessageId === item.id || audioLoadingMessageId === item.id) ? 'is-playing' : ''}}"
-            data-id="{{item.id}}"
-            data-content="{{item.content}}"
-            bindtap="handleSpeakMessage"
-          >
-            <view class="voice-wave" wx:if="{{playingMessageId === item.id || audioLoadingMessageId === item.id}}">
-              <view class="wave-bar"></view>
-              <view class="wave-bar"></view>
-              <view class="wave-bar"></view>
+          <view wx:if="{{!item.loading}}" class="message-actions">
+            <view
+              wx:if="{{item.role === 'ai'}}"
+              class="voice-control {{(playingMessageId === item.id || audioLoadingMessageId === item.id) ? 'is-playing' : ''}}"
+              data-id="{{item.id}}"
+              data-content="{{item.content}}"
+              bindtap="handleSpeakMessage"
+            >
+              <view class="voice-wave" wx:if="{{playingMessageId === item.id || audioLoadingMessageId === item.id}}">
+                <view class="wave-bar"></view>
+                <view class="wave-bar"></view>
+                <view class="wave-bar"></view>
+              </view>
+              <view class="voice-icon-new" wx:else></view>
+              <text class="voice-status-text">{{(playingMessageId === item.id || audioLoadingMessageId === item.id) ? '停止' : '朗读'}}</text>
             </view>
-            <view class="voice-icon-new" wx:else></view>
-            <text class="voice-status-text">{{(playingMessageId === item.id || audioLoadingMessageId === item.id) ? '停止' : '朗读'}}</text>
+            <view
+              class="copy-control"
+              data-content="{{item.content}}"
+              bindtap="handleCopyMessage"
+            >
+              <view class="copy-icon"></view>
+              <text>复制</text>
+            </view>
           </view>
         </view>
         <view wx:if="{{item.role === 'user'}}" class="user-avatar">

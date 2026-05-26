@@ -28,7 +28,7 @@
         bindtap="handleBookTap"
       >
         <view class="grid-cover">
-          <image wx:if="{{item.coverUrl}}" src="{{item.coverUrl}}" mode="aspectFill" />
+          <image wx:if="{{item.coverUrl}}" src="{{item.coverUrl}}" mode="aspectFill" data-id="{{item.id}}" binderror="handleImageError" />
           <view wx:else class="grid-cover-empty"><text>暂无封面</text></view>
           <view class="ai-ready-tag">
             <text>AI-Ready</text>
