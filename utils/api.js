@@ -318,8 +318,9 @@ function appendConversationMessages(conversationId, messages) {
 /** 流式书籍问答 - 使用 chunked 传输逐段返回回答 */
 function sendBookChatMessageStream(bookId, message, handlers) {
   const callbacks = handlers || {}
+  let streamRequestTask = null
 
-  return ensureUserIdentity().then((identity) => {
+  const promise = ensureUserIdentity().then((identity) => {
     if (!identity || !identity.openid || !identity.token) {
       throw new Error('登录失败，请稍后重试')
     }
@@ -408,7 +409,7 @@ function sendBookChatMessageStream(bookId, message, handlers) {
         })
       }
 
-      const requestTask = wx.request({
+      streamRequestTask = wx.request({
         url: `${BASE_URL}/novelindex/api/chat/stream`,
         method: 'POST',
         enableChunked: true,
@@ -448,14 +449,23 @@ function sendBookChatMessageStream(bookId, message, handlers) {
         },
       })
 
-      if (requestTask && typeof requestTask.onChunkReceived === 'function') {
-        requestTask.onChunkReceived((chunk) => {
+      if (streamRequestTask && typeof streamRequestTask.onChunkReceived === 'function') {
+        streamRequestTask.onChunkReceived((chunk) => {
           buffer += decode(chunk.data)
           processBuffer()
         })
       }
     })
   })
+
+  // 暴露 abort 方法，允许调用方中止流式请求
+  promise.abort = () => {
+    if (streamRequestTask && typeof streamRequestTask.abort === 'function') {
+      streamRequestTask.abort()
+    }
+  }
+
+  return promise
 }
 
 /** 获取出版方统计数据 */
@@ -527,9 +537,13 @@ function startBuildBook(id, onProgress) {
   })
 }
 
+/** 切换用户活跃角色（reader / publisher） */
 function switchUserRole(role) {
-  // Simulator: return the role directly
-  return Promise.resolve({ role })
+  return request({
+    url: '/api/auth/switch-role',
+    method: 'POST',
+    data: { role },
+  }).then((data) => data.identity || data)
 }
 
 module.exports = {

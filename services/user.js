@@ -102,15 +102,7 @@ function loginWithWechat() {
   const previousIdentity = loadIdentity() || {}
 
   return getWxLoginCode()
-    .then((code) => {
-      // 优先新版 API，fallback 到旧版
-      return callLoginApi('/api/auth/login', code).catch((error) => {
-        if (error && error.statusCode && error.statusCode !== 404) {
-          throw error
-        }
-        return callLoginApi('/auth/login', code)
-      })
-    })
+    .then((code) => callLoginApi('/api/auth/login', code))
     .then((data) => {
       const openid = String(data.openid || '').trim()
       const token = String(data.token || '').trim()

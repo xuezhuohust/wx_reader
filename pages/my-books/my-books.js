@@ -56,6 +56,22 @@ Page({
       currentRole: role
     })
     syncRoleTabBar(this, 'pages/my-books/my-books', identity)
+    this.setProfileTabBarHidden(this.data.showProfileModal)
+  },
+
+  onHide() {
+    this.setProfileTabBarHidden(false)
+  },
+
+  onUnload() {
+    this.setProfileTabBarHidden(false)
+  },
+
+  setProfileTabBarHidden(hidden) {
+    const tabBar = this.getTabBar && this.getTabBar()
+    if (tabBar && typeof tabBar.setHidden === 'function') {
+      tabBar.setHidden(!!hidden)
+    }
   },
 
   bootstrapIdentity() {
@@ -78,6 +94,7 @@ Page({
     this.setData({
       showProfileModal: true,
     })
+    this.setProfileTabBarHidden(true)
   },
 
   onChooseAvatar(event) {
@@ -141,6 +158,7 @@ Page({
           profileSaving: false,
           showProfileModal: false,
         })
+        this.setProfileTabBarHidden(false)
 
         wx.showToast({
           title: '身份同步成功',
@@ -160,6 +178,7 @@ Page({
           profileSaving: false,
           showProfileModal: false,
         })
+        this.setProfileTabBarHidden(false)
 
         wx.showToast({
           title: '身份同步成功',
@@ -172,6 +191,7 @@ Page({
     this.setData({
       showProfileModal: false,
     })
+    this.setProfileTabBarHidden(false)
   },
 
   handleStopPropagation() {},

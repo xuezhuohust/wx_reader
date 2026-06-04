@@ -47,12 +47,11 @@ App({
 
   switchUserRole(role) {
     return api.switchUserRole(role)
-      .then((res) => {
-        const nextIdentity = Object.assign({}, this.globalData.identity, {
-          role: res.role || role,
+      .then((identity) => {
+        const nextIdentity = saveIdentity(Object.assign({}, this.globalData.identity, identity, {
           updatedAt: Date.now(),
-        })
-        this.globalData.identity = saveIdentity(nextIdentity)
+        }))
+        this.globalData.identity = nextIdentity
         return nextIdentity
       })
   },

@@ -31,10 +31,12 @@
 }
 
 .nav-back {
+  position: absolute;
+  left: 32rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-left: -20rpx;
+  margin-left: 0;
 }
 
 .back-arrow {
@@ -50,7 +52,7 @@
   font-size: 36rpx;
   font-weight: 700;
   color: var(--primary);
-  margin-left: 16rpx;
+  margin-left: 0;
 }
 
 /* 2026-05-19 新增：对话切换按钮 */

@@ -1,6 +1,6 @@
 // 网络请求封装模块 - 提供统一的请求、响应处理和鉴权
 
-const BASE_URL = 'https://yakosang.icu'
+const BASE_URL = 'https://xiandianzigyy.cloud/reader'
 
 /** 拼接完整的请求 URL */
 function buildUrl(url) {

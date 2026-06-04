@@ -61,6 +61,8 @@ Page({
     this.currentAudioStartedAt = 0
     this.isAudioPlaying = false
     this.ignoreNextStopEvent = false
+    this.playbackEpoch = 0
+    this._streamRequestTask = null
     this.audioQueue = []        // {messageId, text} 待生成
     this.readyMap = {}          // seq -> {messageId, audioUrl} 已生成
     this.nextPlaySeq = 0       // 下一个该播放的序号
@@ -313,6 +315,11 @@ Page({
     clearTimeout(this._scrollTailTimer)
     clearTimeout(this._streamFlushTimer)
     clearTimeout(this._autoScrollTimer)
+    clearTimeout(this._ignoreStopTimer)
+    if (this._streamRequestTask && typeof this._streamRequestTask.abort === 'function') {
+      this._streamRequestTask.abort()
+      this._streamRequestTask = null
+    }
     this.destroyAudioContext()
   },
 
@@ -872,13 +879,15 @@ Page({
 
     audio.onStop(() => {
       if (this.ignoreNextStopEvent) {
-        this.ignoreNextStopEvent = false
         return
       }
       this.finishCurrentAudio(false)
     })
 
     audio.onPause(() => {
+      if (this.ignoreNextStopEvent) {
+        return
+      }
       this.finishCurrentAudio(false)
     })
 
@@ -959,6 +968,13 @@ Page({
   },
 
   resetAudioPlayback() {
+    // 中止正在进行的 SSE 流式响应，防止 onSegment 继续入队新的 TTS 请求
+    if (this._streamRequestTask && typeof this._streamRequestTask.abort === 'function') {
+      this._streamRequestTask.abort()
+      this._streamRequestTask = null
+    }
+    // 递增播放纪元，让飞行中的 TTS Promise 回调识别为过期数据
+    this.playbackEpoch += 1
     this.audioQueue = []
     this.readyMap = {}
     this.pendingTTSQueue = []
@@ -970,6 +986,11 @@ Page({
     if (this.audioContext && (this.isAudioPlaying || this.currentAudioMessageId)) {
       this.ignoreNextStopEvent = true
       this.audioContext.stop()
+      // 延迟清除标记，确保 onStop 和 onPause（无论触发顺序）都被拦截
+      clearTimeout(this._ignoreStopTimer)
+      this._ignoreStopTimer = setTimeout(() => {
+        this.ignoreNextStopEvent = false
+      }, 200)
     }
     this.currentAudioMessageId = ''
     this.currentAudioStartedAt = 0
@@ -1139,12 +1160,17 @@ Page({
   },
 
   generateAudio(seq, messageId, text) {
+    const epoch = this.playbackEpoch
     this.generatingCount += 1
     this.setData({ audioLoadingMessageId: messageId })
 
     const startedAt = Date.now()
     api.requestSpeech(text)
       .then(({ audioUrl, cached, size }) => {
+        // 播放已被重置，丢弃过期结果
+        if (this.playbackEpoch !== epoch) {
+          return
+        }
         this.generatingCount -= 1
         console.info('[chat] tts ready', {
           seq,
@@ -1159,6 +1185,10 @@ Page({
         this.playNextIfIdle()
       })
       .catch((error) => {
+        // 播放已被重置，丢弃过期错误
+        if (this.playbackEpoch !== epoch) {
+          return
+        }
         console.error('[chat] requestSpeech failed', error)
         this.generatingCount -= 1
         // 跳过失败的段，推进序号
@@ -1337,7 +1367,7 @@ Page({
 
     const convId = this.data.currentConversationId
     const chatBookId = (this.data.book && (this.data.book.bookKey || this.data.book.id)) || this.bookId
-    api.sendBookChatMessageStream(chatBookId, serverQuestion, {
+    const streamPromise = api.sendBookChatMessageStream(chatBookId, serverQuestion, {
       conversationId: convId,
       onSegment: (segment, fullReply) => {
         this._pendingStreamReply = fullReply
@@ -1346,7 +1376,11 @@ Page({
         this.appendSpeechSegment(loadingMessage.id, segment, false)
       },
     })
+    // 保存引用，以便 resetAudioPlayback 可以中止流
+    this._streamRequestTask = streamPromise
+    streamPromise
       .then((result) => {
+        this._streamRequestTask = null
         this.flushSpeechBuffer(loadingMessage.id)
         const finalReply = result.reply || ''
         this._pendingStreamReply = finalReply
@@ -1370,6 +1404,7 @@ Page({
         }
       })
       .catch(() => {
+        this._streamRequestTask = null
         this.streamSpeechBuffer = ''
         const failedContent = this._pendingStreamReply || '暂时无法获取回答，请稍后重试。'
         this._pendingStreamReply = failedContent
