@@ -242,3 +242,26 @@
 .bottom-safe {
   height: calc(48rpx + env(safe-area-inset-bottom));
 }
+
+/* Logout */
+.logout-area {
+  padding: 16rpx 24rpx 0;
+}
+
+.btn-logout {
+  width: 100%;
+  height: 96rpx;
+  background: transparent;
+  color: var(--danger, #e74c3c);
+  font-size: 28rpx;
+  font-weight: 500;
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5rpx solid var(--hairline-strong, #e0e0e0);
+}
+
+.btn-logout:active {
+  background: rgba(231, 76, 60, 0.06);
+}

@@ -259,6 +259,7 @@ Page({
           clearIdentity()
           this.setData({ identity: null })
           wx.showToast({ title: '已退出登录', icon: 'success' })
+          wx.switchTab({ url: '/pages/index/index' })
         }
       }
     })

@@ -125,4 +125,20 @@ Page({
       })
   },
 
+  handleLogout() {
+    wx.showModal({
+      title: '退出登录',
+      content: '确定要退出当前账号吗？',
+      success: (res) => {
+        if (res.confirm) {
+          const { clearIdentity } = require('../../utils/storage')
+          clearIdentity()
+          this.setData({ identity: null })
+          wx.showToast({ title: '已退出登录', icon: 'success' })
+          wx.switchTab({ url: '/pages/index/index' })
+        }
+      }
+    })
+  },
+
 })

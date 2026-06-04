@@ -150,6 +150,11 @@
         <text class="menu-text">智能设置</text>
         <view class="menu-arrow"></view>
       </view>
+      <view class="menu-item menu-item--logout" bindtap="handleLogout">
+        <view class="menu-icon icon-logout"></view>
+        <text class="menu-text menu-text--logout">退出登录</text>
+        <view class="menu-arrow"></view>
+      </view>
     </view>
   </scroll-view>
 

@@ -63,6 +63,9 @@
       </button>
     </view>
 
+    <view class="logout-area">
+      <button class="btn-logout" bindtap="handleLogout">退出登录</button>
+    </view>
 
     <view class="bottom-safe"></view>
   </scroll-view>

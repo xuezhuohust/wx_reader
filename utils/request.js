@@ -110,6 +110,7 @@ function request(options) {
         throw error
       }
 
+      wx.showToast({ title: '登录已过期，正在重新登录...', icon: 'none', duration: 2000 })
       clearIdentity()
 
       return request(Object.assign({}, options, {
