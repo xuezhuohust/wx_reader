@@ -410,7 +410,7 @@ function sendBookChatMessageStream(bookId, message, handlers) {
       }
 
       streamRequestTask = wx.request({
-        url: `${BASE_URL}/novelindex/api/chat/stream`,
+        url: `${BASE_URL}/api/chat/stream`,
         method: 'POST',
         enableChunked: true,
         responseType: 'arraybuffer',
