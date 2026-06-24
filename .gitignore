@@ -27,3 +27,6 @@ project.private.config.json
 .env
 .env.local
 .env.*.local
+
+# workbuddy files
+.workbuddy/

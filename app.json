@@ -10,7 +10,8 @@
     "pages/publisher/upload",
     "pages/publisher/build",
     "pages/publisher/edit",
-    "pages/settings/settings"
+    "pages/settings/settings",
+    "pages/guide/guide"
   ],
   "window": {
     "navigationStyle": "custom",

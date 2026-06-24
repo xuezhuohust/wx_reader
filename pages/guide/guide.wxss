@@ -1,0 +1,174 @@
+.guide-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background-color: #faf8f5;
+  color: #1b1b1b;
+}
+
+.guide-swiper {
+  flex: 1;
+}
+
+.guide-slide {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 60rpx;
+  text-align: center;
+  height: 100%;
+}
+
+.illustration {
+  margin-bottom: 56rpx;
+}
+
+.icon-wrap {
+  width: 200rpx;
+  height: 200rpx;
+  border-radius: 50%;
+  background-color: rgba(60, 105, 43, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon {
+  width: 96rpx;
+  height: 96rpx;
+}
+
+/* Fallback icons using CSS if images are missing */
+.icon-placeholder {
+  width: 100rpx;
+  height: 100rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-book {
+  width: 60rpx;
+  height: 80rpx;
+  border: 4rpx solid #3c692b;
+  border-radius: 4rpx;
+  position: relative;
+}
+
+.icon-book::after {
+  content: '';
+  position: absolute;
+  left: 10rpx;
+  top: 20rpx;
+  width: 30rpx;
+  height: 4rpx;
+  background-color: #3c692b;
+  box-shadow: 0 10rpx 0 #3c692b, 0 20rpx 0 #3c692b;
+}
+
+.icon-user {
+  width: 50rpx;
+  height: 50rpx;
+  border: 4rpx solid #3c692b;
+  border-radius: 50%;
+  position: relative;
+}
+
+.icon-user::after {
+  content: '';
+  position: absolute;
+  bottom: -30rpx;
+  left: -10rpx;
+  width: 70rpx;
+  height: 30rpx;
+  border: 4rpx solid #3c692b;
+  border-bottom: none;
+  border-radius: 30rpx 30rpx 0 0;
+}
+
+.title {
+  font-size: 48rpx;
+  font-weight: 900;
+  letter-spacing: -1rpx;
+  color: #1b1b1b;
+  margin-bottom: 16rpx;
+}
+
+.subtitle {
+  font-size: 28rpx;
+  color: #8c8c8c;
+  line-height: 1.5;
+  max-width: 520rpx;
+}
+
+.guide-footer {
+  padding: 0 60rpx 80rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.dots {
+  display: flex;
+  gap: 12rpx;
+  margin-bottom: 40rpx;
+}
+
+.dot {
+  width: 12rpx;
+  height: 12rpx;
+  border-radius: 50%;
+  background-color: rgba(0, 0, 0, 0.1);
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dot.active {
+  background-color: #3c692b;
+  width: 36rpx;
+  border-radius: 99rpx;
+}
+
+.actions {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24rpx;
+}
+
+.next-btn {
+  width: 100% !important;
+  max-width: 560rpx;
+  padding: 28rpx 0;
+  border-radius: 28rpx;
+  background-color: #1b1b1b;
+  color: #fff;
+  font-size: 30rpx;
+  font-weight: 700;
+  border: none;
+}
+
+.login-btn {
+  width: 100% !important;
+  max-width: 560rpx;
+  padding: 28rpx 0;
+  border-radius: 28rpx;
+  background-color: #07C160;
+  color: #fff;
+  font-size: 30rpx;
+  font-weight: 700;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16rpx;
+}
+
+.wechat-icon {
+  width: 40rpx;
+  height: 40rpx;
+  background-image: url('data:image/svg+xml;utf8,<svg width="24" height="24" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg"><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.963-1.613 4.747-1.737 6.674-.292.34.23.654.496.94.788a8.07 8.07 0 0 0-2.756-2.198C12.75 2.638 10.878 2.188 8.691 2.188zm-2.77 4.08a1.49 1.49 0 1 1 0 2.98 1.49 1.49 0 0 1 0-2.98zm5.54 0a1.49 1.49 0 1 1 0 2.98 1.49 1.49 0 0 1 0-2.98z"/><path d="M23.76 14.939c0-3.754-3.503-6.799-7.828-6.799-4.376 0-7.829 3.045-7.829 6.799 0 3.754 3.453 6.799 7.829 6.799.966 0 1.926-.131 2.816-.393a.68.68 0 0 1 .546.076l1.527.893a.167.167 0 0 0 .084.028.258.258 0 0 0 .253-.263c0-.06-.024-.118-.04-.177l-.313-1.188a.474.474 0 0 1 .17-.532C23.052 18.86 23.76 17.052 23.76 14.94zm-10.487-.664a1.212 1.212 0 1 1 0-2.424 1.212 1.212 0 0 1 0 2.424zm5.581 0a1.212 1.212 0 1 1 0-2.424 1.212 1.212 0 0 1 0 2.424z"/></svg>');
+  background-size: contain;
+  background-repeat: no-repeat;
+}

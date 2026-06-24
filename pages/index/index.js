@@ -56,6 +56,14 @@ Page({
   },
 
   onLoad(options) {
+    // Check if guide needs to be shown
+    if (!wx.getStorageSync('guide_shown')) {
+      wx.reLaunch({
+        url: '/pages/guide/guide',
+      })
+      return
+    }
+
     const app = getApp()
     this.setData({
       navBarHeight: app.globalData.navBarHeight,
@@ -102,6 +110,11 @@ Page({
   },
 
   onShow() {
+    // 同样在 onShow 中拦截，防止重定向过程中触发了首页的登录逻辑
+    if (!wx.getStorageSync('guide_shown')) {
+      return
+    }
+
     const { getUserRole } = require('../../utils/role')
     const { loadIdentity } = require('../../utils/storage')
     const identity = loadIdentity()

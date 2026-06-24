@@ -1,0 +1,53 @@
+<view class="guide-container">
+  <swiper class="guide-swiper" indicator-dots="{{false}}" current="{{current}}" bindchange="onSwiperChange">
+    <!-- Slide 1: Deep Reading -->
+    <swiper-item>
+      <view class="guide-slide">
+        <view class="illustration">
+          <view class="icon-wrap">
+            <image class="icon" src="/app-assets/guide-read.svg" mode="aspectFit" wx:if="{{hasReadIcon}}"></image>
+            <view class="icon-placeholder" wx:else>
+              <view class="icon-book"></view>
+            </view>
+          </view>
+        </view>
+        <view class="title">让阅读更有深度</view>
+        <view class="subtitle">AI 伴读助手，随时解答你的阅读疑问</view>
+      </view>
+    </swiper-item>
+
+    <!-- Slide 2: Start Journey -->
+    <swiper-item>
+      <view class="guide-slide">
+        <view class="illustration">
+          <view class="icon-wrap">
+            <image class="icon" src="/app-assets/guide-user.svg" mode="aspectFit" wx:if="{{hasUserIcon}}"></image>
+            <view class="icon-placeholder" wx:else>
+              <view class="icon-user"></view>
+            </view>
+          </view>
+        </view>
+        <view class="title">开启你的阅读之旅</view>
+        <view class="subtitle">登录后同步进度、笔记与 AI 对话</view>
+      </view>
+    </swiper-item>
+  </swiper>
+
+  <view class="guide-footer">
+    <view class="dots">
+      <view wx:for="{{2}}" wx:key="*this" class="dot {{current === index ? 'active' : ''}}"></view>
+    </view>
+    
+    <view class="actions">
+      <block wx:if="{{current < 1}}">
+        <button class="next-btn" bindtap="nextSlide">下一步</button>
+      </block>
+      <block wx:else>
+        <button class="login-btn" open-type="getUserInfo" bindgetuserinfo="handleLogin">
+          <view class="wechat-icon"></view>
+          微信一键登录
+        </button>
+      </block>
+    </view>
+  </view>
+</view>
