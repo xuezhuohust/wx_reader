@@ -182,18 +182,19 @@
   <!-- Chat Footer -->
   <view class="chat-footer">
     <view class="composer-wrap">
-      <!-- 语音按钮 -->
-      <view class="voice-toggle-btn {{isRecording ? 'recording' : ''}}" 
-            bindtouchstart="handleVoiceStart" 
-            bindtouchend="handleVoiceEnd"
-            bindtouchcancel="handleVoiceCancel">
-        <view class="icon-mic"></view>
+      <!-- 模式切换按钮 -->
+      <view class="mode-toggle-btn" bindtap="handleToggleInputMode">
+        <view class="{{inputMode === 'keyboard' ? 'icon-mic' : 'icon-keyboard'}}"></view>
       </view>
-      <view class="input-container">
+
+      <!-- 输入区域 -->
+      <view class="input-container {{inputMode === 'voice' ? 'voice-mode' : ''}}">
+        <!-- 文本输入模式 -->
         <textarea
+          wx:if="{{inputMode === 'keyboard'}}"
           class="composer-input"
           value="{{inputValue}}"
-          placeholder="{{isRecording ? '正在聆听...' : '问问伴读助手...'}}"
+          placeholder="问问伴读助手..."
           placeholder-class="placeholder-text"
           bindinput="handleInput"
           bindfocus="handleFocus"
@@ -201,11 +202,25 @@
           bindconfirm="handleSend"
           confirm-type="send"
           auto-height
-          adjust-position="{{false}}"
+          adjust-position="{{true}}"
           maxlength="1000"
+          cursor-spacing="20"
         />
+        
+        <!-- 语音录音模式 (类似微信) -->
+        <view
+          wx:else
+          class="voice-bar {{isRecording ? 'recording' : ''}} {{voiceCancel ? 'cancel' : ''}}"
+          bindtouchstart="handleVoiceStart"
+          bindtouchmove="handleVoiceMove"
+          bindtouchend="handleVoiceEnd"
+          bindtouchcancel="handleVoiceCancel"
+        >
+          <text>{{isRecording ? (voiceCancel ? '松开取消' : '松开发送') : '按住说话'}}</text>
+        </view>
       </view>
-      <view class="send-btn {{!inputValue ? 'send-btn--disabled' : ''}}" bindtap="handleSend">
+
+      <view class="send-btn {{!inputValue ? 'send-btn--disabled' : ''}}" bindtap="handleSend" wx:if="{{inputMode === 'keyboard'}}">
         <view class="send-icon"></view>
       </view>
     </view>

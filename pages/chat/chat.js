@@ -206,7 +206,7 @@ Page({
   },
 
   handleVoiceStart(event) {
-    if (this.data.inputMode !== 'voice' || this.data.loadingReply || this.data.isRecording) {
+    if (this.data.loadingReply || this.data.isRecording) {
       return
     }
 
@@ -217,14 +217,36 @@ Page({
       return
     }
 
-    const touch = event.touches && event.touches[0]
-    this.voiceStartY = touch ? touch.clientY : 0
-    this.voiceStartAt = Date.now()
-    this.voiceRecordingCancelled = false
-    this.voiceRecordingTooShort = false
-    wx.vibrateShort()
-    this.setData({ voiceCancel: false })
-    this.startRecording()
+    // Check recording permission before starting
+    wx.getSetting({
+      success: (res) => {
+        const auth = res.authSetting['scope.record']
+        if (auth === false) {
+          // Explicitly denied, guide to settings
+          wx.showModal({
+            title: '需要录音权限',
+            content: '您已禁用录音权限，请在设置中开启后使用语音功能',
+            confirmText: '去设置',
+            success: (res) => {
+              if (res.confirm) {
+                wx.openSetting()
+              }
+            }
+          })
+          return
+        }
+        
+        // If undefined (not asked) or true (granted), proceed
+        const touch = event.touches && event.touches[0]
+        this.voiceStartY = touch ? touch.clientY : 0
+        this.voiceStartAt = Date.now()
+        this.voiceRecordingCancelled = false
+        this.voiceRecordingTooShort = false
+        wx.vibrateShort()
+        this.setData({ voiceCancel: false })
+        this.startRecording()
+      }
+    })
   },
 
   handleVoiceMove(event) {
@@ -270,6 +292,29 @@ Page({
     }
     this.voiceRecordingCancelled = true
     this.recorderManager.stop()
+  },
+
+  handleToggleInputMode() {
+    this.setData({
+      inputMode: this.data.inputMode === 'keyboard' ? 'voice' : 'keyboard',
+      isRecording: false,
+      voiceCancel: false
+    })
+    wx.vibrateShort()
+  },
+
+  handleVoiceMove(event) {
+    if (!this.data.isRecording) return
+    const touch = event.touches && event.touches[0]
+    if (!touch) return
+    
+    // 简单的判断：如果上滑超过一定距离，标记为取消
+    const deltaY = this.voiceStartY - touch.clientY
+    const cancel = deltaY > 100 // 向上滑动超过 100 像素取消
+    if (cancel !== this.data.voiceCancel) {
+      this.setData({ voiceCancel: cancel })
+      if (cancel) wx.vibrateShort()
+    }
   },
 
   requestPrivacyAuthorization(next, options) {

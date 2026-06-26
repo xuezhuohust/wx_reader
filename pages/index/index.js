@@ -182,6 +182,11 @@ Page({
     this.setData({
       scrolled: false,
     })
+
+    // If privacy already agreed, check for microphone permission
+    if (wx.getStorageSync('privacy_agreed')) {
+      this.checkAndRequestMicrophonePermission()
+    }
   },
 
   onPullDownRefresh() {
@@ -527,6 +532,28 @@ Page({
     const tabBar = this.getTabBar && this.getTabBar()
     if (tabBar) tabBar.setHidden(false)
     getApp().resolvePrivacy(true, event)
+    
+    // Privacy agreed, now proactively request microphone permission
+    this.checkAndRequestMicrophonePermission()
+  },
+
+  checkAndRequestMicrophonePermission() {
+    wx.getSetting({
+      success: (res) => {
+        if (res.authSetting['scope.record'] === undefined) {
+          // Hasn't asked yet, request it now
+          wx.authorize({
+            scope: 'scope.record',
+            success: () => {
+              console.log('Microphone permission granted proactively')
+            },
+            fail: () => {
+              console.log('Microphone permission denied proactively')
+            }
+          })
+        }
+      }
+    })
   },
 
   handleDisagreePrivacy(event) {
