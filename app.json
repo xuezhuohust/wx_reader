@@ -6,6 +6,7 @@
     "pages/publisher/index",
     "pages/book-detail/book-detail",
     "pages/chat/chat",
+    "pages/read/read",
     "pages/publisher/books",
     "pages/publisher/upload",
     "pages/publisher/build",

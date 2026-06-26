@@ -68,8 +68,15 @@ function getPurchasedBooks() {
 /** 根据 ID 获取单本书籍信息 */
 function getBookById(id) {
   return request({
-    url: `/api/books/${id}`,
-  }).then((data) => data.book)
+    url: `/api/books/${encodeURIComponent(id)}`,
+  }).then((data) => data.book || data)
+}
+
+/** 获取书籍指定章节的内容 */
+function getChapterContent(bookId, chapterIndex) {
+  return request({
+    url: `/api/books/${encodeURIComponent(bookId)}/chapters/${chapterIndex}`,
+  }).then((data) => data.content || '')
 }
 
 /** 购买指定书籍 */
@@ -410,13 +417,13 @@ function sendBookChatMessageStream(bookId, message, handlers) {
       }
 
       streamRequestTask = wx.request({
-        url: `${BASE_URL}/api/chat/stream`,
+        url: `${BASE_URL}/api/ask/segments`,
         method: 'POST',
         enableChunked: true,
         responseType: 'arraybuffer',
         data: {
-          doc_id: bookId,
-          message,
+          book: bookId,
+          question: message,
           session_id: callbacks.conversationId || '',
           user_id: identity.userId || identity.openid || 'default',
         },
@@ -552,6 +559,7 @@ module.exports = {
   getAllBooks,
   getPurchasedBooks,
   getBookById,
+  getChapterContent,
   purchaseBook,
   sendBookChatMessageStream,
   listConversations,

@@ -7,6 +7,7 @@ Page({
     identity: null,
     userAvatarText: '我',
     messages: [],
+    loadingMessages: true, // 新增：控制骨架屏显示
     inputValue: '',
     inputLineCount: 1,
     isInputExpanded: false,
@@ -91,6 +92,8 @@ Page({
     this._userTouchingChat = false
     this.initRecorder()
     this.syncChatIdentity()
+    this.bookId = options.bookId
+    this.initialText = options.initialText || ''
     // 2026-05-19: 改为加载书籍 + 对话列表 + 历史消息
     this.initialized = false
     this.loadBookAndConversations()
@@ -448,6 +451,59 @@ Page({
 
     source = source.replace(/\r\n/g, '\n').replace(/\t/g, ' ')
     const blocks = []
+
+    // 1. 处理引用块 (Callout) - 以 > 开头
+    const lines = source.split('\n')
+    let currentCallout = []
+    const processedLines = []
+
+    lines.forEach(line => {
+      if (line.startsWith('>')) {
+        currentCallout.push(line.replace(/^>\s*/, ''))
+      } else {
+        if (currentCallout.length > 0) {
+          blocks.push({
+            key: `callout-${blocks.length}`,
+            type: 'callout',
+            text: currentCallout.join('\n')
+          })
+          currentCallout = []
+        }
+        processedLines.push(line)
+      }
+    })
+    if (currentCallout.length > 0) {
+      blocks.push({
+        key: `callout-${blocks.length}`,
+        type: 'callout',
+        text: currentCallout.join('\n')
+      })
+    }
+
+    source = processedLines.join('\n').trim()
+    if (!source) return blocks
+
+    // 2. 处理代码块 - 以 ``` 开头
+    const codePattern = /```(?:\w+)?\n([\s\S]+?)```/g
+    let codeMatch
+    let lastIdx = 0
+    const finalSourceParts = []
+
+    while ((codeMatch = codePattern.exec(source)) !== null) {
+      if (codeMatch.index > lastIdx) {
+        finalSourceParts.push(source.slice(lastIdx, codeMatch.index))
+      }
+      blocks.push({
+        key: `code-${blocks.length}`,
+        type: 'code',
+        text: codeMatch[1].trim()
+      })
+      lastIdx = codePattern.lastIndex
+    }
+    finalSourceParts.push(source.slice(lastIdx))
+    source = finalSourceParts.join('\n').trim()
+
+    // 原有的标题、列表、段落处理逻辑
     const headingMatch = source.match(/^\s*(?:#{1,4}\s*)?\*\*([^*]+)\*\*\s*/)
       || source.match(/^\s*#{1,4}\s+([^\n]+)\n?/)
 
@@ -497,6 +553,15 @@ Page({
       .then((book) => {
         this.setData({ book })
         return this.loadConversations(book)
+      })
+      .then(() => {
+        if (this.initialText) {
+          const q = this.initialText
+          this.initialText = ''
+          setTimeout(() => {
+            this.sendMessage(q)
+          }, 500)
+        }
       })
       .catch((error) => {
         console.error('loadChatBook failed:', error)
@@ -561,6 +626,7 @@ Page({
         }
         this.setData({
           messages: formatted,
+          loadingMessages: false, // 关闭骨架屏
         }, () => {
           this.scrollToBottom(true)
         })
@@ -574,6 +640,7 @@ Page({
         )
         this.setData({
           messages: [welcomeMessage],
+          loadingMessages: false, // 关闭骨架屏
         }, () => {
           this.scrollToBottom(true)
         })
@@ -596,6 +663,7 @@ Page({
         )
         this.setData({
           messages: [welcomeMessage],
+          loadingMessages: false, // 新对话创建完也关闭骨架屏
         }, () => {
           this.scrollToBottom(true)
         })
@@ -836,6 +904,19 @@ Page({
       if (this.data.isInputExpanded) {
         this.scrollToBottom()
       }
+    })
+  },
+
+  handleFocus() {
+    this.setData({
+      isInputFocused: true
+    })
+  },
+
+  handleBlur() {
+    this.setData({
+      isInputFocused: false,
+      keyboardHeight: 0
     })
   },
 
@@ -1165,7 +1246,14 @@ Page({
     this.setData({ audioLoadingMessageId: messageId })
 
     const startedAt = Date.now()
-    api.requestSpeech(text)
+    const requestPromise = api.requestSpeech(text)
+    
+    // 增加前端超时保护，防止单次 TTS 请求卡死队列
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('TTS_TIMEOUT')), 10000)
+    )
+
+    Promise.race([requestPromise, timeoutPromise])
       .then(({ audioUrl, cached, size }) => {
         // 播放已被重置，丢弃过期结果
         if (this.playbackEpoch !== epoch) {
@@ -1191,10 +1279,16 @@ Page({
         }
         console.error('[chat] requestSpeech failed', error)
         this.generatingCount -= 1
-        // 跳过失败的段，推进序号
+        
+        // 遇到 503 或超时，静默跳过此段，保证对话流不卡死
         this.readyMap[seq] = null
         this.drainTTSQueue()
         this.playNextIfIdle()
+        
+        // 如果是严重错误，给用户一个轻提示
+        if (error.message === 'TTS_TIMEOUT' || error.code === 'SERVICE_UNAVAILABLE') {
+          console.warn('TTS 服务繁忙，已跳过当前段落朗读')
+        }
       })
   },
 
@@ -1341,7 +1435,15 @@ Page({
     // 文本输入和语音识别最终都走此入口；精简要求只作为服务端提示，不进入当前展示消息。
     const serverQuestion = `${message}\n回复精简`
     const userMessage = this.createMessage('user', message)
-    const loadingMessage = this.createMessage('ai', '伴读助手正在思考……', true)
+    // 创建带有思考状态的 AI 消息
+    const loadingMessage = {
+      id: `msg-${Date.now()}-${this.messageSeed++}`,
+      role: 'assistant',
+      content: '',
+      renderBlocks: [],
+      streaming: true,
+      thinking: true, // 初始开启思考动画
+    }
     const messages = this.data.messages.concat([userMessage, loadingMessage])
     // 记录本轮流式回复所在的消息，后续只更新这一条，避免每个 token 重建整个 messages 数组。
     this._streamingMessageIndex = messages.length - 1
@@ -1429,7 +1531,7 @@ Page({
     }
     this._streamFlushTimer = setTimeout(() => {
       this.flushStreamReply()
-    }, 80)
+    }, 60) // 微调刷新率，实现更细腻的打字机感
   },
 
   flushStreamReply(force = false) {
@@ -1456,7 +1558,8 @@ Page({
     this.setData({
       [`messages[${messageIndex}].content`]: content,
       [`messages[${messageIndex}].renderBlocks`]: this.buildMessageBlocks('ai', content),
-      [`messages[${messageIndex}].loading`]: false,
+      [`messages[${messageIndex}].thinking`]: false, // 收到内容，关闭思考动画
+      [`messages[${messageIndex}].loading`]: !force,
     }, () => {
       this.scheduleAutoScroll()
     })

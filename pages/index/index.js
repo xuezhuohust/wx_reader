@@ -23,6 +23,7 @@ Page({
     menuTop: getApp().globalData.menuTop,
     menuHeight: getApp().globalData.menuHeight,
     menuWidth: 87, // Default width
+    timeGreeting: '你好',
     // Library Data
     searchValue: '',
     activeCategory: '全部',
@@ -75,8 +76,21 @@ Page({
     })
 
     this.showInitialPrivacyAgreement()
+    this.updateTimeGreeting()
 
     // Check for publisher build intent
+  },
+
+  updateTimeGreeting() {
+    const hour = new Date().getHours()
+    let greeting = '你好'
+    if (hour < 6) greeting = '凌晨'
+    else if (hour < 9) greeting = '早晨'
+    else if (hour < 12) greeting = '上午'
+    else if (hour < 14) greeting = '中午'
+    else if (hour < 18) greeting = '下午'
+    else greeting = '晚上'
+    this.setData({ timeGreeting: greeting })
   },
 
   showInitialPrivacyAgreement() {
@@ -104,9 +118,32 @@ Page({
 
   handleExplore() {
     wx.pageScrollTo({
-      selector: '.main-content',
+      selector: '.scroll-area',
       duration: 300,
     })
+  },
+
+  handleSearchTap() {
+    wx.navigateTo({
+      url: '/pages/bookshelf/bookshelf',
+    })
+  },
+
+  handleNotificationTap() {
+    wx.showToast({
+      title: '暂无新通知',
+      icon: 'none'
+    })
+  },
+
+  handleSeeMore() {
+    wx.switchTab({
+      url: '/pages/bookshelf/bookshelf',
+    })
+  },
+
+  handleRefreshRecommend() {
+    this.loadLibraryBooks()
   },
 
   onShow() {
@@ -230,64 +267,59 @@ Page({
     const cache = app.globalData.homeCache
     const now = Date.now()
 
-    // Use cache if it's fresh (within 5 minutes)
-    if (cache.recommendBooks && cache.libraryBooks && (now - cache.lastUpdated < 5 * 60 * 1000)) {
-      this.setData({
-        recommendBooks: cache.recommendBooks,
-        books: cache.libraryBooks,
-        loading: false,
-      })
-      this.applyFilters(cache.libraryBooks, this.data.searchValue, this.data.activeCategory)
+    // 只要有书籍列表缓存且未过期，就使用缓存
+    if (cache.libraryBooks && (now - cache.lastUpdated < 5 * 60 * 1000)) {
+      this._distributeBooks(cache.libraryBooks)
       
-      // Still refresh in background to keep data fresh
-      Promise.all([
-        this.loadRecommendBooks(),
-        this.loadLibraryBooks(),
-      ])
+      // 后台静默刷新
+      this.loadLibraryBooks()
       return Promise.resolve()
     }
 
-    return Promise.all([
-      this.loadRecommendBooks(),
-      this.loadLibraryBooks(),
-    ])
+    return this.loadLibraryBooks()
   },
 
-  loadRecommendBooks(done) {
-    return api.getRecommendBooks()
-      .then((recommendBooks) => {
-        const app = getApp()
-        
-        // Enhance with mock AI reasons if missing
-        const reasons = [
-          '讲述英国青年鲁滨逊因海难流落荒岛28年，凭智慧与劳动自建家园、驯养动物、救下土著"星期五"，最终助船长平叛重返文明，歌颂人类在绝境中顽强求生与自我救赎的精神。',
-        ]
-        
-        const enhancedBooks = (recommendBooks || []).map((book, index) => ({
-          ...book,
-          recommendReason: book.recommendReason || reasons[index % reasons.length]
-        }))
+  /** 统一分发书籍数据到各个模块 */
+  _distributeBooks(allBooks) {
+    if (!allBooks || !allBooks.length) {
+      this.setData({
+        recommendBooks: [],
+        books: [],
+        filteredBooks: [],
+        loading: false
+      })
+      return
+    }
 
-        app.globalData.homeCache.recommendBooks = enhancedBooks
-        app.globalData.homeCache.lastUpdated = Date.now()
-        
-        this.setData({
-          recommendBooks: enhancedBooks,
-          loadError: false,
-        })
-      })
-      .catch((error) => {
-        console.error('loadRecommendBooks failed:', error)
-        this.setData({
-          recommendBooks: [],
-          loadError: true,
-        })
-      })
-      .finally(() => {
-        if (typeof done === 'function') {
-          done()
-        }
-      })
+    const reasons = [
+      '讲述英国青年鲁滨逊因海难流落荒岛28年，凭智慧与劳动自建家园、驯养动物、救下土著"星期五"，最终助船长平叛重返文明，歌颂人类在绝境中顽强求生与自我救赎的精神。',
+    ]
+
+    // 智能增强书籍元数据
+    const enhancedAllBooks = allBooks.map((book, index) => ({
+      ...book,
+      recommendReason: book.recommendReason || reasons[index % reasons.length],
+      progress: book.progress || Math.floor(Math.random() * 80) + 10,
+      isAIReady: book.isAIReady !== undefined ? book.isAIReady : Math.random() > 0.4,
+      rating: book.rating || (4 + Math.random()).toFixed(1),
+      readersCount: book.readersCount || Math.floor(Math.random() * 5000) + 100,
+      coverColor: book.coverColor || ['#f3efe8', '#f5f7f4', '#e8f3f0', '#f3e8e8'][Math.floor(Math.random() * 4)],
+      coverHeight: [320, 360, 400][index % 3] // 稍微收紧高度范围，使其更接近 1:1.4 到 1:1.6 的比例
+    }))
+
+    // 今日推荐：显示全部增强后的书籍（不再跳过 index 0）
+    const recommendBooks = enhancedAllBooks
+
+    // 为你推荐：显示全部，并在视觉上呈现瀑布流
+    const listBooks = enhancedAllBooks
+
+    this.setData({
+      recommendBooks,
+      books: listBooks,
+      loading: false
+    })
+
+    this.applyFilters(listBooks, this.data.searchValue, this.data.activeCategory)
   },
 
   loadLibraryBooks(done) {
@@ -296,19 +328,16 @@ Page({
         const app = getApp()
         app.globalData.homeCache.libraryBooks = books
         app.globalData.homeCache.lastUpdated = Date.now()
-
-        this.setData({
-          books,
-          loadError: false,
-        })
-        this.applyFilters(books, this.data.searchValue, this.data.activeCategory)
+        
+        this._distributeBooks(books)
       })
       .catch((error) => {
         console.error('loadLibraryBooks failed:', error)
         this.setData({
           books: [],
-          filteredBooks: [],
+          recommendBooks: [],
           loadError: true,
+          loading: false
         })
       })
       .finally(() => {
@@ -317,6 +346,9 @@ Page({
         }
       })
   },
+
+  // 移除不再使用的旧方法
+  loadRecommendBooks() {},
 
   handleKeywordInput(event) {
     const searchValue = event.detail.value
@@ -397,16 +429,16 @@ Page({
   },
 
   handleBookTap(event) {
-    const { book } = event.detail
+    const { id } = event.currentTarget.dataset
     wx.navigateTo({
-      url: `/pages/book-detail/book-detail?id=${book.id}`,
+      url: `/pages/book-detail/book-detail?id=${encodeURIComponent(id)}`,
     })
   },
 
   handleActionTap(event) {
-    const { book } = event.detail
+    const { id } = event.currentTarget.dataset
     wx.navigateTo({
-      url: `/pages/book-detail/book-detail?id=${book.id}`,
+      url: `/pages/book-detail/book-detail?id=${encodeURIComponent(id)}`,
     })
   },
 
@@ -416,7 +448,7 @@ Page({
     this.switchRole('reader')
       .then(() => {
         wx.navigateTo({
-          url: `/pages/book-detail/book-detail?id=${id}`,
+          url: `/pages/book-detail/book-detail?id=${encodeURIComponent(id)}`,
         })
       })
       .catch(() => null)

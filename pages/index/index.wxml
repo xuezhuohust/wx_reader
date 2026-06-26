@@ -1,162 +1,139 @@
-<view class="page-shell home-page">
-  <!-- Custom Navigation Bar -->
-  <view class="custom-nav" style="height: {{navBarHeight}}px;">
-    <view class="nav-inner" style="top: {{menuTop}}px; height: {{menuHeight}}px; padding-left: 40rpx; padding-right: {{menuRight}}px;">
-      <text class="nav-title">AI 伴读</text>
+<view class="page-container home-page">
+  <!-- Sticky Header -->
+  <view class="home-nav" style="padding-top: {{statusBarHeight}}px;">
+    <view class="nav-header" style="height: {{menuHeight}}px; padding-right: {{menuRight}}px;">
+      <view class="greeting-wrap">
+        <view class="greeting-wave">{{timeGreeting}}好</view>
+        <view class="greeting-name">{{identity.displayName || '读者'}}</view>
+      </view>
+      <view class="nav-actions">
+        <view class="nav-btn" bindtap="handleSearchTap">
+          <view class="icon-search"></view>
+        </view>
+        <view class="nav-btn" bindtap="handleNotificationTap">
+          <view class="icon-bell"></view>
+        </view>
+      </view>
     </view>
   </view>
 
   <scroll-view
-    class="content-body"
+    class="scroll-area"
     scroll-y
     enhanced
     show-scrollbar="{{false}}"
-    style="padding-top: {{navBarHeight + 16}}px;"
     bindscroll="onPageScroll"
   >
-    <!-- Greeting -->
-    <view class="greeting-section">
-      <text class="greeting-title">你好，读者</text>
-      <text class="greeting-desc">今天是一个适合深度思考的好日子。</text>
-    </view>
-
-    <!-- Stats Cards -->
-    <view class="stats-row">
-      <view class="stat-card levitating-paper">
-        <view class="stat-icon stat-icon--book"></view>
-        <text class="stat-value">{{books.length || 0}}</text>
-        <text class="stat-label">在读文献</text>
-      </view>
-      <view class="stat-card levitating-paper">
-        <view class="stat-icon stat-icon--streak"></view>
-        <text class="stat-value">34</text>
-        <text class="stat-label">连续阅读</text>
-      </view>
-      <view class="stat-card levitating-paper">
-        <view class="stat-icon stat-icon--time"></view>
-        <text class="stat-value">128</text>
-        <text class="stat-label">专注时长(h)</text>
-      </view>
-    </view>
-
-    <!-- Continue Reading -->
-    <view class="section-header">
-      <text class="section-title">继续阅读</text>
-      <text class="section-link" bindtap="handleProfileTap">查看全部</text>
-    </view>
-
-    <view class="continue-card levitating-paper" wx:if="{{recommendBooks.length > 0}}" bindtap="handleRecommendTap" data-id="{{recommendBooks[0].id}}">
-      <view class="continue-row">
-        <view class="continue-cover">
-          <image wx:if="{{recommendBooks[0].coverUrl}}" src="{{recommendBooks[0].coverUrl}}" mode="aspectFill" />
-          <view wx:else class="cover-empty-sm"><text>暂无</text></view>
-        </view>
-        <view class="continue-info">
-          <text class="continue-title">{{recommendBooks[0].title}}</text>
-          <text class="continue-author">{{recommendBooks[0].author || '未知作者'}}</text>
-          <view class="continue-meta">
-            <text class="continue-category">{{recommendBooks[0].category || '综合'}}</text>
+    <view class="scroll-content">
+      <!-- AI Today's Summary Card -->
+      <view class="ai-summary-card fade-up d1" wx:if="{{recommendBooks.length > 0}}">
+        <view class="ai-summary-label">AI 今日总结</view>
+        <view class="ai-summary-title">《{{recommendBooks[0].title}}》要点</view>
+        <view class="ai-summary-text">{{recommendBooks[0].recommendReason || '正在为你生成核心阅读摘要...'}}</view>
+        <view class="continue-reading-bar" bindtap="handleRecommendTap" data-id="{{recommendBooks[0].id}}">
+          <view class="reading-info">
+            <view class="icon-book-small"></view>
+            <text class="reading-text">继续阅读《{{recommendBooks[0].title}}》</text>
+            <text class="reading-pct">{{recommendBooks[0].progress || '0'}}%</text>
           </view>
-          <text class="continue-desc">{{recommendBooks[0].description || '暂无简介'}}</text>
+          <view class="icon-arrow-right"></view>
         </view>
       </view>
-      <view class="ai-summary-box">
-        <text class="ai-summary-label">AI 核心摘要</text>
-        <text class="ai-summary-text">{{recommendBooks[0].recommendReason || 'AI 已为您预处理深度关联分析...'}}</text>
-      </view>
-      <view class="continue-btn">
-        <text>开启 AI 伴读</text>
-      </view>
-    </view>
 
-    <!-- Skeleton for continue card -->
-    <view class="continue-card levitating-paper skeleton-pulse" wx:elif="{{loading}}">
-      <view class="continue-row">
-        <view class="continue-cover skeleton-bg"></view>
-        <view class="continue-info">
-          <view class="skeleton-bg" style="width: 60%; height: 32rpx;"></view>
-          <view class="skeleton-bg" style="width: 40%; height: 24rpx; margin-top: 12rpx;"></view>
-        </view>
+      <!-- Skeleton for AI Summary -->
+      <view class="ai-summary-card skeleton-pulse" wx:elif="{{loading}}">
+        <view class="skeleton-bg" style="width: 120rpx; height: 24rpx; margin-bottom: 12rpx;"></view>
+        <view class="skeleton-bg" style="width: 300rpx; height: 32rpx; margin-bottom: 12rpx;"></view>
+        <view class="skeleton-bg" style="width: 100%; height: 60rpx; margin-bottom: 24rpx;"></view>
+        <view class="skeleton-bg" style="width: 100%; height: 64rpx; border-radius: 99rpx;"></view>
       </view>
-    </view>
 
-    <!-- Recommendations -->
-    <view class="section-header">
-      <text class="section-title">为你推荐</text>
-      <text class="section-link">换一批</text>
-    </view>
-
-    <scroll-view class="recommend-scroll" scroll-x enhanced show-scrollbar="{{false}}">
-      <view class="recommend-row">
-        <block wx:if="{{loading}}">
-          <view wx:for="{{[1,2,3]}}" wx:key="*this" class="recommend-card levitating-paper skeleton-pulse">
-            <view class="recommend-cover skeleton-bg"></view>
-            <view class="recommend-info">
-              <view class="skeleton-bg" style="width: 80%; height: 24rpx;"></view>
-              <view class="skeleton-bg" style="width: 50%; height: 20rpx; margin-top: 8rpx;"></view>
+      <!-- Today's Recommendations -->
+      <view class="section-header fade-up d2">
+        <view class="section-title">今日推荐</view>
+        <view class="section-link" bindtap="handleSeeMore">查看全部</view>
+      </view>
+      
+      <scroll-view class="book-scroll fade-up d3" scroll-x enhanced show-scrollbar="{{false}}">
+        <view class="book-row">
+          <block wx:if="{{loading}}">
+            <view wx:for="{{[1,2,3]}}" wx:key="*this" class="book-card-skeleton skeleton-pulse">
+              <view class="skeleton-bg cover-placeholder"></view>
+              <view class="skeleton-bg title-placeholder"></view>
             </view>
+          </block>
+          <block wx:else>
+            <view 
+              class="book-card" 
+              wx:for="{{recommendBooks}}" 
+              wx:key="id" 
+              bindtap="handleRecommendTap"
+              data-id="{{item.id}}"
+            >
+              <view class="book-card-cover" style="background: {{item.coverColor}};">
+                <image wx:if="{{item.coverUrl}}" src="{{item.coverUrl}}" mode="aspectFill"></image>
+                <view class="book-placeholder-inner-flat" wx:else>
+                  <view class="placeholder-title-flat" style="font-size: 60rpx;">{{item.title[0]}}</view>
+                </view>
+              </view>
+              <view class="book-card-info">
+                <view class="book-card-title">{{item.title}}</view>
+                <view class="book-card-meta">
+                  <text>{{item.author || '读者'}}</text>
+                  <text class="meta-dot" wx:if="{{item.category}}">·</text>
+                  <text wx:if="{{item.category}}">{{item.category}}</text>
+                </view>
+              </view>
+            </view>
+          </block>
+        </view>
+      </scroll-view>
+
+      <!-- For You (Masonry Style Library) -->
+      <view class="section-header fade-up d4" style="margin-top: 36rpx;">
+        <view class="section-title">为你推荐</view>
+        <view class="section-link" bindtap="handleRefreshRecommend">更多</view>
+      </view>
+
+      <view class="masonry-grid fade-up d5">
+        <block wx:if="{{loading}}">
+          <view wx:for="{{[1,2,3,4]}}" wx:key="*this" class="masonry-item-skeleton skeleton-pulse">
+            <view class="skeleton-bg" style="height: {{index % 2 === 0 ? '300rpx' : '400rpx'}};"></view>
+            <view class="skeleton-bg" style="width: 80%; height: 24rpx; margin-top: 12rpx;"></view>
           </view>
         </block>
         <block wx:else>
-          <view
-            wx:for="{{recommendBooks}}"
+          <view 
+            class="masonry-item" 
+            wx:for="{{filteredBooks}}" 
             wx:key="id"
-            wx:if="{{index > 0}}"
-            class="recommend-card levitating-paper"
+            bindtap="handleBookTap"
             data-id="{{item.id}}"
-            bindtap="handleRecommendTap"
           >
-            <view class="recommend-cover">
-              <image wx:if="{{item.coverUrl}}" src="{{item.coverUrl}}" mode="aspectFill" />
-              <view wx:else class="cover-empty-sm"><text>暂无</text></view>
+            <view class="masonry-cover" style="background: {{item.coverColor || '#f3efe8'}}; height: {{item.coverHeight}}rpx;">
+              <image wx:if="{{item.coverUrl}}" src="{{item.coverUrl}}" mode="aspectFill"></image>
+              <view class="book-placeholder-inner-flat" wx:else>
+                <view class="placeholder-title-flat">{{item.title[0]}}</view>
+              </view>
+              <view class="masonry-badge" wx:if="{{item.isAIReady}}">AI讲解</view>
             </view>
-            <view class="recommend-info">
-              <text class="recommend-title">{{item.title}}</text>
-              <text class="recommend-author">{{item.author || '未知作者'}}</text>
+            <view class="masonry-info">
+              <view class="masonry-title">{{item.title}}</view>
+              <view class="masonry-meta">
+                <text>{{item.author || '读者'}}</text>
+                <text class="meta-dot">·</text>
+                <text>{{item.rating}}分</text>
+              </view>
             </view>
           </view>
         </block>
       </view>
-    </scroll-view>
 
-    <!-- Library -->
-    <view class="section-header">
-      <text class="section-title">书库</text>
-      <text class="section-link">{{filteredBooks.length}} 本</text>
+      <view class="safe-area-bottom"></view>
     </view>
-
-    <scroll-view class="category-scroll" scroll-x enhanced show-scrollbar="{{false}}">
-      <view class="category-row">
-        <view
-          wx:for="{{categories}}"
-          wx:key="*this"
-          class="category-chip {{activeCategory === item ? 'category-chip--active' : ''}}"
-          data-value="{{item}}"
-          bindtap="handleTabChange"
-        >
-          <text>{{item}}</text>
-        </view>
-      </view>
-    </scroll-view>
-
-    <view class="library-list" wx:if="{{filteredBooks.length > 0}}">
-      <book-card
-        wx:for="{{filteredBooks}}"
-        wx:key="id"
-        book="{{item}}"
-        mode="market"
-        bind:cardtap="handleBookTap"
-        bind:actiontap="handleActionTap"
-      />
-    </view>
-
-    <empty-state
-      wx:elif="{{!loading}}"
-      title="暂无书籍"
-      description="当前分类还没有可阅读的书籍"
-    />
   </scroll-view>
 
+  <!-- Privacy Modal -->
   <view wx:if="{{showPrivacyModal}}" class="privacy-overlay" catchtap="handleDisagreePrivacy">
     <view class="privacy-sheet" catchtap="handleStopPropagation">
       <view class="privacy-header">

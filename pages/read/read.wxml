@@ -1,0 +1,156 @@
+<view class="reader-page" wx:if="{{book}}">
+  <!-- Custom Navigation Bar -->
+  <view class="reader-header" style="height: {{navBarHeight}}px; padding-top: {{menuTop}}px;" wx:if="{{showControls}}">
+    <view class="nav-inner" style="height: {{menuHeight}}px;">
+      <view class="nav-left" bindtap="handleBack">
+        <view class="icon-back"></view>
+      </view>
+      <view class="nav-center">
+        <view class="reader-chapter-title">{{currentChapterName || '正在加载...'}}</view>
+      </view>
+      <view class="nav-right" bindtap="handleStartAI">
+        <view class="icon-ai-nav"></view>
+      </view>
+    </view>
+  </view>
+
+  <!-- Reading Content (Swiper Mode) -->
+  <swiper 
+    class="reader-swiper" 
+    current="{{currentPageIndex}}"
+    bindchange="onPageChange"
+    bindtap="handleScreenTap"
+    duration="300"
+  >
+    <swiper-item wx:for="{{chapterPages}}" wx:key="index" wx:for-index="pageIdx">
+      <view class="reader-page-content" style="padding-top: {{navBarHeight + 8}}px;">
+        <!-- 正文页渲染 -->
+        <view class="reader-article {{loading ? 'loading-fade' : ''}}" wx:if="{{item.type === 'content'}}">
+          
+          <!-- AI 伴读入口（仅在每章第一页显示，且不加载时） -->
+          <view 
+            class="ai-guide-entry" 
+            wx:if="{{pageIdx === (currentChapterIndex > 0 ? 1 : 0) && !loading}}"
+            bindtap="handleStartAI"
+          >
+            <view class="ai-guide-content">
+              <view class="icon-ai-sparkle"></view>
+              <text class="ai-guide-text">AI 伴读已就绪，点击开始解析当前章节</text>
+            </view>
+            <view class="icon-arrow-right"></view>
+          </view>
+
+          <block wx:if="{{item.content.length > 0}}">
+            <view 
+              wx:for="{{item.content}}" 
+              wx:for-item="para"
+              wx:for-index="paraIdx"
+              wx:key="paraIdx" 
+              class="paragraph {{selectedParaText === para ? 'para-selected' : ''}}"
+              bindlongpress="handleLongPressPara"
+              data-text="{{para}}"
+            >
+              {{para}}
+            </view>
+          </block>
+          
+          <!-- 仅在最后一页正文显示本章完 -->
+          <view class="chapter-end-hint" wx:if="{{pageIdx === chapterPages.length - (currentChapterIndex < totalChapters - 1 ? 2 : 1) && !loading}}">
+            <text>— 本章完 —</text>
+          </view>
+        </view>
+
+        <!-- 跨章桥接页渲染 -->
+        <view class="reader-bridge-page" wx:else>
+          <view class="bridge-loader">
+            <view class="loading-dots">
+              <view class="dot"></view>
+              <view class="dot"></view>
+              <view class="dot"></view>
+            </view>
+            <text class="bridge-text">{{item.text}}</text>
+          </view>
+        </view>
+        
+        <view class="safe-area-bottom"></view>
+      </view>
+    </swiper-item>
+  </swiper>
+
+  <!-- Reader Footer -->
+  <view class="reader-footer fade-up" wx:if="{{showControls}}">
+    <view class="footer-actions">
+      <view class="footer-btn-wrap {{currentChapterIndex <= 0 ? 'btn--disabled' : ''}}" bindtap="handlePrevChapter">
+        <view class="footer-btn">
+          <view class="icon-chapter-prev"></view>
+        </view>
+        <text class="btn-label">上一章</text>
+      </view>
+      
+      <view class="footer-nav-center" bindtap="handleShowToc">
+        <view class="nav-info-cluster">
+          <view class="nav-chapter-name">{{currentChapterName}}</view>
+          <view class="nav-progress-meta">
+            <text class="progress-pct">本章 {{readingProgress}}%</text>
+            <text class="progress-sep">·</text>
+            <text class="progress-chapter">第 {{currentChapterIndex + 1}} / {{totalChapters}} 章</text>
+          </view>
+        </view>
+      </view>
+
+      <view class="footer-btn-wrap {{currentChapterIndex >= totalChapters - 1 ? 'btn--disabled' : ''}}" bindtap="handleNextChapter">
+        <text class="btn-label">下一章</text>
+        <view class="footer-btn">
+          <view class="icon-chapter-next"></view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- Custom TOC Bottom Sheet -->
+  <view class="toc-sheet-overlay {{showTocSheet ? 'show' : ''}}" bindtap="handleHideToc"></view>
+  <view class="toc-sheet {{showTocSheet ? 'show' : ''}}">
+    <view class="toc-header">
+      <view class="toc-handle"></view>
+      <view class="toc-title">目录</view>
+      <view class="toc-subtitle">共 {{totalChapters}} 章节</view>
+    </view>
+    <scroll-view class="toc-list" scroll-y scroll-into-view="chapter-{{currentChapterIndex}}">
+      <view 
+        wx:for="{{allChapterNames}}" 
+        wx:key="index" 
+        id="chapter-{{index}}"
+        class="toc-item {{index === currentChapterIndex ? 'active' : ''}}"
+        data-index="{{index}}"
+        bindtap="handleSelectChapter"
+      >
+        <text class="toc-index">{{index + 1}}</text>
+        <text class="toc-name">{{item}}</text>
+        <view class="toc-active-icon" wx:if="{{index === currentChapterIndex}}"></view>
+      </view>
+      <view class="safe-area-bottom"></view>
+    </scroll-view>
+  </view>
+
+  <!-- Floating Selection Menu -->
+  <view class="selection-menu-overlay {{showSelectionMenu ? 'show' : ''}}" bindtap="handleCloseSelectionMenu">
+    <view class="selection-menu" catchtap="nop">
+      <view class="menu-item" bindtap="handleMenuAI">
+        <view class="menu-icon icon-ai-sparkle-white"></view>
+        <text>AI 解析</text>
+      </view>
+      <view class="menu-item" bindtap="handleMenuCopy">
+        <view class="menu-icon icon-copy"></view>
+        <text>复制</text>
+      </view>
+      <view class="menu-item" bindtap="handleMenuHighlight">
+        <view class="menu-icon icon-highlight"></view>
+        <text>划线</text>
+      </view>
+      <view class="menu-item" bindtap="handleMenuShare">
+        <view class="menu-icon icon-share"></view>
+        <text>分享</text>
+      </view>
+    </view>
+  </view>
+</view>

@@ -14,6 +14,7 @@ Page({
     visibleChapters: [],
     chapterCount: 0,
     hasHiddenChapters: false,
+    loading: true
   },
 
   onLoad(options) {
@@ -84,8 +85,12 @@ Page({
   },
 
   loadBook(done) {
+    this.setData({ loading: true })
     api.getBookById(this.bookId)
       .then((book) => {
+        if (!book) {
+          throw new Error('书籍数据加载失败')
+        }
         if (!this.data.isPublisherScene && (book.onlineStatus !== 'online' || book.buildStatus !== 'done')) {
           wx.showToast({
             title: '该书暂未开放阅读',
@@ -96,7 +101,8 @@ Page({
           })
           return
         }
-        const chapters = Array.isArray(book.chapters) ? book.chapters : []
+        // 尝试从多个可能的字段中获取目录数据
+        const chapters = Array.isArray(book.chapters) ? book.chapters : (Array.isArray(book.catalog) ? book.catalog : (Array.isArray(book.sections) ? book.sections : []))
         const chaptersExpanded = false
         this.setData({
           book,
@@ -105,14 +111,16 @@ Page({
           visibleChapters: this.getVisibleChapters(chapters, chaptersExpanded),
           chapterCount: chapters.length,
           hasHiddenChapters: chapters.length > this.getChapterPreviewCount(),
+          loading: false
         })
       })
       .catch((error) => {
         console.error('loadBook failed:', error)
         wx.showToast({
-          title: '书籍不存在',
+          title: error.message || '书籍加载失败',
           icon: 'none',
         })
+        this.setData({ loading: false })
       })
       .finally(() => {
         if (typeof done === 'function') {
@@ -134,12 +142,16 @@ Page({
   },
 
   handleToggleChapters() {
-    const book = this.data.book
-    const chapters = book && Array.isArray(book.chapters) ? book.chapters : []
-    const chaptersExpanded = !this.data.chaptersExpanded
+    const { book, chaptersExpanded } = this.data
+    if (!book) return
+
+    // 尝试从多个可能的字段中获取目录数据，保持与 loadBook 逻辑一致
+    const chapters = Array.isArray(book.chapters) ? book.chapters : (Array.isArray(book.catalog) ? book.catalog : (Array.isArray(book.sections) ? book.sections : []))
+    const nextExpanded = !chaptersExpanded
+    
     this.setData({
-      chaptersExpanded,
-      visibleChapters: this.getVisibleChapters(chapters, chaptersExpanded),
+      chaptersExpanded: nextExpanded,
+      visibleChapters: this.getVisibleChapters(chapters, nextExpanded),
     })
   },
 
@@ -148,7 +160,10 @@ Page({
     if (!book) return
 
     if (book.purchased) {
-      this.handleStartChat()
+      // 默认阅读第一章
+      wx.navigateTo({
+        url: `/pages/read/read?id=${encodeURIComponent(book.id)}&index=0`,
+      })
     } else {
       this.handlePurchase()
     }
@@ -234,6 +249,24 @@ Page({
     }
     wx.navigateTo({
       url: `/pages/chat/chat?bookId=${book.id}`,
+    })
+  },
+
+  handleReadChapter(e) {
+    const { index } = e.currentTarget.dataset
+    const { book } = this.data
+    if (!book) return
+
+    if (!book.purchased) {
+      wx.showToast({
+        title: '请先购买后再阅读',
+        icon: 'none',
+      })
+      return
+    }
+
+    wx.navigateTo({
+      url: `/pages/read/read?id=${encodeURIComponent(book.id)}&index=${index}`,
     })
   },
 
