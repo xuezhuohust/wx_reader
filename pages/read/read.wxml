@@ -8,8 +8,8 @@
       <view class="nav-center">
         <view class="reader-chapter-title">{{currentChapterName || '正在加载...'}}</view>
       </view>
-      <view class="nav-right" bindtap="handleStartAI">
-        <view class="icon-ai-nav"></view>
+      <view class="nav-right">
+        <!-- 移除灯泡入口 -->
       </view>
     </view>
   </view>
@@ -20,7 +20,7 @@
     current="{{currentPageIndex}}"
     bindchange="onPageChange"
     bindtap="handleScreenTap"
-    duration="300"
+    duration="{{swiperDuration}}"
   >
     <swiper-item wx:for="{{chapterPages}}" wx:key="index" wx:for-index="pageIdx">
       <view class="reader-page-content" style="padding-top: {{navBarHeight + 8}}px;">

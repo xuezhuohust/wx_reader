@@ -19,7 +19,8 @@ Page({
     selectedParaText: '',
     navBarHeight: 64,
     menuTop: 24,
-    menuHeight: 32
+    menuHeight: 32,
+    swiperDuration: 300 // 控制滑动动画时长
   },
 
   onLoad(options) {
@@ -65,16 +66,18 @@ Page({
     const { currentChapterIndex, allChapterNames } = this.data
     const chapterName = allChapterNames[currentChapterIndex] || `第 ${currentChapterIndex + 1} 章`
     
+    // 切换章节时，先将滑动动画设为 0，防止“回退”动画
     this.setData({ 
       loading: true, 
       scrollTop: 0,
-      currentChapterName: chapterName
+      currentChapterName: chapterName,
+      swiperDuration: 0
     })
 
     // 模拟加载延迟
     setTimeout(() => {
       this.mockChapterContent(fromDirection)
-    }, 150)
+    }, 100)
   },
 
   mockChapterContent(fromDirection = 'next') {
@@ -91,9 +94,8 @@ Page({
     }
 
     // 2. 正文分页逻辑
-    // 寻找呼吸感：下调行数上限，恢复合理的段间距权重
     const CHARS_PER_LINE = 18 
-    const LINES_PER_PAGE = 27 // 调优后的行数，确保在各种屏幕下底部都有足够的留白
+    const LINES_PER_PAGE = 27 
     const paragraphs = fullContent.split('\n')
     
     let currentPage = []
@@ -101,8 +103,6 @@ Page({
     
     paragraphs.forEach(p => {
       if (!p.trim()) return
-      
-      // 恢复段间距权重为 1 行，增加垂直节奏感
       const pLines = Math.ceil(p.length / CHARS_PER_LINE) + 1
       
       if (currentLines + pLines > LINES_PER_PAGE && currentPage.length > 0) {
@@ -126,9 +126,15 @@ Page({
 
     let startIdx = 0
     if (fromDirection === 'prev') {
-      startIdx = pages.length - (currentChapterIndex < totalChapters - 1 ? 2 : 1)
+      // 如果是从后往前跳转，目标应该是【最后一页正文】
+      // 如果有 next-bridge，最后一页正文索引是 pages.length - 2
+      // 如果没有 next-bridge（即最后一章），最后一页正文索引是 pages.length - 1
+      startIdx = (currentChapterIndex < totalChapters - 1) ? pages.length - 2 : pages.length - 1
     } else {
-      startIdx = currentChapterIndex > 0 ? 1 : 0
+      // 如果是从前往后跳转，目标应该是【第一页正文】
+      // 如果有 prev-bridge，第一页正文索引是 1
+      // 如果没有 prev-bridge（即第一章），第一页正文索引是 0
+      startIdx = (currentChapterIndex > 0) ? 1 : 0
     }
     
     this.setData({
@@ -137,6 +143,10 @@ Page({
       currentPageIndex: startIdx 
     }, () => {
       this.updateReadingProgress()
+      // 数据渲染完成后，恢复滑动动画时长
+      setTimeout(() => {
+        this.setData({ swiperDuration: 300 })
+      }, 50)
     })
   },
 
