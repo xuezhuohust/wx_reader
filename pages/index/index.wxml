@@ -1,18 +1,10 @@
 <view class="page-container home-page">
   <!-- Sticky Header -->
-  <view class="home-nav" style="padding-top: {{statusBarHeight}}px;">
-    <view class="nav-header" style="height: {{menuHeight}}px; padding-right: {{menuRight}}px;">
+  <view class="home-nav" style="height: {{navBarHeight}}px; background-color: #faf8f5;">
+    <view class="nav-header" style="position: absolute; top: {{menuTop}}px; height: {{menuHeight}}px; left: 0; right: 0; padding-right: {{menuRight}}px;">
       <view class="greeting-wrap">
         <view class="greeting-wave">{{timeGreeting}}好</view>
         <view class="greeting-name">{{identity.displayName || '读者'}}</view>
-      </view>
-      <view class="nav-actions">
-        <view class="nav-btn" bindtap="handleSearchTap">
-          <view class="icon-search"></view>
-        </view>
-        <view class="nav-btn" bindtap="handleNotificationTap">
-          <view class="icon-bell"></view>
-        </view>
       </view>
     </view>
   </view>
@@ -25,19 +17,31 @@
     bindscroll="onPageScroll"
   >
     <view class="scroll-content">
-      <!-- AI Today's Summary Card -->
-      <view class="ai-summary-card fade-up d1" wx:if="{{recommendBooks.length > 0}}">
-        <view class="ai-summary-label">AI 今日总结</view>
-        <view class="ai-summary-title">《{{recommendBooks[0].title}}》要点</view>
-        <view class="ai-summary-text">{{recommendBooks[0].recommendReason || '正在为你生成核心阅读摘要...'}}</view>
-        <view class="continue-reading-bar" bindtap="handleRecommendTap" data-id="{{recommendBooks[0].id}}">
-          <view class="reading-info">
-            <view class="icon-book-small"></view>
-            <text class="reading-text">继续阅读《{{recommendBooks[0].title}}》</text>
-            <text class="reading-pct">{{recommendBooks[0].progress || '0'}}%</text>
-          </view>
-          <view class="icon-arrow-right"></view>
+      <!-- Continue Reading Section Header -->
+      <view class="section-header fade-up d1" wx:if="{{recommendBooks.length > 0}}">
+        <view class="section-title">继续阅读</view>
+        <view class="section-link" bindtap="handleSwitchToShelf">我的书架</view>
+      </view>
+
+      <!-- AI Compact Reading Card -->
+      <view class="ai-compact-card fade-up d1" wx:if="{{recommendBooks.length > 0}}" bindtap="handleRecommendTap" data-id="{{recommendBooks[0].id}}">
+        <view class="ai-compact-cover">
+          <image wx:if="{{recommendBooks[0].coverUrl}}" src="{{recommendBooks[0].coverUrl}}" mode="aspectFill" />
+          <view class="cover-placeholder-small" wx:else>{{recommendBooks[0].title[0]}}</view>
         </view>
+        <view class="ai-compact-info">
+          <view class="ai-compact-header">
+            <text class="ai-compact-tag">AI 导读</text>
+            <text class="ai-compact-title">{{recommendBooks[0].title}}</text>
+          </view>
+          <view class="ai-compact-progress-row">
+            <view class="ai-compact-bar-wrap">
+              <view class="ai-compact-bar-fill" style="width: {{recommendBooks[0].progress || 0}}%;"></view>
+            </view>
+            <text class="ai-compact-pct">{{recommendBooks[0].progress || '0'}}%</text>
+          </view>
+        </view>
+        <view class="icon-arrow-right-faint-small"></view>
       </view>
 
       <!-- Skeleton for AI Summary -->
@@ -49,7 +53,7 @@
       </view>
 
       <!-- Today's Recommendations -->
-      <view class="section-header fade-up d2">
+      <view class="section-header fade-up d2" wx:if="{{recommendBooks.length > 0}}">
         <view class="section-title">今日推荐</view>
         <view class="section-link" bindtap="handleSeeMore">查看全部</view>
       </view>
@@ -90,7 +94,7 @@
       </scroll-view>
 
       <!-- For You (Masonry Style Library) -->
-      <view class="section-header fade-up d4" style="margin-top: 36rpx;">
+      <view class="section-header fade-up d4 section-mt">
         <view class="section-title">为你推荐</view>
         <view class="section-link" bindtap="handleRefreshRecommend">更多</view>
       </view>

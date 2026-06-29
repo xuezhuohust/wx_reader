@@ -1,160 +1,165 @@
-<view class="page-shell my-page">
-  <!-- Navigation -->
-  <view class="custom-nav" style="height: {{navBarHeight}}px;">
-    <view class="nav-inner" style="top: {{menuTop}}px; height: {{menuHeight}}px; padding: 0 40rpx;">
-      <text class="nav-title">我的</text>
+<view class="page-container my-page">
+  <!-- Sticky Header -->
+  <view class="home-nav" style="height: {{navBarHeight}}px; background-color: #faf8f5;">
+    <view class="nav-header" style="position: absolute; top: {{menuTop}}px; height: {{menuHeight}}px; left: 0; right: 0; padding-right: {{menuRight}}px;">
+      <view class="nav-title">我的</view>
+      <view class="nav-actions">
+        <view class="nav-btn" bindtap="handleOpenSettings">
+          <view class="icon-settings"></view>
+        </view>
+      </view>
     </view>
   </view>
 
-  <scroll-view class="content-body" scroll-y enhanced show-scrollbar="{{false}}" style="padding-top: {{navBarHeight + 16}}px;">
-    <!-- Profile Card -->
-    <view class="profile-card levitating-paper" bindtap="handleOpenProfile">
-      <view class="profile-row">
-        <view class="avatar-wrap">
-          <image wx:if="{{identity && identity.avatarUrl}}" src="{{identity.avatarUrl}}" mode="aspectFill" class="avatar-img" />
-          <view wx:else class="avatar-placeholder">
-            <view class="icon-user"></view>
+  <scroll-view 
+    class="scroll-area" 
+    scroll-y 
+    enhanced 
+    show-scrollbar="{{false}}"
+    style="padding-top: 20rpx;"
+  >
+    <view class="scroll-content">
+      <!-- Profile Header -->
+      <view class="profile-header fade-up d1" bindtap="handleOpenProfile">
+        <view class="profile-avatar">
+          <view class="profile-avatar-inner">
+            <image wx:if="{{identity && identity.avatarUrl}}" src="{{identity.avatarUrl}}" mode="aspectFill" />
+            <view class="icon-user-white" wx:else></view>
           </view>
         </view>
         <view class="profile-info">
-          <text class="profile-name">{{identity.displayName || '未登录'}}</text>
-          <view class="profile-tags">
-            <view class="tag-pro">会员用户</view>
-            <text class="tag-joined">2024 加入</text>
+          <view class="profile-name">{{identity.displayName || '未登录'}}</view>
+          <view class="profile-badge">深度阅读者</view>
+          <view class="profile-joined">2024 年加入</view>
+        </view>
+        <view class="icon-arrow-right-faint"></view>
+      </view>
+
+      <!-- Reading Stats Bento -->
+      <view class="reading-stats fade-up d2">
+        <view class="reading-stat">
+          <view class="reading-stat-value">216h</view>
+          <view class="reading-stat-label">累计阅读</view>
+        </view>
+        <view class="reading-stat">
+          <view class="reading-stat-value">23</view>
+          <view class="reading-stat-label">已读书籍</view>
+        </view>
+        <view class="reading-stat">
+          <view class="reading-stat-value">156</view>
+          <view class="reading-stat-label">我的笔记</view>
+        </view>
+      </view>
+
+      <!-- Badges Row -->
+      <view class="section-header-small fade-up d3">
+        <view class="section-title-small">成就勋章</view>
+      </view>
+      <scroll-view class="badges-scroll fade-up d3" scroll-x enhanced show-scrollbar="{{false}}">
+        <view class="badges-row">
+          <view class="badge-item">
+            <view class="badge-icon-wrap morning">
+              <view class="icon-morning"></view>
+            </view>
+            <view class="badge-label">晨读达人</view>
+            <view class="badge-level">Lv.3</view>
+            <view class="badge-progress-bar">
+              <view class="badge-progress-fill" style="width: 75%;"></view>
+            </view>
+          </view>
+          
+          <view class="badge-item">
+            <view class="badge-icon-wrap marathon">
+              <view class="icon-marathon"></view>
+            </view>
+            <view class="badge-label">阅读马拉松</view>
+            <view class="badge-level">Lv.2</view>
+            <view class="badge-progress-bar">
+              <view class="badge-progress-fill" style="width: 40%;"></view>
+            </view>
+          </view>
+
+          <view class="badge-item locked">
+            <view class="badge-icon-wrap locked">
+              <view class="icon-pen"></view>
+            </view>
+            <view class="badge-label">妙笔生花</view>
+            <view class="badge-level">未解锁</view>
           </view>
         </view>
-      </view>
-    </view>
+      </scroll-view>
 
-    <!-- 阅读动态 -->
-    <view class="section-block">
-      <view class="section-header-row">
-        <text class="section-heading">阅读动态</text>
-        <text class="section-filter">本周</text>
-      </view>
-
-      <view class="activity-card levitating-paper">
-        <view class="activity-item">
-          <view class="activity-icon icon-clock"></view>
-          <text class="activity-label">阅读时长</text>
+      <!-- Weekly Chart -->
+      <view class="weekly-chart fade-up d4">
+        <view class="chart-header">
+          <view class="chart-title">本周阅读时长</view>
+          <view class="chart-summary">12.5h</view>
         </view>
-        <text class="activity-value">12.5 <text class="activity-unit">小时</text></text>
-        <view class="activity-bar">
-          <view class="bar-fill" style="width: 75%;"></view>
-        </view>
-      </view>
-
-      <view class="activity-card levitating-paper">
-        <view class="activity-item">
-          <view class="activity-icon icon-pages"></view>
-          <text class="activity-label">阅读页数</text>
-        </view>
-        <text class="activity-value">486</text>
-        <view class="activity-bar">
-          <view class="bar-fill" style="width: 60%;"></view>
-        </view>
-      </view>
-
-      <view class="activity-card levitating-paper">
-        <view class="activity-item">
-          <view class="activity-icon icon-ai-query"></view>
-          <text class="activity-label">智能提问</text>
-        </view>
-        <text class="activity-value">87</text>
-        <view class="activity-bar bar-accent">
-          <view class="bar-fill" style="width: 45%;"></view>
-        </view>
-      </view>
-    </view>
-
-    <!-- AI Tutor Evaluation -->
-    <view class="section-block">
-      <view class="ai-eval-header">
-        <view class="ai-eval-icon"></view>
-        <text class="ai-eval-title">智能导师评价</text>
-        <view class="eval-badge">实时分析</view>
-      </view>
-      <view class="eval-tags">
-        <view class="eval-tag">深度思辨者</view>
-        <view class="eval-tag">知识探索家</view>
-      </view>
-      <view class="eval-stat">
-        <text class="eval-stat-num">24</text>
-        <text class="eval-stat-desc">个辅助解决的阅读难题</text>
-      </view>
-      <text class="eval-quote">"你在处理哲学与科学交叉领域的理解力表现卓越。"</text>
-    </view>
-
-    <!-- Weekly Chart -->
-    <view class="section-block">
-      <view class="chart-wrap levitating-paper">
         <view class="chart-bars">
-          <view class="chart-col">
-            <view class="chart-bar" style="height: 60rpx;"></view>
-            <text class="chart-day">一</text>
-          </view>
-          <view class="chart-col">
-            <view class="chart-bar" style="height: 80rpx;"></view>
-            <text class="chart-day">二</text>
-          </view>
-          <view class="chart-col">
-            <view class="chart-bar" style="height: 70rpx;"></view>
-            <text class="chart-day">三</text>
-          </view>
-          <view class="chart-col chart-col--active">
-            <text class="chart-label">2小时</text>
-            <view class="chart-bar chart-bar--active" style="height: 120rpx;"></view>
-            <text class="chart-day">四</text>
-          </view>
-          <view class="chart-col">
-            <view class="chart-bar" style="height: 90rpx;"></view>
-            <text class="chart-day">五</text>
-          </view>
-          <view class="chart-col">
-            <view class="chart-bar" style="height: 50rpx;"></view>
-            <text class="chart-day">六</text>
-          </view>
-          <view class="chart-col">
-            <view class="chart-bar" style="height: 40rpx;"></view>
-            <text class="chart-day">日</text>
+          <view class="chart-bar-wrap" wx:for="{{weeklyStats}}" wx:key="day">
+            <view class="chart-bar {{item.active ? 'active' : ''}}" style="height: {{item.height}}rpx;"></view>
+            <text class="chart-bar-label">{{item.day}}</text>
           </view>
         </view>
       </view>
-    </view>
 
-    <!-- 成就徽章 -->
-    <view class="section-block">
-      <text class="section-heading">成就徽章</text>
-      <view class="achievement-row">
-        <view class="achievement-item">
-          <view class="achievement-badge"></view>
-          <text class="achievement-name">晨读达人</text>
+      <!-- Menu List -->
+      <view class="menu-list fade-up d5">
+        <view class="menu-item" bindtap="handleDeveloping">
+          <view class="menu-item-icon green">
+            <view class="icon-menu-notes"></view>
+          </view>
+          <view class="menu-item-text">
+            <view class="menu-item-title">我的笔记</view>
+            <view class="menu-item-sub">156 条 · 6 本书</view>
+          </view>
+          <view class="icon-arrow-right-small"></view>
+        </view>
+
+        <view class="menu-item" bindtap="handleDeveloping">
+          <view class="menu-item-icon green">
+            <view class="icon-menu-fav"></view>
+          </view>
+          <view class="menu-item-text">
+            <view class="menu-item-title">我的收藏</view>
+            <view class="menu-item-sub">12 本书 · 3 篇笔记</view>
+          </view>
+          <view class="icon-arrow-right-small"></view>
+        </view>
+
+        <view class="menu-item" bindtap="handleDeveloping">
+          <view class="menu-item-icon warm">
+            <view class="icon-menu-history"></view>
+          </view>
+          <view class="menu-item-text">
+            <view class="menu-item-title">阅读历史</view>
+            <view class="menu-item-sub">最近 7 天阅读记录</view>
+          </view>
+          <view class="icon-arrow-right-small"></view>
+        </view>
+
+        <view class="menu-item" bindtap="handleOpenSettings">
+          <view class="menu-item-icon green">
+            <view class="icon-menu-settings"></view>
+          </view>
+          <view class="menu-item-text">
+            <view class="menu-item-title">智能设置</view>
+            <view class="menu-item-sub">AI 伴读偏好设置</view>
+          </view>
+          <view class="icon-arrow-right-small"></view>
+        </view>
+
+        <view class="menu-item" bindtap="handleLogout">
+          <view class="menu-item-icon red">
+            <view class="icon-menu-logout"></view>
+          </view>
+          <view class="menu-item-text">
+            <view class="menu-item-title logout-text">退出登录</view>
+          </view>
         </view>
       </view>
-    </view>
 
-    <!-- Menu List -->
-    <view class="menu-list">
-      <view class="menu-item" bindtap="handleDeveloping">
-        <view class="menu-icon icon-heart"></view>
-        <text class="menu-text">我的收藏</text>
-        <view class="menu-arrow"></view>
-      </view>
-      <view class="menu-item" bindtap="handleDeveloping">
-        <view class="menu-icon icon-history"></view>
-        <text class="menu-text">阅读历史</text>
-        <view class="menu-arrow"></view>
-      </view>
-      <view class="menu-item" bindtap="handleOpenSettings">
-        <view class="menu-icon icon-sliders"></view>
-        <text class="menu-text">智能设置</text>
-        <view class="menu-arrow"></view>
-      </view>
-      <view class="menu-item menu-item--logout" bindtap="handleLogout">
-        <view class="menu-icon icon-logout"></view>
-        <text class="menu-text menu-text--logout">退出登录</text>
-        <view class="menu-arrow"></view>
-      </view>
+      <view class="safe-area-bottom"></view>
     </view>
   </scroll-view>
 
@@ -162,26 +167,27 @@
   <view wx:if="{{showProfileModal}}" class="profile-overlay" bindtap="handleCloseProfile">
     <view class="profile-sheet" catchtap="handleStopPropagation">
       <view class="sheet-bar"></view>
-      <text class="sheet-title">完善个人资料</text>
+      <view class="sheet-title">完善个人资料</view>
       <button class="avatar-uploader" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
         <view class="uploader-inner">
           <image wx:if="{{identity && identity.avatarUrl}}" src="{{identity.avatarUrl}}" mode="aspectFill" />
-          <view wx:else class="uploader-placeholder">+</view>
+          <view class="uploader-placeholder" wx:else>+</view>
         </view>
-        <text class="uploader-hint">点击更换头像</text>
+        <view class="uploader-hint">点击更换头像</view>
       </button>
       <view class="input-group">
-        <text class="input-label">昵称</text>
+        <view class="input-label">昵称</view>
         <input
           class="input-field"
-          type="text"
+          type="nickname"
           value="{{nicknameDraft}}"
           placeholder="请输入您的昵称"
-          placeholder-style="color: var(--stone);"
+          placeholder-class="search-placeholder"
           bindinput="handleNicknameDraftInput"
+          bindblur="handleNicknameDraftInput"
         />
       </view>
-      <button class="btn-save" bindtap="handleProfileSubmit">保存</button>
+      <view class="btn-primary" bindtap="handleProfileSubmit">保存设置</view>
     </view>
   </view>
 </view>

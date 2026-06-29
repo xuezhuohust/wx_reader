@@ -66,13 +66,15 @@ Page({
     }
 
     const app = getApp()
+    const menuButtonInfo = wx.getMenuButtonBoundingClientRect()
+    const systemInfo = wx.getSystemInfoSync()
+
     this.setData({
-      navBarHeight: app.globalData.navBarHeight,
+      navBarHeight: app.globalData.navBarHeight + 24, // 增加 24px 的额外高度，让头部更开阔
       statusBarHeight: app.globalData.statusBarHeight,
-      menuRight: app.globalData.menuRight,
-      menuTop: app.globalData.menuTop,
-      menuHeight: app.globalData.menuHeight,
-      menuWidth: app.globalData.menuWidth,
+      menuTop: menuButtonInfo.top,
+      menuHeight: menuButtonInfo.height,
+      menuRight: systemInfo.windowWidth - menuButtonInfo.left + 10
     })
 
     this.showInitialPrivacyAgreement()
@@ -137,6 +139,12 @@ Page({
   },
 
   handleSeeMore() {
+    wx.switchTab({
+      url: '/pages/bookshelf/bookshelf',
+    })
+  },
+
+  handleSwitchToShelf() {
     wx.switchTab({
       url: '/pages/bookshelf/bookshelf',
     })
@@ -449,14 +457,11 @@ Page({
 
   handleRecommendTap(event) {
     const { id } = event.currentTarget.dataset
-
-    this.switchRole('reader')
-      .then(() => {
-        wx.navigateTo({
-          url: `/pages/book-detail/book-detail?id=${encodeURIComponent(id)}`,
-        })
-      })
-      .catch(() => null)
+    
+    // 直接进入详情页，不再执行可能导致数据刷新的 switchRole 逻辑
+    wx.navigateTo({
+      url: `/pages/book-detail/book-detail?id=${encodeURIComponent(id)}`,
+    })
   },
 
   handlePublisherActionTap(event) {

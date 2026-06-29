@@ -31,15 +31,29 @@ Page({
     statusBarHeight: 0,
     menuTop: 0,
     menuHeight: 0,
+    menuRight: 0,
+    weeklyStats: [
+      { day: '一', height: 40, active: false },
+      { day: '二', height: 65, active: false },
+      { day: '三', height: 30, active: false },
+      { day: '四', height: 80, active: false },
+      { day: '五', height: 55, active: false },
+      { day: '六', height: 90, active: true },
+      { day: '日', height: 72, active: false },
+    ]
   },
 
   onLoad() {
     const app = getApp()
+    const menuButtonInfo = wx.getMenuButtonBoundingClientRect()
+    const systemInfo = wx.getSystemInfoSync()
+    
     this.setData({
       navBarHeight: app.globalData.navBarHeight,
       statusBarHeight: app.globalData.statusBarHeight,
-      menuTop: app.globalData.menuTop,
-      menuHeight: app.globalData.menuHeight,
+      menuTop: menuButtonInfo.top,
+      menuHeight: menuButtonInfo.height,
+      menuRight: systemInfo.windowWidth - menuButtonInfo.left + 10
     })
   },
 

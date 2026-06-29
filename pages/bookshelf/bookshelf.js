@@ -7,31 +7,36 @@ Page({
     statusBarHeight: 0,
     menuTop: 0,
     menuHeight: 0,
+    menuRight: 0,
     books: [],
-    allBooks: [], // Store all books for filtering
+    allBooks: [],
     loading: true,
-    scrolled: false,
     searchValue: '',
+    
+    // Filters
+    activeStatus: 'all',
+    statusTabs: [
+      { label: '全部', value: 'all' },
+      { label: '在读', value: 'reading' },
+      { label: '想读', value: 'wishlist' },
+      { label: '已读', value: 'finished' }
+    ],
+    activeCategory: '全部',
+    categories: ['全部', '计算机', 'AI', '文学', '历史', '商业', '职场'],
   },
 
   onLoad() {
     const app = getApp()
+    const menuButtonInfo = wx.getMenuButtonBoundingClientRect()
+    const systemInfo = wx.getSystemInfoSync()
+    
     this.setData({
       navBarHeight: app.globalData.navBarHeight,
       statusBarHeight: app.globalData.statusBarHeight,
-      menuTop: app.globalData.menuTop,
-      menuHeight: app.globalData.menuHeight,
+      menuTop: menuButtonInfo.top,
+      menuHeight: menuButtonInfo.height,
+      menuRight: systemInfo.windowWidth - menuButtonInfo.left + 10
     })
-  },
-
-  onPageScroll(e) {
-    const scrollTop = (e.detail && e.detail.scrollTop) || e.scrollTop || 0
-    const isScrolled = scrollTop > 50
-    if (isScrolled !== this.data.scrolled) {
-      this.setData({
-        scrolled: isScrolled,
-      })
-    }
   },
 
   onShow() {
@@ -51,134 +56,134 @@ Page({
     this.loadBookshelf()
   },
 
-  onPullDownRefresh() {
-    this.loadBookshelf(() => {
-      wx.stopPullDownRefresh()
-    })
-  },
-
-  isImageCoverValue(value) {
-    const raw = String(value || '').trim()
-    if (!raw) {
-      return false
-    }
-    return /^(https?:\/\/|wxfile:\/\/|cloud:\/\/|data:image\/|\/)/.test(raw)
-      || /\.(png|jpe?g|webp|gif|svg)(\?|#|$)/i.test(raw)
-  },
-
-  resolveCoverUrl(book) {
-    const candidates = [
-      book && book.coverUrl,
-      book && book.cover_url,
-      book && book.imageUrl,
-      book && book.image_url,
-      book && book.coverImage,
-      book && book.cover_image,
-    ]
-
-    for (let i = 0; i < candidates.length; i += 1) {
-      if (this.isImageCoverValue(candidates[i])) {
-        return api.toAbsoluteUrl(candidates[i])
-      }
-    }
-
-    if (book && this.isImageCoverValue(book.cover)) {
-      return api.toAbsoluteUrl(book.cover)
-    }
-
-    return ''
-  },
-
   loadBookshelf(done) {
     this.setData({ loading: true })
     api.getPurchasedBooks()
       .then((books) => {
-        // 只把真实图片路径转成封面地址；cover-sunset 这类主题值不能当图片加载。
         const processedBooks = (books || []).map(book => {
           return Object.assign({}, book, {
             coverUrl: this.resolveCoverUrl(book),
+            // Mocking some data for the UI if not present
+            rating: book.rating || (4 + Math.random()).toFixed(1),
+            readersCount: book.readersCount || Math.floor(Math.random() * 5000 + 100) + (Math.random() > 0.5 ? 'k' : ''),
+            isAIReady: book.isAIReady !== undefined ? book.isAIReady : Math.random() > 0.5,
+            status: book.status || ['reading', 'wishlist', 'finished'][Math.floor(Math.random() * 3)],
+            category: book.category || this.data.categories[Math.floor(Math.random() * (this.data.categories.length - 1)) + 1]
           })
         })
         this.setData({
           allBooks: processedBooks,
-          books: processedBooks,
           loading: false,
+        }, () => {
+          this.applyFilters()
         })
       })
       .catch((error) => {
         console.error('[bookshelf] loadBookshelf failed', error)
-        this.setData({
-          loading: false,
-        })
+        this.setData({ loading: false })
       })
       .finally(() => {
-        if (typeof done === 'function') {
-          done()
-        }
+        if (typeof done === 'function') done()
       })
   },
 
-  handleSearchInput(event) {
-    const value = event.detail.value.toLowerCase()
-    const filtered = this.data.allBooks.filter(book => 
-      book.title.toLowerCase().includes(value) || 
-      (book.author && book.author.toLowerCase().includes(value))
-    )
-    this.setData({
-      searchValue: value,
-      books: filtered
+  resolveCoverUrl(book) {
+    const candidates = [book.coverUrl, book.cover_url, book.imageUrl, book.image_url, book.coverImage, book.cover_image]
+    for (const c of candidates) {
+      if (this.isImageCoverValue(c)) return api.toAbsoluteUrl(c)
+    }
+    if (this.isImageCoverValue(book.cover)) return api.toAbsoluteUrl(book.cover)
+    return ''
+  },
+
+  isImageCoverValue(value) {
+    const raw = String(value || '').trim()
+    if (!raw) return false
+    return /^(https?:\/\/|wxfile:\/\/|cloud:\/\/|data:image\/|\/)/.test(raw) || /\.(png|jpe?g|webp|gif|svg)(\?|#|$)/i.test(raw)
+  },
+
+  handleSearchInput(e) {
+    this.setData({ searchValue: e.detail.value.toLowerCase() }, () => {
+      this.applyFilters()
     })
   },
 
+  handleStatusChange(e) {
+    const { value } = e.currentTarget.dataset
+    if (this.data.activeStatus === value) return
+    this.setData({ activeStatus: value }, () => {
+      this.applyFilters()
+    })
+  },
+
+  handleCategoryChange(e) {
+    const { value } = e.currentTarget.dataset
+    if (this.data.activeCategory === value) return
+    this.setData({ activeCategory: value }, () => {
+      this.applyFilters()
+    })
+  },
+
+  handleResetFilters() {
+    this.setData({
+      searchValue: '',
+      activeStatus: 'all',
+      activeCategory: '全部'
+    }, () => {
+      this.applyFilters()
+    })
+  },
+
+  applyFilters() {
+    const { allBooks, searchValue, activeStatus, activeCategory } = this.data
+    
+    let filtered = allBooks.filter(book => {
+      // Search match
+      const matchesSearch = !searchValue || 
+        book.title.toLowerCase().includes(searchValue) || 
+        (book.author && book.author.toLowerCase().includes(searchValue))
+      
+      // Status match
+      const matchesStatus = activeStatus === 'all' || book.status === activeStatus
+      
+      // Category match
+      const matchesCategory = activeCategory === '全部' || book.category === activeCategory
+      
+      return matchesSearch && matchesStatus && matchesCategory
+    })
+    
+    this.setData({ books: filtered })
+  },
+
   handleSortTap() {
-    // Simple toggle sort logic or show picker
     wx.showActionSheet({
-      itemList: ['最近阅读', '按标题 A-Z', '按添加时间'],
+      itemList: ['最近阅读', '评分最高', '读者最多'],
       success: (res) => {
         let sorted = [...this.data.books]
         if (res.tapIndex === 1) {
-          sorted.sort((a, b) => a.title.localeCompare(b.title))
+          sorted.sort((a, b) => b.rating - a.rating)
         } else if (res.tapIndex === 2) {
-          sorted.sort((a, b) => (b.purchaseTime || 0) - (a.purchaseTime || 0))
+          // Simple string parser for readersCount
+          const parseCount = (s) => parseFloat(s) * (s.includes('k') ? 1000 : 1)
+          sorted.sort((a, b) => parseCount(b.readersCount) - parseCount(a.readersCount))
         }
         this.setData({ books: sorted })
       }
     })
   },
 
-  handleBookTap(event) {
-    const { book } = event.currentTarget.dataset
+  handleBookTap(e) {
+    const { book } = e.currentTarget.dataset
     wx.navigateTo({
       url: `/pages/book-detail/book-detail?id=${book.id}`,
     })
   },
 
-  handleActionTap(event) {
-    const { book } = event.currentTarget.dataset
-    wx.navigateTo({
-      url: `/pages/chat/chat?bookId=${book.id}`,
-    })
+  onPullDownRefresh() {
+    this.loadBookshelf(() => wx.stopPullDownRefresh())
   },
 
-  handleExplore() {
-    wx.switchTab({
-      url: '/pages/index/index',
-    })
-  },
-
-  handleImageError(e) {
-    const { id } = e.currentTarget.dataset
-    const failedId = String(id || '')
-    const books = this.data.books.map((book) => (
-      String(book.id || '') === failedId ? Object.assign({}, book, { coverUrl: '' }) : book
-    ))
-    const allBooks = this.data.allBooks.map((book) => (
-      String(book.id || '') === failedId ? Object.assign({}, book, { coverUrl: '' }) : book
-    ))
-
-    this.setData({
-      books,
-      allBooks,
-    })
-  },
+  onPageScroll() {
+    // Keep for potential scroll-linked animations
+  }
 })

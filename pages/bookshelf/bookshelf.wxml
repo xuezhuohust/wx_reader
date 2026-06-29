@@ -1,62 +1,118 @@
-<view class="page-shell bookshelf-page">
-  <!-- Navigation -->
-  <view class="custom-nav" style="height: {{navBarHeight}}px;">
-    <view class="nav-inner" style="top: {{menuTop}}px; height: {{menuHeight}}px; padding-left: 40rpx; padding-right: 40rpx;">
-      <text class="nav-title">书库</text>
+<view class="page-container bookshelf-page">
+  <!-- Sticky Header -->
+  <view class="home-nav" style="height: {{navBarHeight}}px; background-color: #faf8f5;">
+    <view class="nav-header" style="position: absolute; top: {{menuTop}}px; height: {{menuHeight}}px; left: 0; right: 0; padding-right: {{menuRight}}px;">
+      <view class="nav-title">书库</view>
+      <view class="nav-actions">
+        <view class="nav-btn" bindtap="handleSortTap">
+          <view class="icon-sort"></view>
+        </view>
+      </view>
     </view>
   </view>
 
-  <scroll-view class="content-body" scroll-y enhanced show-scrollbar="{{false}}" style="padding-top: {{navBarHeight + 16}}px;" bindscroll="onPageScroll">
-    <!-- Search -->
-    <view class="search-bar">
-      <input
-        class="search-input"
-        placeholder="搜索书名或作者"
-        placeholder-style="color: var(--stone); font-size: 26rpx;"
-        bindinput="handleSearchInput"
-        value="{{searchValue}}"
-      />
-    </view>
+  <scroll-view 
+    class="scroll-area" 
+    scroll-y 
+    enhanced 
+    show-scrollbar="{{false}}" 
+    bindscroll="onPageScroll"
+    style="padding-top: 20rpx;"
+  >
+    <view class="scroll-content">
+      <!-- Search Bar -->
+      <view class="search-bar fade-up d1">
+        <view class="icon-search-small"></view>
+        <input
+          class="search-input"
+          placeholder="搜索书名或作者..."
+          placeholder-class="search-placeholder"
+          bindinput="handleSearchInput"
+          value="{{searchValue}}"
+        />
+      </view>
 
-    <!-- Book Grid -->
-    <view class="book-grid" wx:if="{{books.length > 0}}">
-      <view
-        wx:for="{{books}}"
-        wx:key="id"
-        class="book-grid-item"
-        data-book="{{item}}"
-        bindtap="handleBookTap"
-      >
-        <view class="grid-cover">
-          <image wx:if="{{item.coverUrl}}" src="{{item.coverUrl}}" mode="aspectFill" data-id="{{item.id}}" binderror="handleImageError" />
-          <view wx:else class="grid-cover-empty"><text>暂无封面</text></view>
-          <view class="ai-ready-tag">
-            <text>AI-Ready</text>
+      <!-- Shelf Status Tabs -->
+      <view class="shelf-tabs fade-up d2">
+        <view 
+          class="shelf-tab {{activeStatus === item.value ? 'active' : ''}}" 
+          wx:for="{{statusTabs}}" 
+          wx:key="value"
+          bindtap="handleStatusChange"
+          data-value="{{item.value}}"
+        >
+          {{item.label}}
+        </view>
+      </view>
+
+      <!-- Filter Chips -->
+      <scroll-view class="filter-chips-scroll fade-up d3" scroll-x enhanced show-scrollbar="{{false}}">
+        <view class="filter-chips">
+          <view 
+            class="chip {{activeCategory === item ? 'active' : ''}}" 
+            wx:for="{{categories}}" 
+            wx:key="*this"
+            bindtap="handleCategoryChange"
+            data-value="{{item}}"
+          >
+            {{item}}
           </view>
         </view>
-        <text class="grid-book-title">{{item.title}}</text>
-        <text class="grid-book-author">{{item.author || '未知作者'}}</text>
-      </view>
-    </view>
+      </scroll-view>
 
-    <!-- Loading -->
-    <view class="book-grid" wx:elif="{{loading}}">
-      <view wx:for="{{[1,2,3,4]}}" wx:key="*this" class="book-grid-item skeleton-pulse">
-        <view class="grid-cover skeleton-bg"></view>
-        <view class="skeleton-bg" style="width: 70%; height: 28rpx; margin-top: 12rpx;"></view>
-        <view class="skeleton-bg" style="width: 50%; height: 22rpx; margin-top: 8rpx;"></view>
+      <!-- Book Grid -->
+      <view class="book-grid" wx:if="{{books.length > 0}}">
+        <view
+          wx:for="{{books}}"
+          wx:key="id"
+          class="book-grid-item fade-up d4"
+          style="animation-delay: {{index * 40}}ms"
+          bindtap="handleBookTap"
+          data-book="{{item}}"
+        >
+          <view class="book-grid-cover" style="background: {{item.coverColor || '#f3efe8'}};">
+            <image wx:if="{{item.coverUrl}}" src="{{item.coverUrl}}" mode="aspectFill" />
+            <view class="book-placeholder-inner-flat" wx:else>
+              <view class="placeholder-title-flat">{{item.title[0]}}</view>
+            </view>
+            <view class="book-grid-badge" wx:if="{{item.isAIReady}}">AI-Ready</view>
+          </view>
+          
+          <view class="book-grid-info">
+            <view class="book-grid-title">{{item.title}}</view>
+            <view class="book-grid-author">{{item.author || '未知作者'}}</view>
+            <view class="book-grid-meta">
+              <view class="meta-item">
+                <text class="meta-star">★</text>
+                <text>{{item.rating || '4.5'}}</text>
+              </view>
+              <view class="meta-dot">·</view>
+              <view class="meta-readers">{{item.readersCount || '1.2k'}} 在读</view>
+            </view>
+          </view>
+        </view>
       </view>
-    </view>
 
-    <!-- Empty -->
-    <view wx:elif="{{!loading}}" class="empty-state">
-      <text class="empty-icon">书</text>
-      <text class="empty-title">书架空空如也</text>
-      <text class="empty-desc">快去看看新书吧</text>
-      <view class="btn-primary" bindtap="handleExplore">
-        <text>前往</text>
+      <!-- Loading State -->
+      <view class="book-grid" wx:elif="{{loading}}">
+        <view wx:for="{{[1,2,3,4,5,6]}}" wx:key="*this" class="book-grid-item skeleton-pulse">
+          <view class="book-grid-cover skeleton-bg"></view>
+          <view class="skeleton-bg" style="width: 80%; height: 28rpx; margin-top: 16rpx;"></view>
+          <view class="skeleton-bg" style="width: 50%; height: 22rpx; margin-top: 8rpx;"></view>
+        </view>
       </view>
+
+      <!-- Empty State -->
+      <view wx:else class="empty-state fade-up">
+        <view class="empty-icon-wrap">
+          <view class="icon-book-empty"></view>
+        </view>
+        <view class="empty-title">未找到相关书籍</view>
+        <view class="empty-desc">尝试换个搜索词或分类看看</view>
+        <view class="btn-primary" bindtap="handleResetFilters">重置筛选</view>
+      </view>
+
+      <view class="safe-area-bottom"></view>
     </view>
   </scroll-view>
-
 </view>
