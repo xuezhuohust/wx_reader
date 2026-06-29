@@ -79,6 +79,18 @@ function getChapterContent(bookId, chapterIndex) {
   }).then((data) => data.content || '')
 }
 
+/** 获取书籍指定章节的原文行窗口 */
+function getOriginalText(bookId, chapterId, offset, limit) {
+  return request({
+    url: `/api/books/${encodeURIComponent(bookId)}/original`,
+    data: {
+      chapterId,
+      offset: Number(offset || 0),
+      limit: Number(limit || 100),
+    },
+  })
+}
+
 /** 购买指定书籍 */
 function purchaseBook(id) {
   return request({
@@ -560,6 +572,7 @@ module.exports = {
   getPurchasedBooks,
   getBookById,
   getChapterContent,
+  getOriginalText,
   purchaseBook,
   sendBookChatMessageStream,
   listConversations,

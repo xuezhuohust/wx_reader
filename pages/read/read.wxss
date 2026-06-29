@@ -165,7 +165,7 @@
 .paragraph { 
   font-size: 34rpx; 
   line-height: 1.8; 
-  margin-bottom: 40rpx; 
+  margin-bottom: 18rpx; 
   color: #1b1b1b;
   text-align: justify;
   font-family: "Noto Serif SC", serif;
