@@ -78,7 +78,7 @@
   </swiper>
 
   <!-- Reader Footer -->
-  <view class="reader-footer fade-up" wx:if="{{showControls}}">
+  <view class="reader-footer fade-up" wx:if="{{showFooterBar}}">
     <view class="footer-actions">
       <view class="footer-btn-wrap {{currentChapterIndex <= 0 ? 'btn--disabled' : ''}}" bindtap="handlePrevChapter">
         <view class="footer-btn">

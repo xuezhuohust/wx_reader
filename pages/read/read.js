@@ -1,5 +1,7 @@
 const api = require('../../utils/api')
 
+const FOOTER_AUTO_HIDE_MS = 1200
+
 Page({
   data: {
     bookId: '',
@@ -10,11 +12,17 @@ Page({
     allChapters: [],
     allChapterNames: [],
     chapterPages: [], // 存储当前章节的分页内容
+    chapterWindowOffset: 0,
+    chapterWindowLimit: 100,
+    chapterWindowNextOffset: null,
+    chapterWindowHasNext: false,
+    chapterWindowLineCount: 0,
     loading: true,
     readingProgress: 0,
     totalChapters: 0,
     scrollTop: 0,
     showControls: true,
+    showFooterBar: true,
     showTocSheet: false,
     showSelectionMenu: false,
     selectedParaText: '',
@@ -37,6 +45,36 @@ Page({
     })
 
     this.loadBookData(id)
+  },
+
+  onUnload() {
+    this.clearFooterAutoHideTimer()
+  },
+
+  onHide() {
+    this.clearFooterAutoHideTimer()
+  },
+
+  clearFooterAutoHideTimer() {
+    if (this.footerAutoHideTimer) {
+      clearTimeout(this.footerAutoHideTimer)
+      this.footerAutoHideTimer = null
+    }
+  },
+
+  scheduleFooterAutoHide() {
+    this.clearFooterAutoHideTimer()
+    this.footerAutoHideTimer = setTimeout(() => {
+      if (this.data.showTocSheet || this.data.showSelectionMenu) return
+      this.setData({ showFooterBar: false })
+      this.footerAutoHideTimer = null
+    }, FOOTER_AUTO_HIDE_MS)
+  },
+
+  showFooterTemporarily() {
+    this.setData({ showFooterBar: true }, () => {
+      this.scheduleFooterAutoHide()
+    })
   },
 
   loadBookData(id) {
@@ -90,9 +128,15 @@ Page({
   },
 
   loadChapterContent(fromDirection = 'next') {
+    this.loadChapterWindow(0, fromDirection)
+  },
+
+  loadChapterWindow(offset = 0, fromDirection = 'next-window') {
     const { currentChapterIndex, allChapterNames, allChapters } = this.data
     const chapter = allChapters[currentChapterIndex] || {}
     const chapterName = chapter.title || allChapterNames[currentChapterIndex] || `第 ${currentChapterIndex + 1} 章`
+    const requestSeq = (this.chapterWindowRequestSeq || 0) + 1
+    this.chapterWindowRequestSeq = requestSeq
     
     this.setData({ 
       loading: true, 
@@ -100,63 +144,75 @@ Page({
       currentChapterName: chapterName
     })
 
-    this.fetchChapterLines(chapter.id)
-      .then((lines) => {
-        this.buildChapterPages(lines, fromDirection)
+    this.fetchChapterWindow(chapter.id, offset)
+      .then((windowData) => {
+        if (requestSeq !== this.chapterWindowRequestSeq) return
+        this.buildChapterPages(windowData, fromDirection)
       })
       .catch((err) => {
+        if (requestSeq !== this.chapterWindowRequestSeq) return
         console.error('加载章节原文失败:', err)
         wx.showToast({
           title: err.message || '加载章节失败',
           icon: 'none',
         })
-        this.buildChapterPages([
-          `章节原文加载失败：${err.message || '请稍后重试'}`,
-        ], fromDirection)
+        this.buildChapterPages({
+          lines: [`章节原文加载失败：${err.message || '请稍后重试'}`],
+          offset,
+          nextOffset: null,
+          hasNext: false,
+          lineCount: 1,
+        }, fromDirection)
       })
   },
 
-  fetchChapterLines(chapterId) {
-    const { bookId } = this.data
+  fetchChapterWindow(chapterId, offset = 0) {
+    const { bookId, chapterWindowLimit } = this.data
     if (!chapterId) {
       return Promise.reject(new Error('章节 ID 缺失'))
     }
 
-    const limit = 200
-    const lines = []
+    const limit = Number(chapterWindowLimit || 100)
 
-    const loadWindow = (offset) => {
-      return api.getOriginalText(bookId, chapterId, offset, limit).then((data) => {
-        const rows = Array.isArray(data.lines) ? data.lines : []
-        rows.forEach((row) => {
-          lines.push(String(row && row.text != null ? row.text : ''))
-        })
+    return api.getOriginalText(bookId, chapterId, offset, limit).then((data) => {
+      const rows = Array.isArray(data.lines) ? data.lines : []
+      let lines = rows.map((row) => String(row && row.text != null ? row.text : ''))
+      if (!lines.length && data.content) {
+        lines = String(data.content).split('\n')
+      }
+      const chapter = data.chapter || {}
 
-        if (data.hasNext && data.nextOffset != null) {
-          return loadWindow(Number(data.nextOffset))
-        }
-
-        if (!lines.length && data.content) {
-          return String(data.content).split('\n')
-        }
-
-        return lines
-      })
-    }
-
-    return loadWindow(0)
+      return {
+        lines,
+        offset: Number(data.offset || offset || 0),
+        limit: Number(data.limit || limit),
+        nextOffset: data.nextOffset != null ? Number(data.nextOffset) : null,
+        hasNext: !!data.hasNext,
+        lineCount: Number(chapter.lineCount || chapter.line_count || 0),
+      }
+    })
   },
 
-  buildChapterPages(lines, fromDirection = 'next') {
+  buildChapterPages(windowData, fromDirection = 'next') {
     const { currentChapterIndex, totalChapters } = this.data
+    const lines = windowData && Array.isArray(windowData.lines) ? windowData.lines : []
+    const offset = Number((windowData && windowData.offset) || 0)
+    const limit = Number((windowData && windowData.limit) || this.data.chapterWindowLimit || 100)
+    const nextOffset = windowData && windowData.nextOffset != null ? Number(windowData.nextOffset) : null
+    const hasNext = !!(windowData && windowData.hasNext)
+    const lineCount = Number((windowData && windowData.lineCount) || 0)
     const pages = []
     
-    // 1. 返回上一章桥接页
-    if (currentChapterIndex > 0) {
+    if (offset > 0) {
+      pages.push({
+        type: 'prev-window',
+        text: '正在加载上一页...',
+        offset: Math.max(0, offset - limit),
+      })
+    } else if (currentChapterIndex > 0) {
       pages.push({ type: 'prev-bridge', text: '正在返回上一章...' })
     }
 
-    // 2. 正文分页逻辑
     const CHARS_PER_LINE = 18 
     const LINES_PER_PAGE = 27 // 调优后的行数，确保在各种屏幕下底部都有足够的留白
     const sourceLines = Array.isArray(lines) && lines.length ? lines : ['本章暂无原文内容']
@@ -182,29 +238,48 @@ Page({
       pages.push({ type: 'content', content: currentPage })
     }
 
-    // 3. 进入下一章桥接页
-    if (currentChapterIndex < totalChapters - 1) {
+    if (hasNext && nextOffset != null) {
+      pages.push({
+        type: 'next-window',
+        text: '继续阅读下一页...',
+        offset: nextOffset,
+      })
+    } else if (currentChapterIndex < totalChapters - 1) {
       pages.push({ type: 'next-bridge', text: '正在进入下一章...' })
     }
 
-    let startIdx = 0
-    if (fromDirection === 'prev') {
-      startIdx = pages.length - (currentChapterIndex < totalChapters - 1 ? 2 : 1)
-    } else {
-      startIdx = currentChapterIndex > 0 ? 1 : 0
-    }
+    const firstContentIndex = pages.findIndex(page => page.type === 'content')
+    const lastContentIndex = pages.reduce((lastIndex, page, index) => (
+      page.type === 'content' ? index : lastIndex
+    ), firstContentIndex)
+    const startIdx = fromDirection === 'prev-window'
+      ? Math.max(0, lastContentIndex)
+      : Math.max(0, firstContentIndex)
     
     this.setData({
       chapterPages: pages,
+      chapterWindowOffset: offset,
+      chapterWindowLimit: limit,
+      chapterWindowNextOffset: nextOffset,
+      chapterWindowHasNext: hasNext,
+      chapterWindowLineCount: lineCount,
+      showFooterBar: true,
       loading: false,
       currentPageIndex: startIdx 
     }, () => {
       this.updateReadingProgress()
+      this.scheduleFooterAutoHide()
     })
   },
 
   updateReadingProgress() {
-    const { currentPageIndex, chapterPages } = this.data
+    const {
+      currentPageIndex,
+      chapterPages,
+      chapterWindowOffset,
+      chapterWindowLineCount,
+      chapterWindowNextOffset,
+    } = this.data
     
     // 过滤出真正的正文页
     const contentPages = chapterPages.filter(p => p.type === 'content')
@@ -214,14 +289,28 @@ Page({
 
     // 找到当前页在正文页中的索引
     const currentPageObj = chapterPages[currentPageIndex]
+    if (!currentPageObj) return
     let progress = 0
     
     if (currentPageObj.type === 'content') {
-      // 找到当前内容页是第几页（从1开始）
-      const contentIdx = contentPages.indexOf(currentPageObj) + 1
-      progress = Math.round((contentIdx / totalContentPages) * 100)
+      const linesBeforePage = contentPages
+        .slice(0, contentPages.indexOf(currentPageObj))
+        .reduce((sum, page) => sum + (Array.isArray(page.content) ? page.content.length : 0), 0)
+      const currentPageLines = Array.isArray(currentPageObj.content) ? currentPageObj.content.length : 0
+      const readLines = Number(chapterWindowOffset || 0) + linesBeforePage + currentPageLines
+      progress = chapterWindowLineCount > 0
+        ? Math.round(Math.min(1, readLines / chapterWindowLineCount) * 100)
+        : Math.round(((contentPages.indexOf(currentPageObj) + 1) / totalContentPages) * 100)
+    } else if (currentPageObj.type === 'next-window') {
+      progress = chapterWindowLineCount > 0 && chapterWindowNextOffset != null
+        ? Math.round(Math.min(1, Number(chapterWindowNextOffset) / chapterWindowLineCount) * 100)
+        : 100
     } else if (currentPageObj.type === 'next-bridge') {
       progress = 100
+    } else if (currentPageObj.type === 'prev-window') {
+      progress = chapterWindowLineCount > 0
+        ? Math.round(Math.min(1, Number(chapterWindowOffset || 0) / chapterWindowLineCount) * 100)
+        : 0
     } else if (currentPageObj.type === 'prev-bridge') {
       progress = 0
     }
@@ -253,25 +342,47 @@ Page({
 
   onPageChange(e) {
     const { current, source } = e.detail
-    const { chapterPages, currentChapterIndex, totalChapters } = this.data
+    const { chapterPages } = this.data
     
     if (source === 'touch') {
       const targetPage = chapterPages[current]
-      
-      if (targetPage && targetPage.type === 'next-bridge') {
-        // 划到了“下一章”占位页
-        this.handleNextChapter()
-        return
-      }
-      
-      if (targetPage && targetPage.type === 'prev-bridge') {
-        // 划到了“上一章”占位页
-        this.handlePrevChapter()
+      if (this.handleBridgePage(targetPage)) {
         return
       }
     }
     
     this.setData({ currentPageIndex: current }, () => {
+      this.updateReadingProgress()
+    })
+  },
+
+  handleBridgePage(page) {
+    if (!page) return false
+    if (page.type === 'next-window') {
+      this.loadChapterWindow(Number(page.offset || 0), 'next-window')
+      return true
+    }
+    if (page.type === 'prev-window') {
+      this.loadChapterWindow(Number(page.offset || 0), 'prev-window')
+      return true
+    }
+    if (page.type === 'next-bridge') {
+      this.handleNextChapter()
+      return true
+    }
+    if (page.type === 'prev-bridge') {
+      this.handlePrevChapter()
+      return true
+    }
+    return false
+  },
+
+  goToPage(index) {
+    const targetPage = this.data.chapterPages[index]
+    if (this.handleBridgePage(targetPage)) {
+      return
+    }
+    this.setData({ currentPageIndex: index }, () => {
       this.updateReadingProgress()
     })
   },
@@ -294,6 +405,13 @@ Page({
   },
 
   handleScreenTap(e) {
+    if (!this.data.showFooterBar) {
+      this.showFooterTemporarily()
+      return
+    }
+
+    this.scheduleFooterAutoHide()
+
     const { x } = e.detail
     const screenWidth = wx.getSystemInfoSync().windowWidth
     const third = screenWidth / 3
@@ -301,29 +419,39 @@ Page({
     if (x < third) {
       // 点击左侧 1/3：上一页
       if (this.data.currentPageIndex > 0) {
-        this.setData({ currentPageIndex: this.data.currentPageIndex - 1 })
+        this.goToPage(this.data.currentPageIndex - 1)
       } else {
         this.handlePrevChapter()
       }
     } else if (x > third * 2) {
       // 点击右侧 1/3：下一页
       if (this.data.currentPageIndex < this.data.chapterPages.length - 1) {
-        this.setData({ currentPageIndex: this.data.currentPageIndex + 1 })
+        this.goToPage(this.data.currentPageIndex + 1)
       } else {
         this.handleNextChapter()
       }
     } else {
       // 点击中间 1/3：切换工具栏显示
+      const nextShowControls = !this.data.showControls
       this.setData({
-        showControls: !this.data.showControls
+        showControls: nextShowControls,
+        showFooterBar: nextShowControls,
+      }, () => {
+        if (nextShowControls) {
+          this.scheduleFooterAutoHide()
+        } else {
+          this.clearFooterAutoHideTimer()
+        }
       })
     }
   },
 
   handleShowToc() {
+    this.clearFooterAutoHideTimer()
     this.setData({
       showTocSheet: true,
-      showControls: false
+      showControls: false,
+      showFooterBar: false
     })
   },
 
@@ -339,10 +467,12 @@ Page({
 
   handleLongPressPara(e) {
     const { text } = e.currentTarget.dataset
+    this.clearFooterAutoHideTimer()
     this.setData({
       selectedParaText: text,
       showSelectionMenu: true,
-      showControls: false // 长按时隐藏上下控制栏
+      showControls: false, // 长按时隐藏上下控制栏
+      showFooterBar: false
     })
   },
 
