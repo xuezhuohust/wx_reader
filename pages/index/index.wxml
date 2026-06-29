@@ -1,14 +1,4 @@
 <view class="page-container home-page">
-  <!-- Sticky Header -->
-  <view class="home-nav" style="height: {{navBarHeight}}px; background-color: #faf8f5;">
-    <view class="nav-header" style="position: absolute; top: {{menuTop}}px; height: {{menuHeight}}px; left: 0; right: 0; padding-right: {{menuRight}}px;">
-      <view class="greeting-wrap">
-        <view class="greeting-wave">{{timeGreeting}}好</view>
-        <view class="greeting-name">{{identity.displayName || '读者'}}</view>
-      </view>
-    </view>
-  </view>
-
   <scroll-view
     class="scroll-area"
     scroll-y
@@ -16,44 +6,48 @@
     show-scrollbar="{{false}}"
     bindscroll="onPageScroll"
   >
-    <view class="scroll-content">
-      <!-- Continue Reading Section Header -->
-      <view class="section-header fade-up d1" wx:if="{{recommendBooks.length > 0}}">
-        <view class="section-title">继续阅读</view>
-        <view class="section-link" bindtap="handleSwitchToShelf">我的书架</view>
-      </view>
-
-      <!-- AI Compact Reading Card -->
-      <view class="ai-compact-card fade-up d1" wx:if="{{recommendBooks.length > 0}}" bindtap="handleRecommendTap" data-id="{{recommendBooks[0].id}}">
-        <view class="ai-compact-cover">
-          <image wx:if="{{recommendBooks[0].coverUrl}}" src="{{recommendBooks[0].coverUrl}}" mode="aspectFill" />
-          <view class="cover-placeholder-small" wx:else>{{recommendBooks[0].title[0]}}</view>
-        </view>
-        <view class="ai-compact-info">
-          <view class="ai-compact-header">
-            <text class="ai-compact-tag">AI 导读</text>
-            <text class="ai-compact-title">{{recommendBooks[0].title}}</text>
-          </view>
-          <view class="ai-compact-progress-row">
-            <view class="ai-compact-bar-wrap">
-              <view class="ai-compact-bar-fill" style="width: {{recommendBooks[0].progress || 0}}%;"></view>
+    <view class="scroll-content no-padding-top">
+      <!-- Hero Header Section -->
+      <view class="home-hero-header fade-up">
+        <image class="hero-bg-image" src="/app-assets/index-bg.png" mode="aspectFill"></image>
+        <view class="hero-glass-overlay"></view>
+        
+        <view class="hero-body" style="padding-top: {{menuTop}}px;">
+          <view class="hero-top-nav">
+            <view class="greeting-group">
+              <text class="greeting-time">{{timeGreeting}}好</text>
+              <view class="greeting-main">
+                <text class="app-title">AI伴读助手</text>
+              </view>
             </view>
-            <text class="ai-compact-pct">{{recommendBooks[0].progress || '0'}}%</text>
+          </view>
+
+          <!-- Stripped-out Continue Reading (Not a card) -->
+          <view class="hero-reading-entry" wx:if="{{recommendBooks.length > 0}}" bindtap="handleRecommendTap" data-id="{{recommendBooks[0].id}}">
+            <view class="entry-cover-box">
+              <image wx:if="{{recommendBooks[0].coverUrl}}" src="{{recommendBooks[0].coverUrl}}" mode="aspectFill" />
+              <view class="cover-placeholder-mini" wx:else>{{recommendBooks[0].title[0]}}</view>
+            </view>
+            <view class="entry-main-info">
+              <view class="entry-meta">
+                <text class="entry-tag">继续阅读</text>
+                <text class="entry-pct">{{recommendBooks[0].progress || '0'}}%</text>
+              </view>
+              <view class="entry-title-row">
+                <text class="entry-book-title">{{recommendBooks[0].title}}</text>
+                <view class="entry-arrow-icon"></view>
+              </view>
+              <view class="entry-progress-bar">
+                <view class="entry-progress-fill" style="width: {{recommendBooks[0].progress || 0}}%;"></view>
+              </view>
+            </view>
           </view>
         </view>
-        <view class="icon-arrow-right-faint-small"></view>
       </view>
 
-      <!-- Skeleton for AI Summary -->
-      <view class="ai-summary-card skeleton-pulse" wx:elif="{{loading}}">
-        <view class="skeleton-bg" style="width: 120rpx; height: 24rpx; margin-bottom: 12rpx;"></view>
-        <view class="skeleton-bg" style="width: 300rpx; height: 32rpx; margin-bottom: 12rpx;"></view>
-        <view class="skeleton-bg" style="width: 100%; height: 60rpx; margin-bottom: 24rpx;"></view>
-        <view class="skeleton-bg" style="width: 100%; height: 64rpx; border-radius: 99rpx;"></view>
-      </view>
-
-      <!-- Today's Recommendations -->
-      <view class="section-header fade-up d2" wx:if="{{recommendBooks.length > 0}}">
+      <view class="main-sections">
+        <!-- Today's Recommendations -->
+        <view class="section-header fade-up d2" wx:if="{{recommendBooks.length > 0}}">
         <view class="section-title">今日推荐</view>
         <view class="section-link" bindtap="handleSeeMore">查看全部</view>
       </view>
@@ -135,7 +129,8 @@
 
       <view class="safe-area-bottom"></view>
     </view>
-  </scroll-view>
+  </view>
+</scroll-view>
 
   <!-- Privacy Modal -->
   <view wx:if="{{showPrivacyModal}}" class="privacy-overlay" catchtap="handleDisagreePrivacy">

@@ -6,111 +6,226 @@
   flex-direction: column;
 }
 
-/* Header */
-.home-nav {
+/* Hero Header Section */
+.home-hero-header {
+  position: relative;
+  width: 100%;
+  min-height: 560rpx; /* 增加总高度，为底部留出更多空间 */
+  overflow: hidden;
   background-color: #faf8f5;
-  position: sticky;
+}
+
+.hero-bg-image {
+  position: absolute;
   top: 0;
-  z-index: 100;
-  flex-shrink: 0;
+  left: 0;
+  width: 100%;
+  height: 100%; /* 背景图铺满，配合长渐变实现渐入效果 */
+  z-index: 0;
+  transform: scale(1);
+  filter: none;
+  opacity: 0.9;
 }
 
-.nav-header {
-  display: flex;
-  align-items: center;
-  padding: 0 40rpx;
+.hero-glass-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to bottom, 
+    rgba(250, 248, 245, 0.05) 0%, 
+    rgba(250, 248, 245, 0.1) 40%, 
+    rgba(250, 248, 245, 0.6) 70%, /* 延长渐变区间 */
+    rgba(250, 248, 245, 0.9) 85%,
+    #faf8f5 100%
+  );
+  z-index: 1;
 }
 
-.greeting-wrap {
+.hero-body {
+  position: relative;
+  z-index: 2;
+  padding: 0 40rpx 100rpx; /* 增加底部内边距，让模块下方露出更多背景图 */
+}
+
+.hero-top-nav {
+  margin-bottom: 72rpx;
+}
+
+.greeting-group {
   display: flex;
   flex-direction: column;
 }
 
-.greeting-wave {
-  font-size: 22rpx;
-  color: #a0a0a0;
+.greeting-time {
+  font-size: 24rpx;
+  color: #8c8c8c;
   font-weight: 500;
   letter-spacing: 2rpx;
   text-transform: uppercase;
 }
 
-.greeting-name {
-  font-size: 52rpx;
+.greeting-main {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-top: 12rpx;
+}
+
+.app-title {
+  font-size: 56rpx;
   font-weight: 900;
   letter-spacing: -1.5rpx;
   color: #1b1b1b;
-  margin-top: 12rpx;
-  line-height: 1;
 }
 
-.nav-actions {
-  display: flex;
-  gap: 20rpx;
-  margin-right: 0rpx;
+.shelf-pill {
+  font-size: 24rpx;
+  font-weight: 700;
+  color: #3c692b;
+  background-color: rgba(60, 105, 43, 0.08);
+  padding: 10rpx 24rpx;
+  border-radius: 99rpx;
+  transition: all 0.2s;
 }
 
-.nav-btn {
-  width: 80rpx;
-  height: 80rpx;
-  border-radius: 20rpx;
-  background-color: #fff;
-  border: 1rpx solid rgba(0, 0, 0, 0.04);
+.shelf-pill:active {
+  transform: scale(0.95);
+  background-color: rgba(60, 105, 43, 0.15);
+}
+
+/* Stripped-out Reading Entry */
+.hero-reading-entry {
   display: flex;
   align-items: center;
-  justify-content: center;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.02);
+  padding: 24rpx 0;
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-radius: 0;
+  border: none;
+  box-shadow: none;
+  transition: all 0.2s ease;
+  margin-top: 0; /* 移除负边距，配合上面的 margin-bottom 实现更宽的间距 */
 }
 
-.nav-btn:active {
-  background-color: #f3efe8;
-  transform: scale(0.94);
+.hero-reading-entry:active {
+  opacity: 0.7;
+  transform: translateX(4rpx); /* 点击时轻微向右滑动，而非缩放 */
 }
 
-/* Scroll Area */
-.scroll-area {
-  flex: 1;
+.entry-cover-box {
+  width: 90rpx;
+  height: 126rpx;
+  border-radius: 8rpx;
   overflow: hidden;
+  margin-right: 32rpx;
+  background-color: #f3efe8;
+  flex-shrink: 0;
+  box-shadow: 0 8rpx 20rpx rgba(0, 0, 0, 0.08); /* 封面保留投影，增加立体感 */
+}
+
+.entry-cover-box image {
+  width: 100%;
+  height: 100%;
+}
+
+.entry-main-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.entry-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8rpx;
+}
+
+.entry-tag {
+  font-size: 18rpx;
+  font-weight: 800;
+  color: #3c692b;
+  letter-spacing: 2rpx;
+  opacity: 0.8;
+}
+
+.entry-pct {
+  font-size: 22rpx;
+  font-weight: 900;
+  color: #3c692b;
+  font-family: 'DIN Alternate', sans-serif;
+  opacity: 0.9;
+}
+
+.entry-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12rpx;
+}
+
+.entry-book-title {
+  font-size: 32rpx;
+  font-weight: 800;
+  color: #1b1b1b;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  letter-spacing: -0.5rpx;
+  line-height: 1.2;
+}
+
+.entry-arrow-icon {
+  width: 10rpx;
+  height: 10rpx;
+  border-top: 3rpx solid #3c692b;
+  border-right: 3rpx solid #3c692b;
+  transform: rotate(45deg);
+  opacity: 0.4;
+  margin-left: 12rpx;
+}
+
+.entry-progress-bar {
+  height: 4rpx; /* 更细的线条 */
+  background-color: rgba(60, 105, 43, 0.08);
+  border-radius: 99rpx;
+  overflow: hidden;
+  width: 100%;
+}
+
+.entry-progress-fill {
+  height: 100%;
+  background-color: #3c692b;
+  border-radius: 99rpx;
+}
+
+/* Main Sections Container */
+.main-sections {
+  padding: 0 40rpx;
+  position: relative;
+  z-index: 3;
+}
+
+.no-padding-top {
+  padding-top: 0 !important;
 }
 
 .scroll-content {
-  padding: 40rpx 40rpx 48rpx;
+  padding: 40rpx 0 48rpx; /* Horizontal padding moved to main-sections */
 }
 
-/* AI Compact Card (Super Minimalist) */
-.ai-compact-card {
-  display: flex;
-  align-items: center;
-  background-color: #fff;
-  border-radius: 28rpx;
-  padding: 28rpx 32rpx;
-  margin-bottom: 60rpx;
-  border: 1rpx solid rgba(0, 0, 0, 0.04);
-  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.03);
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: hidden;
+/* Header (Removed old styles) */
+.home-nav {
+  display: none;
 }
 
-.ai-compact-card:active {
-  transform: scale(0.98);
-  background-color: #fafafa;
-}
-
-.ai-compact-cover {
-  width: 90rpx;
-  height: 124rpx;
-  border-radius: 12rpx;
-  overflow: hidden;
-  margin-right: 28rpx;
-  background-color: #f3efe8;
-  flex-shrink: 0;
-  box-shadow: 0 8rpx 16rpx rgba(0, 0, 0, 0.06);
-}
-
-.ai-compact-cover image {
-  width: 100%;
-  height: 100%;
+.greeting-wrap, .greeting-wave, .greeting-name {
+  display: none;
 }
 
 .cover-placeholder-small {
@@ -123,72 +238,6 @@
   font-weight: 900;
   color: #8c8c8c;
   opacity: 0.3;
-}
-
-.ai-compact-info {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  margin-right: 16rpx;
-}
-
-.ai-compact-header {
-  display: flex;
-  align-items: center;
-  margin-bottom: 16rpx;
-}
-
-.ai-compact-tag {
-  font-size: 18rpx;
-  font-weight: 900;
-  color: #3c692b;
-  background-color: rgba(60, 105, 43, 0.08);
-  padding: 4rpx 14rpx;
-  border-radius: 8rpx;
-  margin-right: 16rpx;
-  white-space: nowrap;
-  letter-spacing: 1rpx;
-}
-
-.ai-compact-title {
-  font-size: 28rpx;
-  font-weight: 700;
-  color: #1b1b1b;
-  display: -webkit-box;
-  -webkit-line-clamp: 1;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  letter-spacing: -0.5rpx;
-}
-
-.ai-compact-progress-row {
-  display: flex;
-  align-items: center;
-  gap: 20rpx;
-}
-
-.ai-compact-bar-wrap {
-  flex: 1;
-  height: 6rpx;
-  background-color: #f3efe8;
-  border-radius: 99rpx;
-  overflow: hidden;
-}
-
-.ai-compact-bar-fill {
-  height: 100%;
-  background-color: #3c692b;
-  border-radius: 99rpx;
-}
-
-.ai-compact-pct {
-  font-size: 22rpx;
-  font-weight: 900;
-  color: #3c692b;
-  min-width: 56rpx;
-  text-align: right;
-  font-family: 'DIN Alternate', 'PingFang SC', sans-serif;
 }
 
 .icon-arrow-right-faint-small {
