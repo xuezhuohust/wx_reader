@@ -86,7 +86,7 @@ function getOriginalText(bookId, chapterId, offset, limit) {
     data: {
       chapterId,
       offset: Number(offset || 0),
-      limit: Number(limit || 100),
+      limit: Number(limit || 50),
     },
   })
 }

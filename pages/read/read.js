@@ -13,10 +13,10 @@ Page({
     allChapterNames: [],
     chapterPages: [], // 存储当前章节的分页内容
     chapterWindowOffset: 0,
-    chapterWindowLimit: 100,
+    chapterWindowLimit: 50,
     chapterWindowNextOffset: null,
     chapterWindowHasNext: false,
-    chapterWindowLineCount: 0,  
+    chapterWindowLineCount: 0,
     loading: true,
     readingProgress: 0,
     totalChapters: 0,
@@ -35,7 +35,7 @@ Page({
   onLoad(options) {
     const { id, index } = options
     const chapterIndex = parseInt(index || 0)
-    
+
     const app = getApp()
     this.setData({
       bookId: id,
@@ -138,19 +138,176 @@ Page({
     const chapterName = chapter.title || allChapterNames[currentChapterIndex] || `第 ${currentChapterIndex + 1} 章`
     const requestSeq = (this.chapterWindowRequestSeq || 0) + 1
     this.chapterWindowRequestSeq = requestSeq
-    
+
     // 切换章节时，先将滑动动画设为 0，防止“回退”动画
-    this.setData({ 
-      loading: true, 
+    this.setData({
+      loading: true,
       scrollTop: 0,
       currentChapterName: chapterName,
       swiperDuration: 0
     })
 
-    // 模拟加载延迟
-    setTimeout(() => {
-      this.mockChapterContent(fromDirection)
-    }, 150)
+    this.fetchOriginalTextWindow(chapter.id, offset)
+      .then((windowData) => {
+        if (requestSeq !== this.chapterWindowRequestSeq) return
+        this.buildOriginalTextPages(windowData, fromDirection)
+      })
+      .catch((err) => {
+        if (requestSeq !== this.chapterWindowRequestSeq) return
+        console.error('加载章节原文失败:', err)
+        wx.showToast({
+          title: err.message || '加载章节失败',
+          icon: 'none',
+        })
+        this.buildOriginalTextPages({
+          lines: [`章节原文加载失败：${err.message || '请稍后重试'}`],
+          offset,
+          limit: Number(this.data.chapterWindowLimit || 50),
+          nextOffset: null,
+          hasNext: false,
+          lineCount: 1,
+        }, fromDirection)
+      })
+  },
+
+  fetchOriginalTextWindow(chapterId, offset = 0) {
+    const { bookId, chapterWindowLimit } = this.data
+    if (!chapterId) {
+      return Promise.reject(new Error('章节 ID 缺失'))
+    }
+
+    const limit = Number(chapterWindowLimit || 50)
+
+    return api.getOriginalText(bookId, chapterId, offset, limit).then((data) => {
+      return this.normalizeOriginalTextWindow(data, offset, limit)
+    })
+  },
+
+  normalizeOriginalTextWindow(data, offset = 0, limit = 50) {
+    const source = Array.isArray(data) ? { lines: data } : (data || {})
+    const rows = Array.isArray(source.lines)
+      ? source.lines
+      : (Array.isArray(source.rows) ? source.rows : [])
+    let lines = rows.map((row) => {
+      if (row == null) return ''
+      if (typeof row === 'string' || typeof row === 'number') return String(row)
+      if (row.text != null) return String(row.text)
+      if (row.content != null) return String(row.content)
+      if (row.line != null) return String(row.line)
+      return ''
+    })
+
+    if (!lines.length && source.content) {
+      lines = String(source.content).split('\n')
+    }
+
+    const chapter = source.chapter || {}
+    const nextOffset = source.nextOffset != null
+      ? Number(source.nextOffset)
+      : (source.next_offset != null ? Number(source.next_offset) : null)
+    const hasNext = source.hasNext != null
+      ? !!source.hasNext
+      : (source.has_next != null ? !!source.has_next : nextOffset != null)
+
+    return {
+      lines,
+      offset: Number(source.offset != null ? source.offset : offset || 0),
+      limit: Number(source.limit || limit),
+      nextOffset,
+      hasNext,
+      lineCount: Number(chapter.lineCount || chapter.line_count || source.lineCount || source.line_count || 0),
+    }
+  },
+
+  buildOriginalTextPages(windowData, fromDirection = 'next') {
+    const { currentChapterIndex, totalChapters } = this.data
+    const lines = windowData && Array.isArray(windowData.lines) ? windowData.lines : []
+    const offset = Number((windowData && windowData.offset) || 0)
+    const limit = Number((windowData && windowData.limit) || this.data.chapterWindowLimit || 50)
+    const nextOffset = windowData && windowData.nextOffset != null ? Number(windowData.nextOffset) : null
+    const hasNext = !!(windowData && windowData.hasNext)
+    const lineCount = Number((windowData && windowData.lineCount) || 0)
+    const pages = []
+
+    if (offset > 0) {
+      pages.push({
+        type: 'prev-window',
+        text: '正在加载上一页...',
+        offset: Math.max(0, offset - limit),
+      })
+    } else if (currentChapterIndex > 0) {
+      pages.push({ type: 'prev-bridge', text: '正在返回上一章...' })
+    }
+
+    const CHARS_PER_LINE = 18
+    const LINES_PER_PAGE = 27
+    const sourceLines = lines.length ? lines : ['本章暂无原文内容']
+
+    let currentPage = []
+    let currentLines = 0
+
+    sourceLines.forEach(line => {
+      const text = String(line || '')
+      const pLines = text.trim() ? Math.max(1, Math.ceil(text.length / CHARS_PER_LINE)) : 1
+
+      if (currentLines + pLines > LINES_PER_PAGE && currentPage.length > 0) {
+        pages.push({ type: 'content', content: currentPage, showChapterEnd: false })
+        currentPage = []
+        currentLines = 0
+      }
+
+      currentPage.push(text)
+      currentLines += pLines
+    })
+
+    if (currentPage.length > 0) {
+      pages.push({ type: 'content', content: currentPage, showChapterEnd: false })
+    }
+
+    if (hasNext && nextOffset != null) {
+      pages.push({
+        type: 'next-window',
+        text: '继续阅读下一页...',
+        offset: nextOffset,
+      })
+    } else {
+      const lastContentPage = pages.reduce((lastPage, page) => (
+        page.type === 'content' ? page : lastPage
+      ), null)
+      if (lastContentPage) {
+        lastContentPage.showChapterEnd = true
+      }
+
+      if (currentChapterIndex < totalChapters - 1) {
+        pages.push({ type: 'next-bridge', text: '正在进入下一章...' })
+      }
+    }
+
+    const firstContentIndex = pages.findIndex(page => page.type === 'content')
+    const lastContentIndex = pages.reduce((lastIndex, page, index) => (
+      page.type === 'content' ? index : lastIndex
+    ), firstContentIndex)
+    const startIdx = fromDirection === 'prev' || fromDirection === 'prev-window'
+      ? Math.max(0, lastContentIndex)
+      : Math.max(0, firstContentIndex)
+
+    this.setData({
+      chapterPages: pages,
+      chapterWindowOffset: offset,
+      chapterWindowLimit: limit,
+      chapterWindowNextOffset: nextOffset,
+      chapterWindowHasNext: hasNext,
+      chapterWindowLineCount: lineCount,
+      showFooterBar: true,
+      loading: false,
+      currentPageIndex: startIdx
+    }, () => {
+      this.updateReadingProgress()
+      this.scheduleFooterAutoHide()
+      setTimeout(() => {
+        this.setData({ swiperDuration: 300 })
+      }, 50)
+    })
   },
 
   getMockText(index) {
@@ -165,37 +322,37 @@ Page({
   mockChapterContent(fromDirection = 'next') {
     const { currentChapterIndex, totalChapters } = this.data
     const fullContent = this.getMockText(currentChapterIndex)
-    
+
     // --- 模拟行数分页算法 ---
     const pages = []
-    
+
     // 1. 返回上一章桥接页
     if (currentChapterIndex > 0) {
       pages.push({ type: 'prev-bridge', text: '正在返回上一章...' })
     }
 
     // 2. 正文分页逻辑
-    const CHARS_PER_LINE = 18 
-    const LINES_PER_PAGE = 27 
+    const CHARS_PER_LINE = 18
+    const LINES_PER_PAGE = 27
     const paragraphs = fullContent.split('\n')
-    
+
     let currentPage = []
     let currentLines = 0
-    
+
     paragraphs.forEach(p => {
       if (!p.trim()) return
       const pLines = Math.ceil(p.length / CHARS_PER_LINE) + 1
-      
+
       if (currentLines + pLines > LINES_PER_PAGE && currentPage.length > 0) {
         pages.push({ type: 'content', content: currentPage })
         currentPage = []
         currentLines = 0
       }
-      
+
       currentPage.push(p)
       currentLines += pLines
     })
-    
+
     if (currentPage.length > 0) {
       pages.push({ type: 'content', content: currentPage })
     }
@@ -213,11 +370,11 @@ Page({
       // 如果是从前往后跳转，目标应该是【第一页正文】
       startIdx = (currentChapterIndex > 0) ? 1 : 0
     }
-    
+
     this.setData({
       chapterPages: pages,
       loading: false,
-      currentPageIndex: startIdx 
+      currentPageIndex: startIdx
     }, () => {
       this.updateReadingProgress()
       // 数据渲染完成后，恢复滑动动画时长
@@ -235,18 +392,18 @@ Page({
       chapterWindowLineCount,
       chapterWindowNextOffset,
     } = this.data
-    
+
     // 过滤出真正的正文页
     const contentPages = chapterPages.filter(p => p.type === 'content')
     const totalContentPages = contentPages.length
-    
+
     if (totalContentPages === 0) return
 
     // 找到当前页在正文页中的索引
     const currentPageObj = chapterPages[currentPageIndex]
     if (!currentPageObj) return
     let progress = 0
-    
+
     if (currentPageObj.type === 'content') {
       const linesBeforePage = contentPages
         .slice(0, contentPages.indexOf(currentPageObj))
@@ -298,14 +455,14 @@ Page({
   onPageChange(e) {
     const { current, source } = e.detail
     const { chapterPages } = this.data
-    
+
     if (source === 'touch') {
       const targetPage = chapterPages[current]
       if (this.handleBridgePage(targetPage)) {
         return
       }
     }
-    
+
     this.setData({ currentPageIndex: current }, () => {
       this.updateReadingProgress()
     })

@@ -55,7 +55,7 @@
           </block>
           
           <!-- 仅在最后一页正文显示本章完 -->
-          <view class="chapter-end-hint" wx:if="{{pageIdx === chapterPages.length - (currentChapterIndex < totalChapters - 1 ? 2 : 1) && !loading}}">
+          <view class="chapter-end-hint" wx:if="{{item.showChapterEnd && !loading}}">
             <text>— 本章完 —</text>
           </view>
         </view>
