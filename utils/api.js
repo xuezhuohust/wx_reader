@@ -429,13 +429,13 @@ function sendBookChatMessageStream(bookId, message, handlers) {
       }
 
       streamRequestTask = wx.request({
-        url: `${BASE_URL}/api/ask/segments`,
+         url: `${BASE_URL}/api/chat/stream`,
         method: 'POST',
         enableChunked: true,
         responseType: 'arraybuffer',
         data: {
-          book: bookId,
-          question: message,
+          doc_id: bookId,
+          message,
           session_id: callbacks.conversationId || '',
           user_id: identity.userId || identity.openid || 'default',
         },
