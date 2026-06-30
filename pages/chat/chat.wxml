@@ -104,15 +104,15 @@
           wx:for="{{messages}}"
           wx:key="id"
           id="{{item.id}}"
-          class="message-row {{item.role === 'user' ? 'row-user' : 'row-ai'}}"
+          class="message-row {{item.isUser ? 'row-user' : 'row-ai'}}"
         >
-          <view class="chat-avatar {{item.role === 'user' ? 'user-avatar' : 'ai-avatar'}}">
-            {{item.role === 'user' ? '我' : '助'}}
+          <view class="chat-avatar {{item.isUser ? 'user-avatar' : 'ai-avatar'}}">
+            {{item.isUser ? '我' : '助'}}
           </view>
           <view class="message-container">
-            <view class="message-bubble {{item.role === 'user' ? 'bubble-user' : 'bubble-ai'}}">
+            <view class="message-bubble {{item.isUser ? 'bubble-user' : 'bubble-ai'}}">
             <!-- 思考中动画 -->
-            <view wx:if="{{item.role === 'assistant' && item.thinking}}" class="thinking-container">
+            <view wx:if="{{item.isAssistant && item.thinking}}" class="thinking-container">
               <view class="thinking-dot"></view>
               <view class="thinking-dot"></view>
               <view class="thinking-dot"></view>
@@ -151,12 +151,30 @@
               <text wx:else class="message-text" user-select>{{item.content}}</text>
               
               <!-- Typing Cursor for Streaming -->
-              <view class="typing-cursor" wx:if="{{item.role === 'ai' && item.loading}}"></view>
+              <view class="typing-cursor" wx:if="{{item.isAssistant && item.loading}}"></view>
             </view>
             
-            <!-- Message Actions (Optional) -->
-            <view class="message-actions" wx:if="{{item.role === 'ai' && !item.loading}}">
-              <view class="action-btn" bindtap="handleCopyMessage" data-id="{{item.id}}">
+            <view class="message-actions" wx:if="{{item.content && !item.loading && (item.isAssistant || item.isUser)}}">
+              <view
+                wx:if="{{item.isAssistant}}"
+                class="voice-control {{playingMessageId === item.id || audioLoadingMessageId === item.id ? 'is-playing' : ''}}"
+                bindtap="handleSpeakMessage"
+                data-id="{{item.id}}"
+              >
+                <block wx:if="{{playingMessageId === item.id || audioLoadingMessageId === item.id}}">
+                  <view class="voice-wave">
+                    <view class="wave-bar"></view>
+                    <view class="wave-bar"></view>
+                    <view class="wave-bar"></view>
+                  </view>
+                  <text class="voice-status-text">停止</text>
+                </block>
+                <block wx:else>
+                  <view class="voice-icon-new"></view>
+                  <text class="voice-status-text">朗读</text>
+                </block>
+              </view>
+              <view class="copy-control" bindtap="handleCopyMessage" data-id="{{item.id}}">
                 <view class="copy-icon"></view>
                 <text>复制</text>
               </view>

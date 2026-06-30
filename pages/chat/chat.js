@@ -373,13 +373,25 @@ Page({
 
   createMessage(role, content, loading) {
     this.messageSeed += 1
-    return {
+    return this.decorateMessage({
       id: `msg-${this.messageSeed}`,
       role,
       content,
       renderBlocks: this.buildMessageBlocks(role, content),
       loading: !!loading,
-    }
+    })
+  },
+
+  isAssistantRole(role) {
+    return role === 'ai' || role === 'assistant'
+  },
+
+  decorateMessage(message) {
+    const role = message && message.role
+    return Object.assign({}, message, {
+      isUser: role === 'user',
+      isAssistant: this.isAssistantRole(role),
+    })
   },
 
   getDisplayMessageContent(role, content) {
@@ -485,7 +497,7 @@ Page({
   },
 
   buildMessageBlocks(role, content) {
-    if (role !== 'ai') {
+    if (!this.isAssistantRole(role)) {
       return []
     }
 
@@ -654,13 +666,16 @@ Page({
     /* 加载指定对话的历史消息 */
     return api.getConversationMessages(conversationId)
       .then((messages) => {
-        const formatted = messages.map((m) => ({
-          id: m.id,
-          role: m.role,
-          content: this.getDisplayMessageContent(m.role, m.content),
-          renderBlocks: this.buildMessageBlocks(m.role, m.content),
-          loading: false,
-        }))
+        const formatted = messages.map((m) => {
+          const content = this.getDisplayMessageContent(m.role, m.content)
+          return this.decorateMessage({
+            id: m.id,
+            role: m.role,
+            content,
+            renderBlocks: this.buildMessageBlocks(m.role, content),
+            loading: false,
+          })
+        })
         if (formatted.length === 0) {
           // 空对话 → 显示欢迎消息
           const welcomeMessage = this.createMessage(
@@ -816,13 +831,16 @@ Page({
 
     api.getConversationMessages(convId)
       .then((messages) => {
-        const formatted = messages.map((m) => ({
-          id: m.id,
-          role: m.role,
-          content: this.getDisplayMessageContent(m.role, m.content),
-          renderBlocks: this.buildMessageBlocks(m.role, m.content),
-          loading: false,
-        }))
+        const formatted = messages.map((m) => {
+          const content = this.getDisplayMessageContent(m.role, m.content)
+          return this.decorateMessage({
+            id: m.id,
+            role: m.role,
+            content,
+            renderBlocks: this.buildMessageBlocks(m.role, content),
+            loading: false,
+          })
+        })
         if (formatted.length === 0) {
           const welcomeMessage = this.createMessage(
             'ai',
@@ -1386,8 +1404,19 @@ Page({
   },
 
   handleSpeakMessage(event) {
-    const { id, content, loading } = event.currentTarget.dataset
-    if (!id || !content || loading) {
+    const dataset = event.currentTarget.dataset || {}
+    const { id } = dataset
+    const message = this.data.messages.find((item) => item.id === id)
+    const loading = (message && message.loading) || dataset.loading
+    const content = String((message && message.content) || dataset.content || '').trim()
+    if (!id || loading) {
+      return
+    }
+    if (!content) {
+      wx.showToast({
+        title: '暂无可朗读内容',
+        icon: 'none',
+      })
       return
     }
 
@@ -1481,14 +1510,15 @@ Page({
     const serverQuestion = `${message}\n回复精简`
     const userMessage = this.createMessage('user', message)
     // 创建带有思考状态的 AI 消息
-    const loadingMessage = {
+    const loadingMessage = this.decorateMessage({
       id: `msg-${Date.now()}-${this.messageSeed++}`,
       role: 'assistant',
       content: '',
       renderBlocks: [],
+      loading: true,
       streaming: true,
       thinking: true, // 初始开启思考动画
-    }
+    })
     const messages = this.data.messages.concat([userMessage, loadingMessage])
     // 记录本轮流式回复所在的消息，后续只更新这一条，避免每个 token 重建整个 messages 数组。
     this._streamingMessageIndex = messages.length - 1

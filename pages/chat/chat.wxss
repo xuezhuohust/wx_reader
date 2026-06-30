@@ -628,6 +628,8 @@
 /* Message Actions */
 .message-actions {
   display: flex;
+  align-items: center;
+  flex-wrap: wrap;
   gap: 16rpx;
   padding: 0 8rpx;
 }
@@ -654,6 +656,7 @@
   background: var(--bg-surface-soft);
   border: 1rpx solid var(--hairline-soft);
   border-radius: var(--radius-full);
+  color: var(--slate);
   width: fit-content;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -688,6 +691,7 @@
   color: var(--slate);
   font-size: 22rpx;
   font-weight: 700;
+  line-height: 1;
 }
 
 .copy-control:active {
@@ -701,15 +705,19 @@
   height: 22rpx;
   background: currentColor;
   mask: url('data:image/svg+xml;utf8,<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>') no-repeat center;
+  -webkit-mask: url('data:image/svg+xml;utf8,<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>') no-repeat center;
   mask-size: contain;
+  -webkit-mask-size: contain;
 }
 
 .voice-icon-new {
   width: 24rpx;
   height: 24rpx;
-  background: var(--stone);
+  background: currentColor;
   mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"></path><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg>') no-repeat center;
+  -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"></path><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg>') no-repeat center;
   mask-size: contain;
+  -webkit-mask-size: contain;
 }
 
 /* Sound Wave Animation */
