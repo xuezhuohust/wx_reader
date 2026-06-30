@@ -3,7 +3,7 @@ const { ensureRole } = require('../../utils/role')
 
 Page({
   data: {
-    categories: ['文学', '科技', '经管', '教育', '武侠', '科幻', '历史', '悬疑'],
+    categories: [],
     categoryIndex: 0,
     fileName: '',
     filePath: '',
@@ -12,7 +12,7 @@ Page({
       title: '',
       author: '',
       publisher: '【测试】出版社',
-      category: '文学',
+      category: '',
       description: '',
       price: '',
       copyright: '',
@@ -34,6 +34,24 @@ Page({
       menuTop: app.globalData.menuTop,
       menuHeight: app.globalData.menuHeight,
     })
+    this.loadBookCategories()
+  },
+
+  loadBookCategories() {
+    return api.getBookCategoryPicker(this.data.form.category)
+      .then(({ categories, categoryIndex, category }) => {
+        if (!categories.length) return
+        const form = Object.assign({}, this.data.form)
+        form.category = category
+        this.setData({
+          categories,
+          categoryIndex,
+          form,
+        })
+      })
+      .catch((error) => {
+        console.error('[publisher] loadBookCategories failed', error)
+      })
   },
 
   registerPrivacyAuthorization() {

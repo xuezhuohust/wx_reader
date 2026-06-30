@@ -22,7 +22,7 @@ Page({
       { label: '已读', value: 'finished' }
     ],
     activeCategory: '全部',
-    categories: ['全部', '计算机', 'AI', '文学', '历史', '商业', '职场'],
+    categories: ['全部'],
   },
 
   onLoad() {
@@ -37,6 +37,7 @@ Page({
       menuHeight: menuButtonInfo.height,
       menuRight: systemInfo.windowWidth - menuButtonInfo.left + 10
     })
+    this.loadBookCategories()
   },
 
   onShow() {
@@ -56,8 +57,24 @@ Page({
     this.loadBookshelf()
   },
 
+  loadBookCategories() {
+    return api.getBookCategoryTabs()
+      .then((categories) => {
+        const activeCategory = categories.indexOf(this.data.activeCategory) >= 0
+          ? this.data.activeCategory
+          : '全部'
+        this.setData({ categories, activeCategory }, () => {
+          this.applyFilters()
+        })
+      })
+      .catch((error) => {
+        console.error('[bookshelf] loadBookCategories failed', error)
+      })
+  },
+
   loadBookshelf(done) {
     this.setData({ loading: true })
+    const availableCategories = this.data.categories.filter((category) => category !== '全部')
     api.getPurchasedBooks()
       .then((books) => {
         const processedBooks = (books || []).map(book => {
@@ -68,7 +85,7 @@ Page({
             readersCount: book.readersCount || Math.floor(Math.random() * 5000 + 100) + (Math.random() > 0.5 ? 'k' : ''),
             isAIReady: book.isAIReady !== undefined ? book.isAIReady : Math.random() > 0.5,
             status: book.status || ['reading', 'wishlist', 'finished'][Math.floor(Math.random() * 3)],
-            category: book.category || this.data.categories[Math.floor(Math.random() * (this.data.categories.length - 1)) + 1]
+            category: book.category || availableCategories[Math.floor(Math.random() * availableCategories.length)] || ''
           })
         })
         this.setData({

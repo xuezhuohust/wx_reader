@@ -27,7 +27,7 @@ Page({
     // Library Data
     searchValue: '',
     activeCategory: '全部',
-    categories: ['全部', '文学', '科技', '经管', '教育', '武侠', '科幻', '历史', '悬疑'],
+    categories: ['全部'],
     books: [],
     filteredBooks: [],
     searchResultBooks: [],
@@ -79,6 +79,7 @@ Page({
 
     this.showInitialPrivacyAgreement()
     this.updateTimeGreeting()
+    this.loadBookCategories()
 
     // Check for publisher build intent
   },
@@ -209,6 +210,7 @@ Page({
 
     Promise.all([
       this.loadRecommendBooks(),
+      this.loadBookCategories(),
       this.loadLibraryBooks(),
     ]).finally(() => {
       done()
@@ -333,6 +335,24 @@ Page({
     })
 
     this.applyFilters(listBooks, this.data.searchValue, this.data.activeCategory)
+  },
+
+  loadBookCategories() {
+    return api.getBookCategoryTabs()
+      .then((categories) => {
+        const activeCategory = categories.indexOf(this.data.activeCategory) >= 0
+          ? this.data.activeCategory
+          : '全部'
+
+        this.setData({
+          categories,
+          activeCategory,
+        })
+        this.applyFilters(this.data.books, this.data.searchValue, activeCategory)
+      })
+      .catch((error) => {
+        console.error('loadBookCategories failed:', error)
+      })
   },
 
   loadLibraryBooks(done) {

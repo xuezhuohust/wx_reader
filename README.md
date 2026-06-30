@@ -99,6 +99,9 @@ wx_reader/
 | 认证 | `ensureUserIdentity()` | 微信登录 + 身份引导（自动） |
 | 书籍 | `getRecommendBooks()` | 推荐书籍 |
 | | `getAllBooks()` | 全量书库 |
+| | `getBookCategories()` | 书籍类目枚举（API 服务提供） |
+| | `getBookCategoryTabs()` | 读者侧筛选类目（含“全部”） |
+| | `getBookCategoryPicker(category)` | 发布者表单 picker 类目与选中项 |
 | | `getPurchasedBooks()` | 已购书籍 |
 | | `getBookById(id)` | 书籍详情 |
 | | `purchaseBook(id)` | 购买 |
@@ -151,12 +154,14 @@ wx_reader/
 
 ## 后端依赖
 
-此小程序需配合 `wx_reader_backend` 使用（Flask + PostgreSQL + DeepSeek API），详见 `../wx_reader_backend/README.md`。
+此小程序需配合 `wx_reader_backend` 使用（NestJS + PostgreSQL + NovelIndex 服务），详见 `../wx_reader_backend/README.md`。
 
 后端 API 地址配置在 `utils/request.js` 中：
 
 ```javascript
-const BASE_URL = 'https://yakosang.icu'
+const BASE_URL = 'https://xiandianzigyy.cloud/reader'
 ```
+
+书籍类目由 API 服务统一提供，外部接口说明见 `../wx_reader_backend/docs/书籍类目接口说明.md`。
 
 ---

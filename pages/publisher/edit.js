@@ -2,14 +2,14 @@ const api = require('../../utils/api')
 
 Page({
   data: {
-    categories: ['文学', '科技', '经管', '教育', '武侠', '科幻', '历史', '悬疑'],
+    categories: [],
     categoryIndex: 0,
     coverPath: '',
     form: {
       title: '',
       author: '',
       publisher: '',
-      category: '文学',
+      category: '',
       description: '',
       price: '',
       copyright: '',
@@ -28,9 +28,28 @@ Page({
       menuTop: app.globalData.menuTop,
       menuHeight: app.globalData.menuHeight,
     })
-    if (this.bookId) {
-      this.loadBook()
-    }
+    this.loadBookCategories().then(() => {
+      if (this.bookId) {
+        this.loadBook()
+      }
+    })
+  },
+
+  loadBookCategories() {
+    return api.getBookCategoryPicker(this.data.form.category)
+      .then(({ categories, categoryIndex, category }) => {
+        if (!categories.length) return
+        const form = Object.assign({}, this.data.form)
+        form.category = category
+        this.setData({
+          categories,
+          categoryIndex,
+          form,
+        })
+      })
+      .catch((error) => {
+        console.error('[publisher] loadBookCategories failed', error)
+      })
   },
 
   loadBook() {
@@ -43,7 +62,7 @@ Page({
           title: book.title || '',
           author: book.author || '',
           publisher: book.publisher || '',
-          category: book.category || '文学',
+          category: book.category || this.data.categories[0] || '',
           description: book.description || '',
           price: String(book.price || ''),
           copyright: book.copyright || '',

@@ -3,6 +3,9 @@
 const { ensureUserIdentity } = require('../services/user')
 const { BASE_URL, request, requestWithoutAuth, uploadFile } = require('./request')
 
+const ALL_BOOK_CATEGORY = '全部'
+let cachedBookCategories = null
+
 /** 将相对路径转为完整的 URL */
 function toAbsoluteUrl(path) {
   const rawPath = String(path || '').trim()
@@ -56,6 +59,72 @@ function getAllBooks() {
   return request({
     url: '/api/books',
   }).then((data) => data.books || [])
+}
+
+function normalizeBookCategories(data) {
+  const source = Array.isArray(data)
+    ? data
+    : Array.isArray(data && data.categories)
+      ? data.categories
+      : Array.isArray(data && data.options)
+        ? data.options.map((item) => item && (item.value || item.label || item))
+        : []
+
+  return source
+    .map((item) => String(item || '').trim())
+    .filter((item, index, list) => item && list.indexOf(item) === index)
+}
+
+/** 获取书籍类目枚举 */
+function getBookCategories() {
+  if (cachedBookCategories && cachedBookCategories.length) {
+    return Promise.resolve(cachedBookCategories.slice())
+  }
+
+  return requestWithoutAuth({
+    url: '/api/books/categories',
+  })
+    .then((data) => {
+      const categories = normalizeBookCategories(data)
+      cachedBookCategories = categories
+      return cachedBookCategories.slice()
+    })
+    .catch((error) => {
+      console.warn('[api] getBookCategories failed', error)
+      return cachedBookCategories && cachedBookCategories.length
+        ? cachedBookCategories.slice()
+        : []
+    })
+}
+
+function withAllBookCategory(categories) {
+  return [ALL_BOOK_CATEGORY].concat(
+    normalizeBookCategories(categories).filter((category) => category !== ALL_BOOK_CATEGORY)
+  )
+}
+
+function resolveBookCategorySelection(categories, selectedCategory) {
+  const normalized = normalizeBookCategories(categories)
+  const categoryIndex = normalized.indexOf(selectedCategory)
+  const nextIndex = categoryIndex >= 0 ? categoryIndex : 0
+
+  return {
+    categories: normalized,
+    categoryIndex: nextIndex,
+    category: normalized[nextIndex] || '',
+  }
+}
+
+/** 获取用于读者侧筛选 tab 的书籍类目，额外包含“全部” */
+function getBookCategoryTabs() {
+  return getBookCategories().then(withAllBookCategory)
+}
+
+/** 获取用于出版方 picker 的书籍类目，并解析当前选中项 */
+function getBookCategoryPicker(selectedCategory) {
+  return getBookCategories().then((categories) => (
+    resolveBookCategorySelection(categories, selectedCategory)
+  ))
 }
 
 /** 获取已购买书籍列表 */
@@ -569,6 +638,9 @@ module.exports = {
   ensureLogin: ensureUserIdentity,
   getRecommendBooks,
   getAllBooks,
+  getBookCategories,
+  getBookCategoryTabs,
+  getBookCategoryPicker,
   getPurchasedBooks,
   getBookById,
   getChapterContent,
