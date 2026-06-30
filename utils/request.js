@@ -1,10 +1,10 @@
 // 网络请求封装模块 - 提供统一的请求、响应处理和鉴权
 
 // 生产环境
-const BASE_URL = 'https://xiandianzigyy.cloud/reader'
+// const BASE_URL = 'https://xiandianzigyy.cloud/reader'
 
 // 开发环境
-// const BASE_URL = 'http://127.0.0.1:8848'
+const BASE_URL = 'http://127.0.0.1:8848'
 
 /** 拼接完整的请求 URL */
 function buildUrl(url) {

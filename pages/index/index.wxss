@@ -1,9 +1,15 @@
 .home-page {
   background-color: #faf8f5;
   color: #1b1b1b;
-  height: 100vh;
+  min-height: 100vh; /* 改为 min-height，允许页面根据内容自动撑开 */
   display: flex;
   flex-direction: column;
+}
+
+/* Scroll Area */
+.scroll-area {
+  width: 100%;
+  height: 100vh; /* 确保 scroll-view 有明确的高度 */
 }
 
 /* Hero Header Section */
@@ -32,12 +38,13 @@
   top: 0;
   left: 0;
   width: 100%;
-  height: 100%;
+  height: 101%; /* 溢出 1% 确保完全覆盖底部接缝 */
   background: linear-gradient(to bottom, 
     rgba(250, 248, 245, 0.05) 0%, 
     rgba(250, 248, 245, 0.1) 40%, 
-    rgba(250, 248, 245, 0.6) 70%, /* 延长渐变区间 */
-    rgba(250, 248, 245, 0.9) 85%,
+    rgba(250, 248, 245, 0.6) 70%, 
+    rgba(250, 248, 245, 0.95) 90%,
+    #faf8f5 98%, /* 在到达底部前提前变为纯色 */
     #faf8f5 100%
   );
   z-index: 1;
@@ -191,11 +198,12 @@
 }
 
 .entry-progress-bar {
-  height: 4rpx; /* 更细的线条 */
+  height: 8rpx; /* 增加厚度，从 4rpx 增加到 8rpx */
   background-color: rgba(60, 105, 43, 0.08);
   border-radius: 99rpx;
   overflow: hidden;
   width: 100%;
+  margin-top: 4rpx; /* 微调间距 */
 }
 
 .entry-progress-fill {
@@ -209,6 +217,8 @@
   padding: 0 40rpx;
   position: relative;
   z-index: 3;
+  margin-top: -2rpx; /* 向上拉 1px，物理遮盖可能的亚像素接缝 */
+  background-color: #faf8f5; /* 确保背景色纯净 */
 }
 
 .no-padding-top {

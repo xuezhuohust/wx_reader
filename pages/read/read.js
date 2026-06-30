@@ -16,7 +16,7 @@ Page({
     chapterWindowLimit: 100,
     chapterWindowNextOffset: null,
     chapterWindowHasNext: false,
-    chapterWindowLineCount: 0,
+    chapterWindowLineCount: 0,  
     loading: true,
     readingProgress: 0,
     totalChapters: 0,

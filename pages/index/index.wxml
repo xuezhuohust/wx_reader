@@ -9,7 +9,7 @@
     <view class="scroll-content no-padding-top">
       <!-- Hero Header Section -->
       <view class="home-hero-header fade-up">
-        <image class="hero-bg-image" src="/app-assets/index-bg.png" mode="aspectFill"></image>
+        <image class="hero-bg-image" src="https://img1.baidu.com/it/u=2426475971,3278061385&fm=253&fmt=auto&app=138&f=JPEG?w=625&h=500" mode="aspectFill"></image>
         <view class="hero-glass-overlay"></view>
         
         <view class="hero-body" style="padding-top: {{menuTop}}px;">
@@ -48,9 +48,9 @@
       <view class="main-sections">
         <!-- Today's Recommendations -->
         <view class="section-header fade-up d2" wx:if="{{recommendBooks.length > 0}}">
-        <view class="section-title">今日推荐</view>
-        <view class="section-link" bindtap="handleSeeMore">查看全部</view>
-      </view>
+          <view class="section-title">今日推荐</view>
+          <view class="section-link" bindtap="handleSeeMore">查看全部</view>
+        </view>
       
       <scroll-view class="book-scroll fade-up d3" scroll-x enhanced show-scrollbar="{{false}}">
         <view class="book-row">
@@ -128,9 +128,9 @@
       </view>
 
       <view class="safe-area-bottom"></view>
-    </view>
-  </view>
-</scroll-view>
+    </view> <!-- Close main-sections -->
+  </view> <!-- Close scroll-content -->
+</scroll-view> <!-- Close scroll-area -->
 
   <!-- Privacy Modal -->
   <view wx:if="{{showPrivacyModal}}" class="privacy-overlay" catchtap="handleDisagreePrivacy">

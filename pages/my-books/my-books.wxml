@@ -1,41 +1,52 @@
 <view class="page-container my-page">
-  <!-- Sticky Header -->
-  <view class="home-nav" style="height: {{navBarHeight}}px; background-color: #faf8f5;">
-    <view class="nav-header" style="position: absolute; top: {{menuTop}}px; height: {{menuHeight}}px; left: 0; right: 0; padding-right: {{menuRight}}px;">
-      <view class="nav-title">我的</view>
-      <view class="nav-actions">
-        <view class="nav-btn" bindtap="handleOpenSettings">
-          <view class="icon-settings"></view>
-        </view>
-      </view>
-    </view>
-  </view>
-
   <scroll-view 
     class="scroll-area" 
     scroll-y 
     enhanced 
     show-scrollbar="{{false}}"
-    style="padding-top: 20rpx;"
+    bindscroll="onPageScroll"
   >
-    <view class="scroll-content">
-      <!-- Profile Header -->
-      <view class="profile-header fade-up d1" bindtap="handleOpenProfile">
-        <view class="profile-avatar">
-          <view class="profile-avatar-inner">
-            <image wx:if="{{identity && identity.avatarUrl}}" src="{{identity.avatarUrl}}" mode="aspectFill" />
-            <view class="icon-user-white" wx:else></view>
+    <view class="scroll-content no-padding-top">
+      <!-- Hero Header Section (Synced with Home) -->
+      <view class="my-hero-header fade-up">
+        <image class="hero-bg-image" src="https://img1.baidu.com/it/u=2426475971,3278061385&fm=253&fmt=auto&app=138&f=JPEG?w=625&h=500" mode="aspectFill"></image>
+        <view class="hero-glass-overlay"></view>
+        
+        <view class="hero-body" style="padding-top: {{menuTop}}px;">
+          <view class="hero-top-nav">
+            <view class="nav-title-hero">我的</view>
+            <view class="nav-actions">
+              <view class="nav-btn-hero" bindtap="handleOpenSettings">
+                <view class="icon-settings-dark"></view>
+              </view>
+            </view>
+          </view>
+
+          <!-- Profile Card (Floating Style) -->
+          <view class="profile-card-hero" bindtap="handleOpenProfile">
+            <view class="profile-avatar-box">
+              <image wx:if="{{identity && identity.avatarUrl}}" src="{{identity.avatarUrl}}" mode="aspectFill" />
+              <view class="avatar-placeholder" wx:else>
+                <view class="icon-user-white"></view>
+              </view>
+            </view>
+            <view class="profile-text-info">
+              <view class="profile-name-row">
+                <text class="profile-display-name">{{identity.displayName || '未登录'}}</text>
+                <view class="profile-status-dot"></view>
+              </view>
+              <view class="profile-meta-row">
+                <text class="profile-tag">深度阅读者</text>
+                <text class="profile-year">2024 年加入</text>
+              </view>
+            </view>
+            <view class="icon-arrow-right-dark"></view>
           </view>
         </view>
-        <view class="profile-info">
-          <view class="profile-name">{{identity.displayName || '未登录'}}</view>
-          <view class="profile-badge">深度阅读者</view>
-          <view class="profile-joined">2024 年加入</view>
-        </view>
-        <view class="icon-arrow-right-faint"></view>
       </view>
 
-      <!-- Reading Stats Bento -->
+      <view class="main-sections">
+        <!-- Reading Stats Bento -->
       <view class="reading-stats fade-up d2">
         <view class="reading-stat">
           <view class="reading-stat-value">216h</view>
@@ -160,8 +171,9 @@
       </view>
 
       <view class="safe-area-bottom"></view>
-    </view>
-  </scroll-view>
+    </view> <!-- Close main-sections -->
+  </view> <!-- Close scroll-content -->
+</scroll-view> <!-- Close scroll-area -->
 
   <!-- Profile Modal -->
   <view wx:if="{{showProfileModal}}" class="profile-overlay" bindtap="handleCloseProfile">
