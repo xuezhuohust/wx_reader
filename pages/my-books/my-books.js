@@ -279,6 +279,10 @@ Page({
     })
   },
 
+  onPageScroll() {
+    // 占位函数，用于处理 scroll-view 的 scroll 事件
+  },
+
   handleRoleChange(event) {
     const { role } = event.currentTarget.dataset
     const app = getApp()
