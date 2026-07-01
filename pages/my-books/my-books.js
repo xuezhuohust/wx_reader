@@ -32,14 +32,15 @@ Page({
     menuTop: 0,
     menuHeight: 0,
     menuRight: 0,
+    greeting: '你好',
     weeklyStats: [
-      { day: '一', height: 40, active: false },
-      { day: '二', height: 65, active: false },
-      { day: '三', height: 30, active: false },
-      { day: '四', height: 80, active: false },
-      { day: '五', height: 55, active: false },
-      { day: '六', height: 90, active: true },
-      { day: '日', height: 72, active: false },
+      { day: '一', height: 45, active: false },
+      { day: '二', height: 75, active: false },
+      { day: '三', height: 35, active: false },
+      { day: '四', height: 90, active: false },
+      { day: '五', height: 60, active: false },
+      { day: '六', height: 100, active: true },
+      { day: '日', height: 80, active: false },
     ]
   },
 
@@ -48,12 +49,23 @@ Page({
     const menuButtonInfo = wx.getMenuButtonBoundingClientRect()
     const systemInfo = wx.getSystemInfoSync()
     
+    // 设置问候语
+    const hour = new Date().getHours()
+    let greeting = '你好'
+    if (hour < 6) greeting = '凌晨好'
+    else if (hour < 9) greeting = '早安'
+    else if (hour < 12) greeting = '上午好'
+    else if (hour < 14) greeting = '中午好'
+    else if (hour < 18) greeting = '下午好'
+    else greeting = '晚上好'
+
     this.setData({
       navBarHeight: app.globalData.navBarHeight,
       statusBarHeight: app.globalData.statusBarHeight,
       menuTop: menuButtonInfo.top,
       menuHeight: menuButtonInfo.height,
-      menuRight: systemInfo.windowWidth - menuButtonInfo.left + 10
+      menuRight: systemInfo.windowWidth - menuButtonInfo.left + 10,
+      greeting
     })
   },
 

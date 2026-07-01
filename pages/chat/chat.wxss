@@ -52,53 +52,7 @@
   letter-spacing: -0.5rpx;
 }
 
-/* Book Tag Bar Optimization */
-.book-tag-bar {
-  position: fixed;
-  left: 0; right: 0;
-  z-index: 900;
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(10px);
-  padding: 16rpx 32rpx;
-  border-bottom: 1rpx solid rgba(0, 0, 0, 0.03);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.book-tag-left {
-  display: flex;
-  align-items: center;
-  gap: 12rpx;
-  flex: 1;
-}
-
-.book-tag-icon {
-  width: 24rpx;
-  height: 24rpx;
-  background: #3c692b;
-  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'%3E%3Cpath d='M4 19.5A2.5 2.5 0 0 1 6.5 17H20'/%3E%3Cpath d='M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z'/%3E%3C/svg%3E") no-repeat center;
-  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'%3E%3Cpath d='M4 19.5A2.5 2.5 0 0 1 6.5 17H20'/%3E%3Cpath d='M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z'/%3E%3C/svg%3E") no-repeat center;
-}
-
-.book-tag-text {
-  font-size: 22rpx;
-  font-weight: 700;
-  color: #8c8c8c;
-}
-
-.clear-btn {
-  margin-left: auto;
-  padding: 8rpx;
-}
-
-.clear-icon {
-  width: 28rpx;
-  height: 28rpx;
-  background: #bfbfbf;
-  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'%3E%3Cpolyline points='3 6 5 6 21 6'%3E%3C/polyline%3E%3Cpath d='M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2'%3E%3C/path%3E%3C/svg%3E") no-repeat center;
-  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'%3E%3Cpolyline points='3 6 5 6 21 6'%3E%3C/polyline%3E%3Cpath d='M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2'%3E%3C/path%3E%3C/svg%3E") no-repeat center;
-}
+/* (Redundant Book Tag Bar styles removed) */
 
 /* 2026-05-19 新增：对话切换按钮 */
 .nav-conv-btn {
@@ -174,7 +128,7 @@
   gap: 40rpx;
 }
 
-/* Fixed Book Tag Bar */
+/* Fixed Book Tag Bar - Optimized for De-cardification */
 .book-tag-bar {
   position: fixed;
   left: 0; right: 0;
@@ -182,56 +136,54 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 12rpx 32rpx;
-  background: rgba(248, 249, 250, 0.95);
-  backdrop-filter: blur(12px);
+  padding: 8rpx 32rpx;
+  background: rgba(250, 248, 245, 0.8); /* Match bg-canvas with transparency */
+  backdrop-filter: blur(10px);
 }
 
 .book-tag-left {
   display: flex;
   align-items: center;
-  gap: 12rpx;
-  background: var(--surface-container);
-  border-radius: var(--radius-md);
-  border: 1rpx solid var(--outline-variant);
-  padding: 12rpx 24rpx;
+  gap: 8rpx;
+  padding: 8rpx 0;
+  /* Removed card background and border */
 }
 
 .book-tag-icon {
-  width: 28rpx;
-  height: 28rpx;
-  background-image: url('data:image/svg+xml,<svg viewBox="0 0 24 24" fill="none" stroke="%233c692b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>');
-  background-size: contain;
-  background-repeat: no-repeat;
+  width: 24rpx;
+  height: 24rpx;
+  background-color: var(--primary);
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 19.5A2.5 2.5 0 0 1 6.5 17H20'/%3E%3Cpath d='M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z'/%3E%3C/svg%3E") no-repeat center;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 19.5A2.5 2.5 0 0 1 6.5 17H20'/%3E%3Cpath d='M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z'/%3E%3C/svg%3E") no-repeat center;
+  mask-size: contain;
+  -webkit-mask-size: contain;
 }
 
-.book-tag-text { font-size: 24rpx; color: var(--on-surface-variant); font-weight: 500; }
+.book-tag-text {
+  font-size: 24rpx;
+  color: var(--stone);
+  font-weight: 500;
+  letter-spacing: 0.5rpx;
+}
 
 .clear-btn {
-  width: 40rpx;
-  height: 40rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   margin-left: 12rpx;
-  border-radius: var(--radius-sm);
+  opacity: 0.4;
+  transition: opacity 0.2s ease;
 }
 
 .clear-btn:active {
-  background: rgba(186, 26, 26, 0.08);
-}
-
-.clear-btn--disabled {
-  opacity: 0.3;
-  pointer-events: none;
+  opacity: 1;
 }
 
 .clear-icon {
-  width: 28rpx;
-  height: 28rpx;
-  background-image: url('data:image/svg+xml,<svg viewBox="0 0 24 24" fill="none" stroke="%23ba1a1a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>');
-  background-size: contain;
-  background-repeat: no-repeat;
+  width: 22rpx;
+  height: 22rpx;
+  background-color: var(--stone);
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 6h18'/%3E%3Cpath d='M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6'/%3E%3Cpath d='M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2'/%3E%3C/svg%3E") no-repeat center;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 6h18'/%3E%3Cpath d='M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6'/%3E%3Cpath d='M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2'/%3E%3C/svg%3E") no-repeat center;
+  mask-size: contain;
+  -webkit-mask-size: contain;
 }
 
 .chat-avatar {
@@ -507,14 +459,28 @@
 }
 
 .bubble-user {
-  background: #1b1b1b;
+  background: var(--primary);
   color: #ffffff;
   border-top-right-radius: 4rpx;
+  box-shadow: 0 4rpx 12rpx rgba(60, 105, 43, 0.12);
+}
+
+.bubble-user .message-text {
+  color: #ffffff;
+  font-weight: 500;
+}
+
+.message-text-wrapper {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
 .message-text {
-  word-break: break-all;
-  white-space: pre-wrap;
+  font-size: 28rpx;
+  line-height: 1.6;
+  color: var(--charcoal);
+  word-break: break-word;
 }
 
 .structured-reply {
@@ -615,7 +581,7 @@
   width: 4rpx;
   height: 30rpx;
   background: #3c692b;
-  margin-left: 8rpx;
+  margin-left: 4rpx;
   vertical-align: middle;
   animation: blink 1s infinite;
 }

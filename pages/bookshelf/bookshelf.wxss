@@ -1,3 +1,7 @@
+page {
+  background-color: #faf8f5;
+}
+
 .bookshelf-page {
   background-color: #faf8f5;
   color: #1b1b1b;
@@ -19,13 +23,13 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 60rpx;
+  padding: 0 40rpx;
 }
 
 .nav-title {
-  font-size: 44rpx;
+  font-size: 56rpx;
   font-weight: 900;
-  letter-spacing: -0.5rpx;
+  letter-spacing: -1.5rpx;
   color: #1b1b1b;
 }
 

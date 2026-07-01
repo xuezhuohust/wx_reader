@@ -56,6 +56,7 @@ Page({
       })
     }
     this.bookId = options.bookId
+    this.initialText = options.initialText ? decodeURIComponent(options.initialText) : ''
     this.messageSeed = 0
     this.audioContext = null
     this.currentAudioMessageId = ''
@@ -91,9 +92,6 @@ Page({
     this._scrollTop = 0
     this._userTouchingChat = false
     this.initRecorder()
-    this.syncChatIdentity()
-    this.bookId = options.bookId
-    this.initialText = options.initialText || ''
     // 2026-05-19: 改为加载书籍 + 对话列表 + 历史消息
     this.initialized = false
     this.loadBookAndConversations()
@@ -605,6 +603,7 @@ Page({
   // ====================================================================
 
   loadBookAndConversations() {
+    this.syncChatIdentity()
     /* 加载书籍信息 + 对话列表 + 最近对话的消息 */
     api.getBookById(this.bookId)
       .then((book) => {

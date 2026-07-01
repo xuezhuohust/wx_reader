@@ -1,3 +1,7 @@
+page {
+  background-color: #faf8f5;
+}
+
 .home-page {
   background-color: #faf8f5;
   color: #1b1b1b;

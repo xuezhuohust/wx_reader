@@ -1,48 +1,30 @@
-<view class="page-container my-page">
-  <scroll-view 
-    class="scroll-area" 
-    scroll-y 
-    enhanced 
-    show-scrollbar="{{false}}"
-    bindscroll="onPageScroll"
-  >
-    <view class="scroll-content no-padding-top">
-      <!-- Hero Header Section (Synced with Home) -->
-      <view class="my-hero-header fade-up">
-        <image class="hero-bg-image" src="https://img1.baidu.com/it/u=2426475971,3278061385&fm=253&fmt=auto&app=138&f=JPEG?w=625&h=500" mode="aspectFill"></image>
-        <view class="hero-glass-overlay"></view>
-        
-        <view class="hero-body" style="padding-top: {{menuTop}}px;">
-          <view class="hero-top-nav">
-            <view class="nav-title-hero">我的</view>
-            <view class="nav-actions">
-              <view class="nav-btn-hero" bindtap="handleOpenSettings">
-                <view class="icon-settings-dark"></view>
-              </view>
-            </view>
-          </view>
+<view class="page-container my-books-page">
+  <!-- Header matched with Bookshelf -->
+  <view class="home-nav" style="height: {{navBarHeight}}px;">
+    <view class="nav-header" style="position: absolute; top: {{menuTop}}px; height: {{menuHeight}}px; left: 0; right: 0; padding-right: {{menuRight}}px;">
+      <view class="nav-title">我的</view>
+      <view class="nav-actions">
+        <view class="nav-btn" bindtap="handleOpenSettings">
+          <view class="icon-settings"></view>
+        </view>
+      </view>
+    </view>
+  </view>
 
-          <!-- Profile Card (Floating Style) -->
-          <view class="profile-card-hero" bindtap="handleOpenProfile">
-            <view class="profile-avatar-box">
-              <image wx:if="{{identity && identity.avatarUrl}}" src="{{identity.avatarUrl}}" mode="aspectFill" />
-              <view class="avatar-placeholder" wx:else>
-                <view class="icon-user-white"></view>
-              </view>
-            </view>
-            <view class="profile-text-info">
-              <view class="profile-name-row">
-                <text class="profile-display-name">{{identity.displayName || '未登录'}}</text>
-                <view class="profile-status-dot"></view>
-              </view>
-              <view class="profile-meta-row">
-                <text class="profile-tag">深度阅读者</text>
-                <text class="profile-year">2024 年加入</text>
-              </view>
-            </view>
-            <view class="icon-arrow-right-dark"></view>
+  <scroll-view class="scroll-area" scroll-y enable-passive>
+    <view class="scroll-content">
+      <view class="profile-card-hero" bindtap="handleOpenProfile">
+        <view class="avatar-wrap">
+          <image class="profile-avatar" src="{{identity.avatarUrl || 'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0'}}" mode="aspectFill"></image>
+        </view>
+        <view class="profile-info">
+          <view class="user-name">{{identity.displayName || '微信用户'}}</view>
+          <view class="profile-meta-row">
+            <view class="user-tag">{{currentRole === 'publisher' ? '内容创作者' : '深度阅读者'}}</view>
+            <text class="join-date">2024 年加入</text>
           </view>
         </view>
+        <view class="icon-arrow-right-faint"></view>
       </view>
 
       <view class="main-sections">
@@ -62,44 +44,6 @@
         </view>
       </view>
 
-      <!-- Badges Row -->
-      <view class="section-header-small fade-up d3">
-        <view class="section-title-small">成就勋章</view>
-      </view>
-      <scroll-view class="badges-scroll fade-up d3" scroll-x enhanced show-scrollbar="{{false}}">
-        <view class="badges-row">
-          <view class="badge-item">
-            <view class="badge-icon-wrap morning">
-              <view class="icon-morning"></view>
-            </view>
-            <view class="badge-label">晨读达人</view>
-            <view class="badge-level">Lv.3</view>
-            <view class="badge-progress-bar">
-              <view class="badge-progress-fill" style="width: 75%;"></view>
-            </view>
-          </view>
-          
-          <view class="badge-item">
-            <view class="badge-icon-wrap marathon">
-              <view class="icon-marathon"></view>
-            </view>
-            <view class="badge-label">阅读马拉松</view>
-            <view class="badge-level">Lv.2</view>
-            <view class="badge-progress-bar">
-              <view class="badge-progress-fill" style="width: 40%;"></view>
-            </view>
-          </view>
-
-          <view class="badge-item locked">
-            <view class="badge-icon-wrap locked">
-              <view class="icon-pen"></view>
-            </view>
-            <view class="badge-label">妙笔生花</view>
-            <view class="badge-level">未解锁</view>
-          </view>
-        </view>
-      </scroll-view>
-
       <!-- Weekly Chart -->
       <view class="weekly-chart fade-up d4">
         <view class="chart-header">
@@ -108,7 +52,9 @@
         </view>
         <view class="chart-bars">
           <view class="chart-bar-wrap" wx:for="{{weeklyStats}}" wx:key="day">
-            <view class="chart-bar {{item.active ? 'active' : ''}}" style="height: {{item.height}}rpx;"></view>
+            <view class="chart-bar-container">
+              <view class="chart-bar {{item.active ? 'active' : ''}}" style="height: {{item.height}}%;"></view>
+            </view>
             <text class="chart-bar-label">{{item.day}}</text>
           </view>
         </view>

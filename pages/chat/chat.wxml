@@ -146,12 +146,16 @@
                     <text class="code-text">{{item.text}}</text>
                   </view>
                 </view>
+                <!-- Typing Cursor for Streaming in blocks -->
+                <view class="typing-cursor" wx:if="{{item.isAssistant && item.loading && !item.thinking}}"></view>
               </block>
+
               <!-- 普通文本兜底 -->
-              <text wx:else class="message-text" user-select>{{item.content}}</text>
-              
-              <!-- Typing Cursor for Streaming -->
-              <view class="typing-cursor" wx:if="{{item.isAssistant && item.loading}}"></view>
+              <view wx:else class="message-text-wrapper">
+                <text wx:if="{{item.content}}" class="message-text" user-select>{{item.content}}</text>
+                <!-- Typing Cursor for Streaming in fallback -->
+                <view class="typing-cursor" wx:if="{{item.isAssistant && item.loading && !item.thinking}}"></view>
+              </view>
             </view>
             
             <view class="message-actions" wx:if="{{item.content && !item.loading && (item.isAssistant || item.isUser)}}">

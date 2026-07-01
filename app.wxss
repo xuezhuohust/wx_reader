@@ -18,9 +18,9 @@ page {
   --on-primary-container: #174207;
 
   /* Surface & Backgrounds */
-  --bg-canvas: #f8f9fa;
-  --bg-surface: #edeeef;
-  --bg-surface-soft: #f3f4f5;
+  --bg-canvas: #faf8f5;
+  --bg-surface: #f3efe8;
+  --bg-surface-soft: #f8f6f2;
   --surface-container-low: #f3f4f5;
   --surface-container: #edeeef;
   --surface-container-high: #e7e8e9;

@@ -13,7 +13,7 @@ Page({
     allChapterNames: [],
     chapterPages: [], // 存储当前章节的分页内容
     chapterWindowOffset: 0,
-    chapterWindowLimit: 50,
+    chapterWindowLimit: 1000, // 调大窗口限制，尽量一次性加载整章，避免因为分页截断导致段落无法合并和页面留白
     chapterWindowNextOffset: null,
     chapterWindowHasNext: false,
     chapterWindowLineCount: 0,
@@ -29,6 +29,8 @@ Page({
     navBarHeight: 64,
     menuTop: 24,
     menuHeight: 32,
+    menuWidth: 80,
+    menuRight: 7,
     swiperDuration: 300 // 控制滑动动画时长
   },
 
@@ -43,6 +45,8 @@ Page({
       navBarHeight: app.globalData.navBarHeight,
       menuTop: app.globalData.menuTop,
       menuHeight: app.globalData.menuHeight,
+      menuWidth: app.globalData.menuWidth,
+      menuRight: app.globalData.menuRight,
     })
 
     this.loadBookData(id)
@@ -64,17 +68,14 @@ Page({
   },
 
   scheduleFooterAutoHide() {
+    // 移除自动隐藏逻辑，改为手动控制
     this.clearFooterAutoHideTimer()
-    this.footerAutoHideTimer = setTimeout(() => {
-      if (this.data.showTocSheet || this.data.showSelectionMenu) return
-      this.setData({ showFooterBar: false })
-      this.footerAutoHideTimer = null
-    }, FOOTER_AUTO_HIDE_MS)
   },
 
   showFooterTemporarily() {
-    this.setData({ showFooterBar: true }, () => {
-      this.scheduleFooterAutoHide()
+    this.setData({ 
+      showFooterBar: true,
+      showControls: true
     })
   },
 
@@ -162,7 +163,7 @@ Page({
         this.buildOriginalTextPages({
           lines: [`章节原文加载失败：${err.message || '请稍后重试'}`],
           offset,
-          limit: Number(this.data.chapterWindowLimit || 50),
+          limit: Number(this.data.chapterWindowLimit || 1000),
           nextOffset: null,
           hasNext: false,
           lineCount: 1,
@@ -176,14 +177,14 @@ Page({
       return Promise.reject(new Error('章节 ID 缺失'))
     }
 
-    const limit = Number(chapterWindowLimit || 50)
+    const limit = Number(chapterWindowLimit || 1000)
 
     return api.getOriginalText(bookId, chapterId, offset, limit).then((data) => {
       return this.normalizeOriginalTextWindow(data, offset, limit)
     })
   },
 
-  normalizeOriginalTextWindow(data, offset = 0, limit = 50) {
+  normalizeOriginalTextWindow(data, offset = 0, limit = 1000) {
     const source = Array.isArray(data) ? { lines: data } : (data || {})
     const rows = Array.isArray(source.lines)
       ? source.lines
@@ -219,11 +220,175 @@ Page({
     }
   },
 
+  getPaginationConfig() {
+    return {
+      charsPerLine: 18,
+      maxLinesPerPage: 22, // 调整行数预算，增加单页显示内容，减少底部留白
+    }
+  },
+
+  isDividerLine(text) {
+    return /^[\-_=~·—─]{6,}$/.test(text)
+  },
+
+  paginateSourceLines(sourceLines) {
+    const { charsPerLine, maxLinesPerPage } = this.getPaginationConfig()
+    const contentPages = []
+    let currentPage = []
+    let consumedLines = 0
+
+    const flushPage = () => {
+      if (currentPage.length > 0) {
+        contentPages.push({
+          type: 'content',
+          content: currentPage,
+          showChapterEnd: false,
+        })
+        currentPage = []
+        consumedLines = 0
+      }
+    }
+
+    // 判断全文是否使用了缩进（若超过 5% 的非空行有缩进，即认为使用了缩进）
+    let indentCount = 0;
+    let validLinesCount = 0;
+    for (let i = 0; i < sourceLines.length; i++) {
+      const line = String(sourceLines[i] || '').replace(/\r/g, '');
+      if (line.trim().length > 0) {
+        validLinesCount++;
+        if (/^[ \t　]{1,}/.test(line)) indentCount++;
+      }
+    }
+    const usesIndents = validLinesCount > 0 && (indentCount / validLinesCount) > 0.05;
+
+    const paragraphs = [];
+    let currentPara = '';
+    for (let i = 0; i < sourceLines.length; i++) {
+      const raw = String(sourceLines[i] || '').replace(/\r/g, '');
+      const trimmed = raw.trim();
+
+      if (!trimmed) {
+        if (currentPara) { paragraphs.push(currentPara); currentPara = ''; }
+        continue;
+      }
+      if (!currentPara) {
+        currentPara = trimmed;
+        continue;
+      }
+      
+      const hasIndent = /^[ \t　]{1,}/.test(raw);
+      if (usesIndents) {
+        if (hasIndent) {
+          paragraphs.push(currentPara);
+          currentPara = trimmed;
+        } else {
+          currentPara += trimmed;
+        }
+      } else {
+        const endsWithPunct = /[。！？；：…”’"」』》】>\])）~—]$/.test(currentPara);
+        if (endsWithPunct) {
+          paragraphs.push(currentPara);
+          currentPara = trimmed;
+        } else {
+          // 彻底修复 Hard-wrap 合并逻辑：
+          // 如果当前行不是以句末标点结尾，且下一行不是空行且没有缩进，则强行合并
+          currentPara += trimmed;
+        }
+      }
+    }
+    if (currentPara) paragraphs.push(currentPara);
+
+    if (!paragraphs.length) {
+      paragraphs.push('本章暂无原文内容')
+    }
+
+    for (let i = 0; i < paragraphs.length; i++) {
+      let text = paragraphs[i]
+      const isDivider = this.isDividerLine(text)
+
+      if (isDivider) {
+        if (consumedLines + 1 > maxLinesPerPage && currentPage.length > 0) {
+          flushPage()
+        }
+        currentPage.push({
+          text,
+          progressUnits: 1,
+          isBlank: false,
+          isDivider: true,
+          isSplitTop: false,
+          isSplitBottom: false,
+        })
+        consumedLines += 1
+        continue
+      }
+
+      while (text.length > 0) {
+        const availableLines = maxLinesPerPage - consumedLines
+        if (availableLines <= 0) {
+          flushPage()
+          continue
+        }
+
+        const totalLinesNeeded = Math.ceil(text.length / charsPerLine)
+
+        if (totalLinesNeeded <= availableLines) {
+          currentPage.push({
+            text,
+            progressUnits: totalLinesNeeded,
+            isBlank: false,
+            isDivider: false,
+            isSplitTop: text !== paragraphs[i],
+            isSplitBottom: false,
+          })
+          consumedLines += totalLinesNeeded
+          consumedLines += 0.5 // Simulate margin-bottom space
+          text = ''
+        } else {
+          let splitLines = availableLines;
+          let remainLines = totalLinesNeeded - splitLines;
+          
+          // 防止出现寡行（widow/orphan），保证拆分后的段落各部分至少占据 2 行
+          if (splitLines < 2) {
+            flushPage();
+            continue;
+          }
+          if (remainLines < 2) {
+            splitLines -= 1;
+            if (splitLines < 2) {
+              flushPage();
+              continue;
+            }
+          }
+
+          let maxChars = Math.floor(splitLines * charsPerLine)
+          let splitIndex = maxChars
+          
+          const chunk = text.substring(0, splitIndex)
+          currentPage.push({
+            text: chunk,
+            progressUnits: splitLines,
+            isBlank: false,
+            isDivider: false,
+            isSplitTop: text !== paragraphs[i],
+            isSplitBottom: true,
+          })
+          
+          consumedLines += splitLines
+          text = text.substring(splitIndex)
+          flushPage()
+        }
+      }
+    }
+    
+    flushPage()
+    return contentPages
+  },
+
   buildOriginalTextPages(windowData, fromDirection = 'next') {
     const { currentChapterIndex, totalChapters } = this.data
     const lines = windowData && Array.isArray(windowData.lines) ? windowData.lines : []
     const offset = Number((windowData && windowData.offset) || 0)
-    const limit = Number((windowData && windowData.limit) || this.data.chapterWindowLimit || 50)
+    const limit = Number((windowData && windowData.limit) || this.data.chapterWindowLimit || 1000)
     const nextOffset = windowData && windowData.nextOffset != null ? Number(windowData.nextOffset) : null
     const hasNext = !!(windowData && windowData.hasNext)
     const lineCount = Number((windowData && windowData.lineCount) || 0)
@@ -239,30 +404,8 @@ Page({
       pages.push({ type: 'prev-bridge', text: '正在返回上一章...' })
     }
 
-    const CHARS_PER_LINE = 18
-    const LINES_PER_PAGE = 27
     const sourceLines = lines.length ? lines : ['本章暂无原文内容']
-
-    let currentPage = []
-    let currentLines = 0
-
-    sourceLines.forEach(line => {
-      const text = String(line || '')
-      const pLines = text.trim() ? Math.max(1, Math.ceil(text.length / CHARS_PER_LINE)) : 1
-
-      if (currentLines + pLines > LINES_PER_PAGE && currentPage.length > 0) {
-        pages.push({ type: 'content', content: currentPage, showChapterEnd: false })
-        currentPage = []
-        currentLines = 0
-      }
-
-      currentPage.push(text)
-      currentLines += pLines
-    })
-
-    if (currentPage.length > 0) {
-      pages.push({ type: 'content', content: currentPage, showChapterEnd: false })
-    }
+    pages.push(...this.paginateSourceLines(sourceLines))
 
     if (hasNext && nextOffset != null) {
       pages.push({
@@ -299,11 +442,11 @@ Page({
       chapterWindowHasNext: hasNext,
       chapterWindowLineCount: lineCount,
       showFooterBar: true,
+      showControls: true,
       loading: false,
       currentPageIndex: startIdx
     }, () => {
       this.updateReadingProgress()
-      this.scheduleFooterAutoHide()
       setTimeout(() => {
         this.setData({ swiperDuration: 300 })
       }, 50)
@@ -332,30 +475,7 @@ Page({
     }
 
     // 2. 正文分页逻辑
-    const CHARS_PER_LINE = 18
-    const LINES_PER_PAGE = 27
-    const paragraphs = fullContent.split('\n')
-
-    let currentPage = []
-    let currentLines = 0
-
-    paragraphs.forEach(p => {
-      if (!p.trim()) return
-      const pLines = Math.ceil(p.length / CHARS_PER_LINE) + 1
-
-      if (currentLines + pLines > LINES_PER_PAGE && currentPage.length > 0) {
-        pages.push({ type: 'content', content: currentPage })
-        currentPage = []
-        currentLines = 0
-      }
-
-      currentPage.push(p)
-      currentLines += pLines
-    })
-
-    if (currentPage.length > 0) {
-      pages.push({ type: 'content', content: currentPage })
-    }
+    pages.push(...this.paginateSourceLines(fullContent.split('\n')))
 
     // 3. 进入下一章桥接页
     if (currentChapterIndex < totalChapters - 1) {
@@ -405,11 +525,15 @@ Page({
     let progress = 0
 
     if (currentPageObj.type === 'content') {
-      const linesBeforePage = contentPages
+      const unitsBeforePage = contentPages
         .slice(0, contentPages.indexOf(currentPageObj))
-        .reduce((sum, page) => sum + (Array.isArray(page.content) ? page.content.length : 0), 0)
-      const currentPageLines = Array.isArray(currentPageObj.content) ? currentPageObj.content.length : 0
-      const readLines = Number(chapterWindowOffset || 0) + linesBeforePage + currentPageLines
+        .reduce((sum, page) => sum + (Array.isArray(page.content)
+          ? page.content.reduce((pageSum, item) => pageSum + Number(item.progressUnits || 0), 0)
+          : 0), 0)
+      const currentPageUnits = Array.isArray(currentPageObj.content)
+        ? currentPageObj.content.reduce((sum, item) => sum + Number(item.progressUnits || 0), 0)
+        : 0
+      const readLines = Number(chapterWindowOffset || 0) + unitsBeforePage + currentPageUnits
       progress = chapterWindowLineCount > 0
         ? Math.round(Math.min(1, readLines / chapterWindowLineCount) * 100)
         : Math.round(((contentPages.indexOf(currentPageObj) + 1) / totalContentPages) * 100)
@@ -517,44 +641,41 @@ Page({
   },
 
   handleScreenTap(e) {
-    if (!this.data.showFooterBar) {
-      this.showFooterTemporarily()
-      return
-    }
-
-    this.scheduleFooterAutoHide()
-
     const { x } = e.detail
     const screenWidth = wx.getSystemInfoSync().windowWidth
     const third = screenWidth / 3
 
-    if (x < third) {
-      // 点击左侧 1/3：上一页
-      if (this.data.currentPageIndex > 0) {
-        this.goToPage(this.data.currentPageIndex - 1)
-      } else {
-        this.handlePrevChapter()
-      }
-    } else if (x > third * 2) {
-      // 点击右侧 1/3：下一页
-      if (this.data.currentPageIndex < this.data.chapterPages.length - 1) {
-        this.goToPage(this.data.currentPageIndex + 1)
-      } else {
-        this.handleNextChapter()
-      }
-    } else {
-      // 点击中间 1/3：切换工具栏显示
-      const nextShowControls = !this.data.showControls
+    if (x >= third && x <= third * 2) {
+      // 点击中间 1/3：切换工具栏显示（同时控制上下）
+      const nextShow = !this.data.showControls
       this.setData({
-        showControls: nextShowControls,
-        showFooterBar: nextShowControls,
+        showControls: nextShow,
+        showFooterBar: nextShow,
       }, () => {
-        if (nextShowControls) {
+        if (nextShow) {
           this.scheduleFooterAutoHide()
         } else {
           this.clearFooterAutoHideTimer()
         }
       })
+      return
+    }
+
+    // 点击两侧：执行翻页
+    if (x < third) {
+      // 上一页
+      if (this.data.currentPageIndex > 0) {
+        this.goToPage(this.data.currentPageIndex - 1)
+      } else {
+        this.handlePrevChapter()
+      }
+    } else {
+      // 下一页
+      if (this.data.currentPageIndex < this.data.chapterPages.length - 1) {
+        this.goToPage(this.data.currentPageIndex + 1)
+      } else {
+        this.handleNextChapter()
+      }
     }
   },
 

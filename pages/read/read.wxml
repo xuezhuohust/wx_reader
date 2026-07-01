@@ -1,15 +1,29 @@
 <view class="reader-page" wx:if="{{book}}">
-  <!-- Custom Navigation Bar -->
-  <view class="reader-header" style="height: {{navBarHeight}}px; padding-top: {{menuTop}}px;" wx:if="{{showControls}}">
+  <!-- Permanent AI Entry (Shown when controls are hidden) -->
+  <view 
+    class="reader-header-ai {{showControls ? 'hidden' : 'fade-in'}}" 
+    style="height: {{navBarHeight}}px; padding-top: {{menuTop}}px;"
+  >
     <view class="nav-inner" style="height: {{menuHeight}}px;">
+      <view class="ai-guide-entry-compact" bindtap="handleStartAI">
+        <view class="icon-ai-sparkle"></view>
+        <text class="ai-guide-text">AI 伴读已就绪，点击开始解析</text>
+        <view class="icon-arrow-right"></view>
+      </view>
+    </view>
+  </view>
+
+  <!-- Custom Navigation Bar -->
+  <view class="reader-header {{showControls ? 'fade-in' : 'hidden'}}" style="height: {{navBarHeight}}px; padding-top: {{menuTop}}px;">
+    <view class="nav-inner" style="height: {{menuHeight}}px; position: relative;">
       <view class="nav-left" bindtap="handleBack">
         <view class="icon-back"></view>
       </view>
-      <view class="nav-center">
-        <view class="reader-chapter-title">{{currentChapterName || '正在加载...'}}</view>
-      </view>
-      <view class="nav-right">
-        <!-- 移除灯泡入口 -->
+      <view class="nav-center" style="position: absolute; left: 50%; transform: translateX(-50%); width: 40%; height: 100%;">
+        <view class="reader-chapter-title {{currentChapterName.length > 10 ? 'should-marquee' : ''}}">
+          <text>{{currentChapterName || '正在加载...'}}</text>
+          <text wx:if="{{currentChapterName.length > 10}}" class="marquee-copy">{{currentChapterName}}</text>
+        </view>
       </view>
     </view>
   </view>
@@ -27,30 +41,17 @@
         <!-- 正文页渲染 -->
         <view class="reader-article {{loading ? 'loading-fade' : ''}}" wx:if="{{item.type === 'content'}}">
           
-          <!-- AI 伴读入口（仅在每章第一页显示，且不加载时） -->
-          <view 
-            class="ai-guide-entry" 
-            wx:if="{{pageIdx === (currentChapterIndex > 0 ? 1 : 0) && !loading}}"
-            bindtap="handleStartAI"
-          >
-            <view class="ai-guide-content">
-              <view class="icon-ai-sparkle"></view>
-              <text class="ai-guide-text">AI 伴读已就绪，点击开始解析当前章节</text>
-            </view>
-            <view class="icon-arrow-right"></view>
-          </view>
-
           <block wx:if="{{item.content.length > 0}}">
             <view 
               wx:for="{{item.content}}" 
-              wx:for-item="para"
+              wx:for-item="paraObj"
               wx:for-index="paraIdx"
               wx:key="paraIdx" 
-              class="paragraph {{selectedParaText === para ? 'para-selected' : ''}}"
+              class="paragraph {{paraObj.text && selectedParaText === paraObj.text ? 'para-selected' : ''}} {{paraObj.isSplitTop ? 'is-split-top' : ''}} {{paraObj.isSplitBottom ? 'is-split-bottom' : ''}} {{paraObj.isBlank ? 'is-blank-line' : ''}} {{paraObj.isDivider ? 'is-divider-line' : ''}}"
               bindlongpress="handleLongPressPara"
-              data-text="{{para}}"
+              data-text="{{paraObj.text}}"
             >
-              {{para}}
+              {{paraObj.text}}
             </view>
           </block>
           
@@ -72,7 +73,6 @@
           </view>
         </view>
         
-        <view class="safe-area-bottom"></view>
       </view>
     </swiper-item>
   </swiper>
@@ -128,7 +128,6 @@
         <text class="toc-name">{{item}}</text>
         <view class="toc-active-icon" wx:if="{{index === currentChapterIndex}}"></view>
       </view>
-      <view class="safe-area-bottom"></view>
     </scroll-view>
   </view>
 
