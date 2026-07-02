@@ -168,26 +168,23 @@ function purchaseBook(id) {
   }).then((data) => data.book)
 }
 
-/** 请求 TTS 语音合成，返回音频地址 */
+/** 请求 TTS 语音合成，返回可边下边播的流式音频地址 */
 function requestSpeech(text, speaker) {
-  return requestWithoutAuth({
-    url: '/api/tts',
-    method: 'POST',
-    data: {
-      text,
-      speaker: speaker || 'x4_yezi',
-    },
-  }).then((data) => {
-    const audioUrl = toAbsoluteUrl(data.audio_url || data.url)
-    if (!audioUrl) {
-      throw new Error(data.error || '未获取到音频地址')
-    }
-    return {
-      audioUrl,
-      cached: !!data.cached,
-      size: Number(data.size || 0),
-      filename: data.filename || '',
-    }
+  const content = String(text || '').trim()
+  if (!content) {
+    return Promise.reject(new Error('未获取到音频文本'))
+  }
+
+  const query = [`text=${encodeURIComponent(content)}`]
+  if (speaker) {
+    query.push(`voice=${encodeURIComponent(speaker)}`)
+  }
+  return Promise.resolve({
+    audioUrl: `${BASE_URL}/api/tts/stream?${query.join('&')}`,
+    cached: false,
+    size: 0,
+    filename: '',
+    streaming: true,
   })
 }
 
