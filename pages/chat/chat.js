@@ -1425,7 +1425,7 @@ Page({
     })
     // 设置 src，等 onCanplay 再 play
     audio.src = next.audioUrl
-    // 超时保护：如果 5s 内 onCanplay/onPlay 都没触发，强制跳过
+    // 超时保护：流式 TTS 冷启动可能需要等待首个音频包。
     clearTimeout(this._audioLoadTimeout)
     this._audioLoadTimeout = setTimeout(() => {
       if (this.isAudioLoading) {
@@ -1433,7 +1433,7 @@ Page({
         this.isAudioLoading = false
         this.playNextIfIdle()
       }
-    }, 5000)
+    }, 15000)
   },
 
   processAudioQueue() {
