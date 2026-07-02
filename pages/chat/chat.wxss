@@ -170,7 +170,7 @@
   z-index: 900;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between; /* 修改为两端对齐 */
   padding: 8rpx 32rpx;
   background: rgba(250, 248, 245, 0.4); /* 更通透的背景 */
   backdrop-filter: blur(10px);
@@ -181,7 +181,35 @@
   align-items: center;
   gap: 8rpx;
   padding: 8rpx 0;
-  /* Removed card background and border */
+}
+
+/* 2026-07-02 查看背景图按钮 */
+.view-bg-btn {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 8rpx 16rpx;
+  background: rgba(60, 105, 43, 0.08);
+  border-radius: 99rpx;
+  font-size: 22rpx;
+  color: var(--primary);
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.view-bg-btn:active {
+  background: rgba(60, 105, 43, 0.15);
+  transform: scale(0.95);
+}
+
+.view-bg-icon {
+  width: 24rpx;
+  height: 24rpx;
+  background-color: currentColor;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z'%3E%3C/path%3E%3Ccircle cx='12' cy='12' r='3'%3E%3C/circle%3E%3C/svg%3E") no-repeat center;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z'%3E%3C/path%3E%3Ccircle cx='12' cy='12' r='3'%3E%3C/circle%3E%3C/svg%3E") no-repeat center;
+  mask-size: contain;
+  -webkit-mask-size: contain;
 }
 
 .book-tag-icon {

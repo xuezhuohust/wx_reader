@@ -126,6 +126,15 @@ Page({
       })
   },
 
+  /** 预览背景图 */
+  handlePreviewBackground() {
+    if (!this.data.backgroundImage) return
+    wx.previewImage({
+      urls: [this.data.backgroundImage],
+      current: this.data.backgroundImage
+    })
+  },
+
   syncChatIdentity() {
     const identity = loadIdentity()
     const displayName = identity ? String(identity.displayName || '').trim() : ''

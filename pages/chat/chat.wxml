@@ -54,6 +54,11 @@
         <view class="clear-icon"></view>
       </view>
     </view>
+    <!-- 2026-07-02 新增：查看背景图按钮 -->
+    <view wx:if="{{backgroundImage}}" class="view-bg-btn" catchtap="handlePreviewBackground">
+      <view class="view-bg-icon"></view>
+      <text>查看意境图</text>
+    </view>
   </view>
 
   <!-- Chat Canvas -->
