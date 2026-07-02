@@ -634,6 +634,16 @@ function switchUserRole(role) {
   }).then((data) => data.identity || data)
 }
 
+/** 智能伴读：生成章节意境背景图 */
+function generateImage(bookId, chapterId) {
+  return request({
+    url: '/api/image-generation',
+    method: 'POST',
+    data: { bookId, chapterId },
+    timeout: 60000, // 图片生成耗时较长，手动设置 60s 超时
+  })
+}
+
 module.exports = {
   ensureLogin: ensureUserIdentity,
   getRecommendBooks,
@@ -664,5 +674,6 @@ module.exports = {
   updateBookMetadata,
   startBuildBook,
   switchUserRole,
+  generateImage,
   toAbsoluteUrl,
 }

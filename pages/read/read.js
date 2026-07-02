@@ -718,8 +718,10 @@ Page({
 
   handleMenuAI() {
     const text = this.data.selectedParaText
+    const currentChapter = this.data.allChapters[this.data.currentChapterIndex]
+    const chapterId = currentChapter ? currentChapter.id : ''
     wx.navigateTo({
-      url: `/pages/chat/chat?bookId=${this.data.bookId}&initialText=${encodeURIComponent(text)}`,
+      url: `/pages/chat/chat?bookId=${this.data.bookId}&chapterId=${chapterId}&initialText=${encodeURIComponent(text)}`,
     })
     this.handleCloseSelectionMenu()
   },
@@ -747,8 +749,10 @@ Page({
   nop() {},
 
   handleStartAI() {
+    const currentChapter = this.data.allChapters[this.data.currentChapterIndex]
+    const chapterId = currentChapter ? currentChapter.id : ''
     wx.navigateTo({
-      url: `/pages/chat/chat?bookId=${this.data.bookId}`,
+      url: `/pages/chat/chat?bookId=${this.data.bookId}&chapterId=${chapterId}`,
     })
   }
 })

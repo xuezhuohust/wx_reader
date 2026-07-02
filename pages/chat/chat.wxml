@@ -1,4 +1,10 @@
 <view wx:if="{{book}}" class="page-shell chat-page">
+  <!-- 背景意境图 -->
+  <view wx:if="{{backgroundImage}}" class="chat-bg-container">
+    <image class="chat-bg-image" src="{{backgroundImage}}" mode="aspectFill" />
+    <view class="chat-bg-mask"></view>
+  </view>
+
   <!-- Top App Bar -->
   <view class="custom-nav" style="height: {{navBarHeight}}px;">
     <view class="nav-inner" style="top: {{menuTop}}px; height: {{menuHeight}}px;">

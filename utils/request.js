@@ -53,6 +53,7 @@ function rawRequest(options) {
       url: requestUrl,
       method: options.method || 'GET',
       data: options.data || {},
+      timeout: options.timeout || 15000, // 默认 15s 超时
       header: Object.assign({
         'Content-Type': 'application/json',
       }, options.header || {}),

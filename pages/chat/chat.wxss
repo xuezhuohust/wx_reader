@@ -3,6 +3,41 @@
   display: flex;
   flex-direction: column;
   background: var(--bg-canvas);
+  position: relative;
+  z-index: 1;
+}
+
+/* 2026-07-02 背景意境图样式 */
+.chat-bg-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1; /* 放在页面最底层 */
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.chat-bg-image {
+  width: 100%;
+  height: 100%;
+  opacity: 0.15; /* 降低不透明度，确保文字清晰 */
+}
+
+.chat-bg-mask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    to bottom,
+    rgba(250, 248, 245, 0.9) 0%,
+    rgba(250, 248, 245, 0.6) 20%,
+    rgba(250, 248, 245, 0.6) 80%,
+    rgba(250, 248, 245, 0.9) 100%
+  );
 }
 
 /* Custom Navigation Bar */
@@ -10,7 +45,7 @@
   position: fixed;
   top: 0; left: 0; right: 0;
   z-index: 1000;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(250, 248, 245, 0.85);
   backdrop-filter: blur(20px);
   border-bottom: 1rpx solid rgba(0, 0, 0, 0.05);
 }
@@ -118,7 +153,7 @@
 .chat-body {
   flex: 1;
   overflow: hidden;
-  background: var(--bg-canvas);
+  background: transparent;
 }
 
 .message-list {
@@ -137,7 +172,7 @@
   align-items: center;
   justify-content: center;
   padding: 8rpx 32rpx;
-  background: rgba(250, 248, 245, 0.8); /* Match bg-canvas with transparency */
+  background: rgba(250, 248, 245, 0.4); /* 更通透的背景 */
   backdrop-filter: blur(10px);
 }
 
@@ -735,10 +770,12 @@
 
 /* Input Bar Optimization */
 .chat-footer {
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(20px);
   padding: 24rpx 32rpx calc(env(safe-area-inset-bottom) + 24rpx);
   border-top: 1rpx solid rgba(0, 0, 0, 0.05);
   flex-shrink: 0;
+  z-index: 100;
 }
 
 /* (Quick tips moved to suggestion chips in message area) */

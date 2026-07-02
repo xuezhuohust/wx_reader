@@ -36,6 +36,9 @@ Page({
     currentConversationId: '',
     currentConversationTitle: '新对话',
     showConversationList: false,
+    // 2026-07-02 新增：背景图支持
+    backgroundImage: '',
+    chapterId: '',
   },
 
   onLoad(options) {
@@ -44,6 +47,7 @@ Page({
       navBarHeight: app.globalData.navBarHeight,
       menuTop: app.globalData.menuTop,
       menuHeight: app.globalData.menuHeight,
+      chapterId: options.chapterId || '',
     })
     if (typeof wx.onNeedPrivacyAuthorization === 'function') {
       wx.onNeedPrivacyAuthorization((resolve) => {
@@ -95,6 +99,31 @@ Page({
     // 2026-05-19: 改为加载书籍 + 对话列表 + 历史消息
     this.initialized = false
     this.loadBookAndConversations()
+
+    // 2026-07-02: 触发背景图生成
+    if (this.bookId && options.chapterId) {
+      this.generateChatBackground(this.bookId, options.chapterId)
+    }
+  },
+
+  /** 生成章节意境背景图 */
+  generateChatBackground(bookId, chapterId) {
+    console.log('[chat] generating background for:', bookId, chapterId)
+    api.generateImage(bookId, chapterId)
+      .then((res) => {
+        // res 已经是解包后的 data.data
+        if (res && res.imageUrl) {
+          console.log('[chat] background generated:', res.imageUrl)
+          this.setData({
+            backgroundImage: res.imageUrl
+          })
+        } else {
+          console.warn('[chat] background response missing imageUrl:', res)
+        }
+      })
+      .catch((err) => {
+        console.error('[chat] generate background failed:', err)
+      })
   },
 
   syncChatIdentity() {
