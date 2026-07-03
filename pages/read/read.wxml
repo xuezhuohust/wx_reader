@@ -1,8 +1,8 @@
 <view class="reader-page" wx:if="{{book}}">
   <!-- Permanent AI Entry (Shown when controls are hidden) -->
   <view 
-    class="reader-header-ai {{showControls ? 'hidden' : 'fade-in'}}" 
-    style="height: {{navBarHeight}}px; padding-top: {{menuTop}}px;"
+    class="reader-header-ai {{showControls ? 'fade-in' : 'hidden'}}"
+    style="top: {{navBarHeight + 8}}px; height: {{menuHeight}}px;"
   >
     <view class="nav-inner" style="height: {{menuHeight}}px;">
       <view class="ai-guide-entry-compact" bindtap="handleStartAI">
@@ -37,7 +37,7 @@
     duration="{{swiperDuration}}"
   >
     <swiper-item wx:for="{{chapterPages}}" wx:key="index" wx:for-index="pageIdx">
-      <view class="reader-page-content" style="padding-top: {{navBarHeight + 8}}px;">
+      <view class="reader-page-content" style="padding-top: {{showControls ? navBarHeight + 66 : navBarHeight + 8}}px;">
         <!-- 正文页渲染 -->
         <view class="reader-article {{loading ? 'loading-fade' : ''}}" wx:if="{{item.type === 'content'}}">
           
@@ -89,7 +89,12 @@
       
       <view class="footer-nav-center" bindtap="handleShowToc">
         <view class="nav-info-cluster">
-          <view class="nav-chapter-name">{{currentChapterName}}</view>
+          <view class="nav-chapter-name">
+            <view class="nav-chapter-name-track {{currentChapterName.length > 10 ? 'should-marquee' : ''}}">
+              <text>{{currentChapterName}}</text>
+              <text wx:if="{{currentChapterName.length > 10}}" class="marquee-copy">{{currentChapterName}}</text>
+            </view>
+          </view>
           <view class="nav-progress-meta">
             <text class="progress-pct">本章 {{readingProgress}}%</text>
             <text class="progress-sep">·</text>

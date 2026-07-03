@@ -767,6 +767,9 @@ function generateCreativeWork(options) {
     data: {
       bookId: payload.bookId || payload.book_id || payload.book || '',
       userPrompt: payload.userPrompt || payload.prompt || payload.message || '',
+      chapterId: payload.chapterId || payload.chapter_id || '',
+      originalText: payload.originalText || payload.original_text || '',
+      type: payload.type || '',
     },
     timeout: 360000,
   })

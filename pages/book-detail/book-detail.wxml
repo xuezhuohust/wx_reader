@@ -102,8 +102,8 @@
           </view>
         </view>
 
-        <view class="copyright fade-up d5">
-          {{book.copyright || '© 2026 读书系统 · AI 智能导读技术支持'}}
+        <view class="copyright fade-up d5" wx:if="{{displayCopyright}}">
+          {{displayCopyright}}
         </view>
         
         <view class="safe-area-bottom"></view>

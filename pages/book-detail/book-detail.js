@@ -15,7 +15,8 @@ Page({
     chapterCount: 0,
     hasHiddenChapters: false,
     loading: true,
-    hasProgress: false
+    hasProgress: false,
+    displayCopyright: ''
   },
 
   onLoad(options) {
@@ -114,6 +115,7 @@ Page({
           book,
           hasProgress,
           priceText: formatPrice(book.price),
+          displayCopyright: this.normalizeDisplayCopyright(book.copyright),
           chaptersExpanded,
           visibleChapters: this.getVisibleChapters(chapters, chaptersExpanded),
           chapterCount: chapters.length,
@@ -138,6 +140,15 @@ Page({
 
   getChapterPreviewCount() {
     return 6
+  },
+
+  normalizeDisplayCopyright(value) {
+    const text = String(value || '').trim()
+    const emptyValues = ['无', '暂无', '暂无版权', '无版权', 'null', 'undefined', 'none', '-']
+    if (!text || emptyValues.indexOf(text.toLowerCase()) >= 0) {
+      return ''
+    }
+    return text
   },
 
   getVisibleChapters(chapters, expanded) {

@@ -412,8 +412,21 @@
   max-width: 320rpx;
   white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis;
   text-align: center;
+  display: block;
+}
+
+.nav-chapter-name-track {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.nav-chapter-name-track.should-marquee {
+  max-width: none;
+  animation: marquee 10s linear infinite;
 }
 
 .nav-progress-meta {

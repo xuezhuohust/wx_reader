@@ -47,7 +47,10 @@ Page({
     chapterId: '',
     chapterTitle: '',
     // 2026-07-03 新增：二创模式支持
-    chatMode: 'chat', // 'chat' or 'creative'
+    chatMode: 'chat', // 'chat', 'story' or 'creative'
+    currentModeLabel: '伴读对话模式',
+    currentModeClass: '',
+    currentModeIconClass: 'icon-chat',
     creativeType: 'story_continue', // 'parallel_world', 'character_extension', 'story_continue'
     creativeTypes: [
       { id: 'story_continue', name: '剧情续写', prompt: '请根据当前章节进度，续写一段剧情。' },
@@ -62,22 +65,16 @@ Page({
     const app = getApp()
     const entry = this.normalizeEntry((options && (options.entry || options.entrance || options.scene || options.mode)) || 'chat')
     const scene = this.normalizeScene((options && (options.scene || options.mode || entry)) || 'chat')
-    const sceneConfig = this.getSceneConfig(entry, scene)
-    this.setData({
+    const chatMode = this.resolveChatMode(entry, scene)
+    const modeState = this.buildModeState(chatMode)
+    this.setData(Object.assign({
       navBarHeight: app.globalData.navBarHeight,
       menuTop: app.globalData.menuTop,
       menuHeight: app.globalData.menuHeight,
       chapterId: options.chapterId || '',
-      entry,
-      scene,
-      sceneTitle: sceneConfig.title,
-      inputPlaceholder: sceneConfig.placeholder,
-      emptyWelcomeText: sceneConfig.emptyWelcome,
-      thinkingText: sceneConfig.thinkingText,
-      quickQuestions: sceneConfig.quickQuestions,
       chapterTitle: options.chapterTitle ? decodeURIComponent(options.chapterTitle) : '',
       creativeBaseText: app.globalData.lastReadContext || '', // 从全局获取阅读进度
-    })
+    }, modeState))
     if (typeof wx.onNeedPrivacyAuthorization === 'function') {
       wx.onNeedPrivacyAuthorization((resolve) => {
         app.globalData._privacyResolve = resolve
@@ -89,8 +86,8 @@ Page({
       })
     }
     this.bookId = options.bookId
-    this.chatEntry = entry
-    this.chatScene = scene
+    this.chatEntry = modeState.entry
+    this.chatScene = modeState.scene
     this.initialText = options.initialText ? decodeURIComponent(options.initialText) : ''
     this.messageSeed = 0
     this.audioContext = null
@@ -160,6 +157,57 @@ Page({
     return 'chat'
   },
 
+  resolveChatMode(entry, scene) {
+    if (entry === 'creative' || scene === 'creative') {
+      return 'creative'
+    }
+    if (entry === 'story' || scene === 'story') {
+      return 'story'
+    }
+    return 'chat'
+  },
+
+  getModeMeta(mode) {
+    if (mode === 'story') {
+      return {
+        label: '讲故事模式',
+        triggerClass: 'mode-trigger--story',
+        iconClass: 'icon-story',
+      }
+    }
+    if (mode === 'creative') {
+      return {
+        label: 'AI 二创模式',
+        triggerClass: 'mode-trigger--creative',
+        iconClass: 'icon-creative',
+      }
+    }
+    return {
+      label: '伴读对话模式',
+      triggerClass: '',
+      iconClass: 'icon-chat',
+    }
+  },
+
+  buildModeState(mode) {
+    const chatMode = this.normalizeEntry(mode)
+    const sceneConfig = this.getSceneConfig(chatMode, chatMode)
+    const meta = this.getModeMeta(chatMode)
+    return {
+      entry: chatMode,
+      scene: chatMode,
+      chatMode,
+      sceneTitle: sceneConfig.title,
+      inputPlaceholder: sceneConfig.placeholder,
+      emptyWelcomeText: sceneConfig.emptyWelcome,
+      thinkingText: sceneConfig.thinkingText,
+      quickQuestions: sceneConfig.quickQuestions,
+      currentModeLabel: meta.label,
+      currentModeClass: meta.triggerClass,
+      currentModeIconClass: meta.iconClass,
+    }
+  },
+
   getSceneConfig(entry, scene) {
     const mode = entry === 'creative' ? 'creative' : scene
     if (mode === 'story') {
@@ -190,14 +238,15 @@ Page({
   },
 
   isCreativeMode() {
-    return this.chatEntry === 'creative' || this.chatScene === 'creative'
+    return this.data.chatMode === 'creative' || this.chatEntry === 'creative' || this.chatScene === 'creative'
   },
 
   getWelcomeMessage(bookTitle) {
-    if (this.chatScene === 'story') {
+    const mode = this.data.chatMode || this.resolveChatMode(this.chatEntry, this.chatScene)
+    if (mode === 'story') {
       return `我会按《${bookTitle}》的情节脉络给你讲故事。你可以说“继续讲”“重讲这一段”，也可以让我跳到指定章节。`
     }
-    if (this.isCreativeMode()) {
+    if (mode === 'creative') {
       return `我会参考《${bookTitle}》和当前章节，帮你续写、改写、写番外或补一段人物对话。直接告诉我想怎么创作。`
     }
     return `你好，我已经了解《${bookTitle}》的内容，你可以问我关于这本书的问题。`
@@ -232,23 +281,52 @@ Page({
     })
   },
 
-  /** 切换模式逻辑升级：增加分割线 */
+  /** 选择伴读模式，并切换到该模式隔离后的会话历史 */
   toggleChatMode() {
-    const newMode = this.data.chatMode === 'chat' ? 'creative' : 'chat'
-    
-    // 在对话流中插入一个模式切换分割线
-    const modeSwitchMsg = {
-      id: `mode-switch-${Date.now()}`,
-      type: 'mode-switch',
-      chatMode: newMode,
-      createdAt: new Date().toISOString()
+    if (this.data.loadingReply) {
+      return
     }
 
-    this.setData({
-      chatMode: newMode,
-      messages: [...this.data.messages, modeSwitchMsg]
-    }, () => {
-      this.scrollToBottom()
+    const modes = ['chat', 'story', 'creative']
+    const labels = ['伴读对话模式', '讲故事模式', 'AI 二创模式']
+    wx.showActionSheet({
+      itemList: labels,
+      success: (res) => {
+        const nextMode = modes[res.tapIndex] || 'chat'
+        this.switchChatMode(nextMode)
+      },
+    })
+  },
+
+  switchChatMode(mode) {
+    const nextMode = this.normalizeEntry(mode)
+    if (nextMode === this.data.chatMode) {
+      return
+    }
+
+    const modeState = this.buildModeState(nextMode)
+    const book = this.data.book
+    this.chatEntry = modeState.entry
+    this.chatScene = modeState.scene
+    this.resetAudioPlayback()
+
+    this.setData(Object.assign({}, modeState, {
+      conversations: [],
+      currentConversationId: '',
+      currentConversationTitle: '新对话',
+      showConversationList: false,
+      messages: [],
+      loadingMessages: true,
+      creativeGenerating: false,
+      loadingReply: false,
+      scrollWithAnimation: true,
+      userHasScrolledUp: false,
+      showScrollDownBtn: false,
+    }, this.buildComposerState({
+      inputValue: '',
+      inputLineCount: 1,
+    })), () => {
+      this.loadConversations(book || {})
     })
 
     wx.vibrateShort({ type: 'light' })
@@ -301,19 +379,27 @@ Page({
       type: this.data.creativeType
     }).then(res => {
       // 成功后更新消息状态
+      const finalContent = String((res && (res.content || res.reply || res.answer)) || '').trim()
       const messages = this.data.messages
       const index = messages.findIndex(m => m.id === creativeMessage.id)
       if (index !== -1) {
         messages[index] = {
           ...messages[index],
           status: 'success',
-          content: res.content,
-          id: res.id || messages[index].id
+          content: finalContent || '暂时没有生成内容，请换个角度再试试。',
+          id: (res && res.id) || messages[index].id
         }
         this.setData({ messages }, () => {
           this.scrollToBottom()
         })
       }
+      return api.appendConversationMessages(this.data.currentConversationId, [
+        { role: 'user', content: userMsgContent },
+        { role: 'assistant', content: finalContent || '暂时没有生成内容，请换个角度再试试。' },
+      ]).catch((error) => {
+        console.warn('[chat] creative history save failed:', error)
+        return null
+      })
     }).catch(err => {
       console.error('二创生成失败:', err)
       const messages = this.data.messages
@@ -563,7 +649,11 @@ Page({
       .then((text) => {
         wx.hideLoading()
         if (text) {
-          this.sendMessage(text)
+          if (this.data.chatMode === 'creative') {
+            this.submitCreativeRequest(text)
+          } else {
+            this.sendMessage(text)
+          }
         }
       })
       .catch((err) => {
@@ -883,6 +973,7 @@ Page({
         )
         this.setData({
           messages: [welcomeMessage],
+          loadingMessages: false,
         }, () => {
           this.scrollToBottom(true)
         })
@@ -1152,7 +1243,11 @@ Page({
     setTimeout(() => { this._isHandlingSend = false }, 500)
 
     const question = event.currentTarget.dataset.question
-    this.sendMessage(question)
+    if (this.data.chatMode === 'creative') {
+      this.submitCreativeRequest(question)
+    } else {
+      this.sendMessage(question)
+    }
   },
 
   handleSend() {
@@ -1909,6 +2004,9 @@ Page({
     api.generateCreativeWork({
       bookId,
       userPrompt: message,
+      chapterId: this.data.chapterId,
+      originalText: this.data.creativeBaseText,
+      type: this.data.creativeType,
     })
       .then((work) => {
         const reply = String(

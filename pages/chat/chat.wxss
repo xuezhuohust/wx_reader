@@ -225,18 +225,23 @@
   align-items: center;
   gap: 8rpx;
   padding: 8rpx 0;
+  max-width: calc(100% - 120rpx);
+  min-width: 0;
 }
 
 /* 2026-07-02 查看背景图按钮 - 极简透明版 */
 .view-bg-icon-btn {
   position: absolute; /* 绝对定位到右侧，不影响居中 */
+  top: 60rpx;
   right: 32rpx;
   display: flex;
   align-items: center;
   justify-content: center;
   width: 56rpx;
   height: 56rpx;
-  background: transparent;
+  background: rgba(250, 248, 245, 0.72);
+  border-radius: 50%;
+  backdrop-filter: blur(10px);
   color: var(--stone);
   transition: all 0.2s ease;
 }
@@ -275,6 +280,10 @@
   align-items: center;
   letter-spacing: 0.5rpx;
   opacity: 0.8;
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 .chapter-tag {
@@ -285,6 +294,10 @@
   border-radius: 2rpx;
   font-size: 20rpx;
   font-weight: 600;
+  max-width: 280rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .clear-btn {
@@ -663,6 +676,13 @@
   -webkit-mask-size: contain;
 }
 
+.icon-story {
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2 4.5A2.5 2.5 0 0 1 4.5 2H20v18H4.5A2.5 2.5 0 0 0 2 22V4.5z'/%3E%3Cpath d='M8 6h8'/%3E%3Cpath d='M8 10h8'/%3E%3Cpath d='M8 14h5'/%3E%3C/svg%3E") no-repeat center;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2 4.5A2.5 2.5 0 0 1 4.5 2H20v18H4.5A2.5 2.5 0 0 0 2 22V4.5z'/%3E%3Cpath d='M8 6h8'/%3E%3Cpath d='M8 10h8'/%3E%3Cpath d='M8 14h5'/%3E%3C/svg%3E") no-repeat center;
+  mask-size: contain;
+  -webkit-mask-size: contain;
+}
+
 /* 底部功能栏 - 极简去卡片化 */
 .chat-footer-tools {
   padding: 16rpx 32rpx;
@@ -684,6 +704,10 @@
   background: transparent;
 }
 
+.mode-trigger--story {
+  background: transparent;
+}
+
 .mode-trigger-icon {
   width: 24rpx;
   height: 24rpx;
@@ -694,6 +718,11 @@
 
 .mode-trigger--creative .mode-trigger-icon {
   background-color: var(--primary);
+  opacity: 1;
+}
+
+.mode-trigger--story .mode-trigger-icon {
+  background-color: #2f6f73;
   opacity: 1;
 }
 
@@ -708,6 +737,10 @@
   color: var(--primary);
 }
 
+.mode-trigger--story text {
+  color: #2f6f73;
+}
+
 .mode-trigger-arrow {
   width: 8rpx;
   height: 8rpx;
@@ -720,6 +753,11 @@
 
 .mode-trigger--creative .mode-trigger-arrow {
   border-color: var(--primary);
+  opacity: 0.8;
+}
+
+.mode-trigger--story .mode-trigger-arrow {
+  border-color: #2f6f73;
   opacity: 0.8;
 }
 

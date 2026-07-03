@@ -116,8 +116,12 @@
             <view class="mode-switch-divider">
               <view class="divider-line"></view>
               <view class="divider-content">
-                <view class="divider-icon {{item.chatMode === 'creative' ? 'icon-creative' : 'icon-chat'}}"></view>
-                <text>已切换至{{item.chatMode === 'creative' ? '二创' : '伴读'}}模式</text>
+                <view wx:if="{{item.chatMode === 'creative'}}" class="divider-icon icon-creative"></view>
+                <view wx:elif="{{item.chatMode === 'story'}}" class="divider-icon icon-story"></view>
+                <view wx:else class="divider-icon icon-chat"></view>
+                <text wx:if="{{item.chatMode === 'creative'}}">已切换至二创模式</text>
+                <text wx:elif="{{item.chatMode === 'story'}}">已切换至讲故事模式</text>
+                <text wx:else>已切换至伴读模式</text>
               </view>
               <view class="divider-line"></view>
             </view>
@@ -245,9 +249,9 @@
     <!-- 二创模式功能栏 -->
     <view class="chat-footer-tools">
       <!-- 模式切换触发器 -->
-      <view class="mode-trigger {{chatMode === 'creative' ? 'mode-trigger--creative' : ''}}" bindtap="toggleChatMode">
-        <view class="mode-trigger-icon {{chatMode === 'creative' ? 'icon-creative' : 'icon-chat'}}"></view>
-        <text>{{chatMode === 'creative' ? 'AI 二创模式' : '伴读对话模式'}}</text>
+      <view class="mode-trigger {{currentModeClass}}" bindtap="toggleChatMode">
+        <view class="mode-trigger-icon {{currentModeIconClass}}"></view>
+        <text>{{currentModeLabel}}</text>
         <view class="mode-trigger-arrow"></view>
       </view>
 
