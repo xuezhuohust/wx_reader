@@ -11,7 +11,7 @@
       <view class="nav-back" bindtap="handleBack" style="width: {{menuHeight}}px; height: {{menuHeight}}px;">
         <view class="back-arrow"></view>
       </view>
-      <text class="nav-title">智能伴读</text>
+      <text class="nav-title">{{sceneTitle}}</text>
     </view>
   </view>
 

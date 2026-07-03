@@ -160,10 +160,7 @@ Page({
     if (!book) return
 
     if (book.purchased) {
-      // 默认阅读第一章
-      wx.navigateTo({
-        url: `/pages/read/read?id=${encodeURIComponent(book.id)}&index=0`,
-      })
+      this.handleStartChat()
     } else {
       this.handlePurchase()
     }
@@ -249,6 +246,23 @@ Page({
     }
     wx.navigateTo({
       url: `/pages/chat/chat?bookId=${book.id}`,
+    })
+  },
+
+  handleStartStory() {
+    const { book } = this.data
+    if (!book) {
+      return
+    }
+    if (!book.purchased) {
+      wx.showToast({
+        title: '请先购买后再听故事',
+        icon: 'none',
+      })
+      return
+    }
+    wx.navigateTo({
+      url: `/pages/chat/chat?bookId=${book.id}&scene=story`,
     })
   },
 

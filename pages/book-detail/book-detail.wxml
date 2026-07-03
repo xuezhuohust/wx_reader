@@ -113,9 +113,11 @@
     <!-- Bottom Action Bar -->
     <view class="detail-footer fade-up d5">
       <block wx:if="{{!isPublisherScene}}">
-        <button class="action-btn-primary" bindtap="handleAction">
-          {{book.purchased ? '进入 AI 沉浸导读' : '立即解锁全书导读'}}
-        </button>
+        <view wx:if="{{book.purchased}}" class="reader-actions">
+          <button class="action-btn-secondary action-btn-chat" bindtap="handleStartChat">进入 AI 沉浸导读</button>
+          <button class="action-btn-primary action-btn-story" bindtap="handleStartStory">讲故事模式</button>
+        </view>
+        <button wx:else class="action-btn-primary" bindtap="handleAction">立即解锁全书导读</button>
       </block>
       <block wx:else>
         <view class="publisher-actions">

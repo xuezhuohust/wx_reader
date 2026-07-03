@@ -15,6 +15,8 @@ Page({
     loadingReply: false,
     scrollTop: 0,
     scrollWithAnimation: true,
+    scene: 'chat',
+    sceneTitle: '智能伴读',
     quickQuestions: ['总结这本书', '这本书适合谁读', '提炼三个核心观点', '帮我解释第一章'],
     playingMessageId: '',
     audioLoadingMessageId: '',
@@ -43,11 +45,17 @@ Page({
 
   onLoad(options) {
     const app = getApp()
+    const scene = this.normalizeScene((options && (options.scene || options.mode)) || 'chat')
     this.setData({
       navBarHeight: app.globalData.navBarHeight,
       menuTop: app.globalData.menuTop,
       menuHeight: app.globalData.menuHeight,
       chapterId: options.chapterId || '',
+      scene,
+      sceneTitle: scene === 'story' ? '讲故事模式' : '智能伴读',
+      quickQuestions: scene === 'story'
+        ? ['继续讲', '重讲这一段', '我讲到哪了', '跳到下一章']
+        : ['总结这本书', '这本书适合谁读', '提炼三个核心观点', '帮我解释第一章'],
     })
     if (typeof wx.onNeedPrivacyAuthorization === 'function') {
       wx.onNeedPrivacyAuthorization((resolve) => {
@@ -60,6 +68,7 @@ Page({
       })
     }
     this.bookId = options.bookId
+    this.chatScene = scene
     this.initialText = options.initialText ? decodeURIComponent(options.initialText) : ''
     this.messageSeed = 0
     this.audioContext = null
@@ -105,6 +114,20 @@ Page({
     if (this.bookId && options.chapterId) {
       this.generateChatBackground(this.bookId, options.chapterId)
     }
+  },
+
+  normalizeScene(scene) {
+    const value = String(scene || '').trim().toLowerCase()
+    return ['story', 'storytelling', 'tell_story', '讲故事', '故事'].indexOf(value) >= 0
+      ? 'story'
+      : 'chat'
+  },
+
+  getWelcomeMessage(bookTitle) {
+    if (this.chatScene === 'story') {
+      return `我会按《${bookTitle}》的情节脉络给你讲故事。你可以说“继续讲”“重讲这一段”，也可以让我跳到指定章节。`
+    }
+    return `你好，我已经了解《${bookTitle}》的内容，你可以问我关于这本书的问题。`
   },
 
   /** 生成章节意境背景图 */
@@ -670,7 +693,7 @@ Page({
   loadConversations(book) {
     /* 加载对话列表，自动选中最近活跃的对话或新建一个 */
     const bookTitle = book && book.title ? book.title : ''
-    return api.listConversations(this.bookId)
+    return api.listConversations(this.bookId, this.chatScene)
       .then((convs) => {
         if (convs && convs.length > 0) {
           // 有已有对话 → 选中最近更新的一个
@@ -690,7 +713,7 @@ Page({
         // 降级：显示欢迎消息
         const welcomeMessage = this.createMessage(
           'ai',
-          `你好，我已经了解《${bookTitle}》的内容，你可以问我关于这本书的问题。`
+          this.getWelcomeMessage(bookTitle)
         )
         this.setData({
           messages: [welcomeMessage],
@@ -721,7 +744,7 @@ Page({
           // 空对话 → 显示欢迎消息
           const welcomeMessage = this.createMessage(
             'ai',
-            `你好，我已经了解《${bookTitle}》的内容，你可以问我关于这本书的问题。`
+            this.getWelcomeMessage(bookTitle)
           )
           formatted.push(welcomeMessage)
         }
@@ -737,7 +760,7 @@ Page({
         console.error('loadMessages failed:', error)
         const welcomeMessage = this.createMessage(
           'ai',
-          `你好，我已经了解《${bookTitle}》的内容，你可以问我关于这本书的问题。`
+          this.getWelcomeMessage(bookTitle)
         )
         this.setData({
           messages: [welcomeMessage],
@@ -751,7 +774,7 @@ Page({
 
   createAndSelectConversation(bookTitle) {
     /* 创建新对话并选中 */
-    return api.createConversation(this.bookId)
+    return api.createConversation(this.bookId, this.chatScene === 'story' ? '讲故事' : undefined, this.chatScene)
       .then((conv) => {
         const presetMessages = Array.isArray(conv && conv.messages) ? conv.messages : []
         this.setData({
@@ -764,7 +787,7 @@ Page({
         }
         const welcomeMessage = this.createMessage(
           'ai',
-          `你好，我已经了解《${bookTitle}》的内容，你可以问我关于这本书的问题。`
+          this.getWelcomeMessage(bookTitle)
         )
         this.setData({
           messages: [welcomeMessage],
@@ -889,7 +912,7 @@ Page({
         if (formatted.length === 0) {
           const welcomeMessage = this.createMessage(
             'ai',
-            `你好，我已经了解《${bookTitle}》的内容，你可以问我关于这本书的问题。`
+            this.getWelcomeMessage(bookTitle)
           )
           formatted.push(welcomeMessage)
         }
@@ -903,7 +926,7 @@ Page({
         console.error('switch conversation failed:', error)
         const welcomeMessage = this.createMessage(
           'ai',
-          `你好，我已经了解《${bookTitle}》的内容，你可以问我关于这本书的问题。`
+          this.getWelcomeMessage(bookTitle)
         )
         this.setData({
           messages: [welcomeMessage],
@@ -1578,8 +1601,8 @@ Page({
     this.resetAudioPlayback()
     this.ensureAudioContext()
 
-    // 文本输入和语音识别最终都走此入口；精简要求只作为服务端提示，不进入当前展示消息。
-    const serverQuestion = `${message}\n回复精简`
+    // 文本输入和语音识别最终都走此入口；讲故事模式不附加精简提示，避免压缩叙事。
+    const serverQuestion = this.chatScene === 'story' ? message : `${message}\n回复精简`
     const userMessage = this.createMessage('user', message)
     // 创建带有思考状态的 AI 消息
     const loadingMessage = this.decorateMessage({
@@ -1619,6 +1642,7 @@ Page({
     const chatBookId = (this.data.book && (this.data.book.bookKey || this.data.book.id)) || this.bookId
     const streamPromise = api.sendBookChatMessageStream(chatBookId, serverQuestion, {
       conversationId: convId,
+      scene: this.chatScene,
       tts: true,
       onTtsStream: (stream) => {
         this._usingServerTtsStream = true
@@ -1655,7 +1679,7 @@ Page({
             this.scrollToBottom()
           }
         })
-        if (convId && finalReply) {
+        if (convId && finalReply && this.chatScene !== 'story') {
           api.appendConversationMessages(convId, [
             { role: 'user', content: message },
             { role: 'ai', content: finalReply },

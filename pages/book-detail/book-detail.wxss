@@ -327,6 +327,28 @@
   gap: 24rpx;
 }
 
+.reader-actions {
+  display: flex;
+  gap: 20rpx;
+}
+
+.reader-actions .action-btn-secondary,
+.reader-actions .action-btn-primary {
+  height: 104rpx;
+  border-radius: 30rpx;
+  font-size: 28rpx;
+  width: auto !important;
+}
+
+.action-btn-chat {
+  color: #1b1b1b;
+  border-color: rgba(27, 27, 27, 0.12);
+}
+
+.action-btn-story {
+  box-shadow: 0 12rpx 30rpx rgba(0, 0, 0, 0.18);
+}
+
 .action-btn-secondary {
   flex: 1;
   background-color: #fff;

@@ -359,20 +359,23 @@ function normalizeConversationMessages(data) {
   return []
 }
 
-function listConversations(bookId) {
+function listConversations(bookId, scene) {
   /* 获取某本书的所有活跃对话列表 */
   return request({
     url: '/api/chat/conversations',
-    data: { book: bookId },
+    data: Object.assign({ book: bookId }, scene ? { scene } : {}),
   }).then(normalizeConversations)
 }
 
-function createConversation(bookId, title) {
+function createConversation(bookId, title, scene) {
   /* 创建新的对话会话 */
   return request({
     url: '/api/chat/conversations',
     method: 'POST',
-    data: { book: bookId, title: title || '新对话' },
+    data: Object.assign(
+      { book: bookId, title: title || (scene === 'story' ? '讲故事' : '新对话') },
+      scene ? { scene } : {}
+    ),
   }).then(normalizeConversation)
 }
 
@@ -564,6 +567,7 @@ function sendBookChatMessageStream(bookId, message, handlers) {
       }
 
       const wantsTts = callbacks.tts === true || typeof callbacks.onTtsStream === 'function'
+      const scene = callbacks.scene || callbacks.mode || ''
       streamRequestTask = wx.request({
          url: `${BASE_URL}/api/chat/stream${wantsTts ? '?tts=1' : ''}`,
         method: 'POST',
@@ -578,6 +582,7 @@ function sendBookChatMessageStream(bookId, message, handlers) {
           enableTts: wantsTts,
           withTts: wantsTts,
           voiceReply: wantsTts,
+          scene,
         },
         header: {
           'Content-Type': 'application/json',
