@@ -680,7 +680,7 @@ Page({
             currentConversationId: latest.id,
             currentConversationTitle: latest.title,
           })
-          return this.loadMessages(latest.id, bookTitle)
+          return this.loadMessages(latest.id, bookTitle, latest.messages)
         }
         // 没有对话 → 自动新建一个
         return this.createAndSelectConversation(bookTitle)
@@ -700,9 +700,12 @@ Page({
       })
   },
 
-  loadMessages(conversationId, bookTitle) {
+  loadMessages(conversationId, bookTitle, presetMessages) {
     /* 加载指定对话的历史消息 */
-    return api.getConversationMessages(conversationId)
+    const messagesPromise = Array.isArray(presetMessages)
+      ? Promise.resolve(presetMessages)
+      : api.getConversationMessages(conversationId)
+    return messagesPromise
       .then((messages) => {
         const formatted = messages.map((m) => {
           const content = this.getDisplayMessageContent(m.role, m.content)
@@ -750,11 +753,15 @@ Page({
     /* 创建新对话并选中 */
     return api.createConversation(this.bookId)
       .then((conv) => {
+        const presetMessages = Array.isArray(conv && conv.messages) ? conv.messages : []
         this.setData({
           conversations: [conv],
           currentConversationId: conv.id,
           currentConversationTitle: conv.title,
         })
+        if (presetMessages.length) {
+          return this.loadMessages(conv.id, bookTitle, presetMessages)
+        }
         const welcomeMessage = this.createMessage(
           'ai',
           `你好，我已经了解《${bookTitle}》的内容，你可以问我关于这本书的问题。`

@@ -314,12 +314,57 @@ function getStreamEvent(payload, explicitEvent) {
 // 对话管理 API (2026-05-19 新增)
 // ====================================================================
 
+function normalizeConversation(raw) {
+  if (!raw || typeof raw !== 'object') {
+    return raw
+  }
+  const nested = raw.conversation && typeof raw.conversation === 'object'
+    ? raw.conversation
+    : {}
+  const messages = Array.isArray(raw.messages)
+    ? raw.messages
+    : (Array.isArray(nested.messages) ? nested.messages : undefined)
+  const messageCount = typeof raw.messageCount === 'number'
+    ? raw.messageCount
+    : (typeof raw.message_count === 'number'
+      ? raw.message_count
+      : (typeof nested.messageCount === 'number' ? nested.messageCount : undefined))
+
+  return Object.assign({}, nested, raw, {
+    id: raw.id || nested.id,
+    title: raw.title || nested.title || '新对话',
+    bookId: raw.bookId || raw.book_id || nested.bookId || nested.book_id,
+  }, typeof messageCount === 'number' ? { messageCount } : {}, messages ? { messages } : {})
+}
+
+function normalizeConversations(data) {
+  const source = Array.isArray(data)
+    ? data
+    : (Array.isArray(data && data.conversations)
+      ? data.conversations
+      : (Array.isArray(data && data.items) ? data.items : []))
+  return source.map(normalizeConversation).filter(Boolean)
+}
+
+function normalizeConversationMessages(data) {
+  if (Array.isArray(data)) {
+    return data
+  }
+  if (Array.isArray(data && data.messages)) {
+    return data.messages
+  }
+  if (Array.isArray(data && data.items)) {
+    return data.items
+  }
+  return []
+}
+
 function listConversations(bookId) {
   /* 获取某本书的所有活跃对话列表 */
   return request({
     url: '/api/chat/conversations',
     data: { book: bookId },
-  }).then((data) => data.conversations || [])
+  }).then(normalizeConversations)
 }
 
 function createConversation(bookId, title) {
@@ -328,7 +373,7 @@ function createConversation(bookId, title) {
     url: '/api/chat/conversations',
     method: 'POST',
     data: { book: bookId, title: title || '新对话' },
-  }).then((data) => data.conversation)
+  }).then(normalizeConversation)
 }
 
 function deleteConversation(conversationId) {
@@ -352,7 +397,7 @@ function getConversationMessages(conversationId) {
   /* 获取某个对话的全部消息 */
   return request({
     url: `/api/chat/conversations/${conversationId}/messages`,
-  }).then((data) => data.messages || [])
+  }).then(normalizeConversationMessages)
 }
 
 function appendConversationMessages(conversationId, messages) {
@@ -385,7 +430,7 @@ function appendConversationMessages(conversationId, messages) {
           }
           try {
             const data = unwrapApiResponse(res.data || {}, '消息保存失败')
-            resolve(data.messages || [])
+            resolve(normalizeConversationMessages(data))
           } catch (error) {
             reject(error)
           }
