@@ -1696,14 +1696,6 @@ Page({
             this.scrollToBottom()
           }
         })
-        if (convId && finalReply && this.chatScene !== 'story') {
-          api.appendConversationMessages(convId, [
-            { role: 'user', content: message },
-            { role: 'ai', content: finalReply },
-          ]).catch((error) => {
-            console.warn('appendConversationMessages failed:', error)
-          })
-        }
       })
       .catch((error) => {
         console.error('[chat] stream failed:', error)
