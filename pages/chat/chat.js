@@ -92,6 +92,7 @@ Page({
     this._lastFlushedStreamReply = ''
     this._streamingMessageIndex = -1
     this._streamingMessageId = ''
+    this._usingServerTtsStream = false
     // 使用 scroll-top 累加触发到底部，避免高频 scroll-into-view 抢占用户手势。
     this._scrollTop = 0
     this._userTouchingChat = false
@@ -1142,6 +1143,7 @@ Page({
     this.generatingCount = 0
     this.streamSpeechBuffer = ''
     this.speechSegmentCount = 0
+    this._usingServerTtsStream = false
     this.setData({
       playingMessageId: '',
       audioLoadingMessageId: '',
@@ -1164,6 +1166,7 @@ Page({
     this.generatingCount = 0
     this.streamSpeechBuffer = ''
     this.speechSegmentCount = 0
+    this._usingServerTtsStream = false
     if (this.audioContext && (this.isAudioPlaying || this.currentAudioMessageId)) {
       this.ignoreNextStopEvent = true
       this.audioContext.stop()
@@ -1311,6 +1314,31 @@ Page({
     this.readyMap[seq] = { messageId, audioUrl }
     this.setData({ audioLoadingMessageId: messageId })
     this.playNextIfIdle()
+  },
+
+  playStreamingAudio(messageId, audioUrl) {
+    const src = api.toAbsoluteUrl(audioUrl)
+    if (!src) {
+      return
+    }
+
+    const audio = this.ensureAudioContext()
+    this.currentAudioMessageId = messageId
+    this.isAudioLoading = true
+    this.setData({
+      playingMessageId: messageId,
+      audioLoadingMessageId: messageId,
+    })
+
+    audio.src = src
+    clearTimeout(this._audioLoadTimeout)
+    this._audioLoadTimeout = setTimeout(() => {
+      if (this.isAudioLoading && this.currentAudioMessageId === messageId) {
+        console.warn('[chat] streaming audio load timeout')
+        this.isAudioLoading = false
+        this.setData({ audioLoadingMessageId: '' })
+      }
+    }, 15000)
   },
 
   enqueueAudioChunk(messageId, text) {
@@ -1562,6 +1590,7 @@ Page({
     this._streamingMessageId = loadingMessage.id
     this._pendingStreamReply = ''
     this._lastFlushedStreamReply = ''
+    this._usingServerTtsStream = false
     clearTimeout(this._streamFlushTimer)
     clearTimeout(this._autoScrollTimer)
 
@@ -1583,19 +1612,30 @@ Page({
     const chatBookId = (this.data.book && (this.data.book.bookKey || this.data.book.id)) || this.bookId
     const streamPromise = api.sendBookChatMessageStream(chatBookId, serverQuestion, {
       conversationId: convId,
+      tts: true,
+      onTtsStream: (stream) => {
+        this._usingServerTtsStream = true
+        this.streamSpeechBuffer = ''
+        this.pendingTTSQueue = []
+        this.readyMap = {}
+        this.generatingCount = 0
+        this.playStreamingAudio(loadingMessage.id, stream.audioUrl)
+      },
+      onTtsEnd: () => {
+        this._streamRequestTask = null
+      },
       onSegment: (segment, fullReply) => {
         this._pendingStreamReply = fullReply
         this.scheduleStreamFlush()
-
-        this.appendSpeechSegment(loadingMessage.id, segment, false)
       },
     })
     // 保存引用，以便 resetAudioPlayback 可以中止流
     this._streamRequestTask = streamPromise
     streamPromise
       .then((result) => {
-        this._streamRequestTask = null
-        this.flushSpeechBuffer(loadingMessage.id)
+        if (!this._usingServerTtsStream) {
+          this._streamRequestTask = null
+        }
         const finalReply = result.reply || ''
         this._pendingStreamReply = finalReply
         this.flushStreamReply(true)
@@ -1620,6 +1660,7 @@ Page({
       .catch(() => {
         this._streamRequestTask = null
         this.streamSpeechBuffer = ''
+        this._usingServerTtsStream = false
         const failedContent = this._pendingStreamReply || '暂时无法获取回答，请稍后重试。'
         this._pendingStreamReply = failedContent
         this.flushStreamReply(true)

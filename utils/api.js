@@ -289,10 +289,10 @@ function parseResponseData(data) {
 }
 
 /** 解析流式推送的事件数据 */
-function getStreamEvent(payload) {
+function getStreamEvent(payload, explicitEvent) {
   if (!payload || typeof payload !== 'object') {
     return {
-      event: '',
+      event: explicitEvent || '',
       content: '',
       audioUrl: '',
       success: false,
@@ -302,9 +302,9 @@ function getStreamEvent(payload) {
 
   const data = payload.data && typeof payload.data === 'object' ? payload.data : {}
   return {
-    event: payload.type || payload.event || data.event || '',
+    event: explicitEvent || payload.type || payload.event || data.event || '',
     content: payload.content || payload.answer || data.content || data.answer || '',
-    audioUrl: data.audio_url || payload.audio_url || '',
+    audioUrl: payload.audioUrl || payload.audio_url || payload.url || data.audioUrl || data.audio_url || data.url || '',
     success: typeof payload.success === 'boolean' ? payload.success : true,
     message: payload.message || payload.error || '',
   }
@@ -438,6 +438,8 @@ function sendBookChatMessageStream(bookId, message, handlers) {
         buffer = parts.pop() || ''
 
         parts.forEach((part) => {
+          const eventLine = part.split('\n').find((line) => line.indexOf('event:') === 0)
+          const explicitEvent = eventLine ? eventLine.replace(/^event:\s*/, '').trim() : ''
           const lines = part.split('\n').filter((line) => line.indexOf('data:') === 0)
           if (!lines.length) {
             return
@@ -456,7 +458,7 @@ function sendBookChatMessageStream(bookId, message, handlers) {
             return
           }
 
-          const streamEvent = getStreamEvent(payload)
+          const streamEvent = getStreamEvent(payload, explicitEvent)
 
           if (!streamEvent.success || streamEvent.event === 'error') {
             finishReject(new Error(streamEvent.content || streamEvent.message || '对话失败'))
@@ -472,6 +474,28 @@ function sendBookChatMessageStream(bookId, message, handlers) {
             reply += segment
             if (typeof callbacks.onSegment === 'function') {
               callbacks.onSegment(segment, reply)
+            }
+            return
+          }
+
+          if (streamEvent.event === 'tts_stream') {
+            const audioUrl = toAbsoluteUrl(streamEvent.audioUrl)
+            if (audioUrl && typeof callbacks.onTtsStream === 'function') {
+              callbacks.onTtsStream(Object.assign({}, payload, {
+                audioUrl,
+              }))
+            }
+            return
+          }
+
+          if (streamEvent.event === 'tts_error') {
+            console.warn('[stream] tts error', streamEvent.message || payload)
+            return
+          }
+
+          if (streamEvent.event === 'tts_end') {
+            if (typeof callbacks.onTtsEnd === 'function') {
+              callbacks.onTtsEnd(payload)
             }
             return
           }
@@ -494,8 +518,9 @@ function sendBookChatMessageStream(bookId, message, handlers) {
         })
       }
 
+      const wantsTts = callbacks.tts === true || typeof callbacks.onTtsStream === 'function'
       streamRequestTask = wx.request({
-         url: `${BASE_URL}/api/chat/stream`,
+         url: `${BASE_URL}/api/chat/stream${wantsTts ? '?tts=1' : ''}`,
         method: 'POST',
         enableChunked: true,
         responseType: 'arraybuffer',
@@ -504,6 +529,10 @@ function sendBookChatMessageStream(bookId, message, handlers) {
           message,
           session_id: callbacks.conversationId || '',
           user_id: identity.userId || identity.openid || 'default',
+          tts: wantsTts,
+          enableTts: wantsTts,
+          withTts: wantsTts,
+          voiceReply: wantsTts,
         },
         header: {
           'Content-Type': 'application/json',
