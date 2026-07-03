@@ -266,6 +266,23 @@ Page({
     })
   },
 
+  handleStartCreative() {
+    const { book } = this.data
+    if (!book) {
+      return
+    }
+    if (!book.purchased) {
+      wx.showToast({
+        title: '请先购买后再二创',
+        icon: 'none',
+      })
+      return
+    }
+    wx.navigateTo({
+      url: `/pages/chat/chat?bookId=${book.id}&entry=creative&scene=creative`,
+    })
+  },
+
   handleReadChapter(e) {
     const { index } = e.currentTarget.dataset
     const { book } = this.data

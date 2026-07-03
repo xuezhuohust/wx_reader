@@ -738,6 +738,20 @@ function generateImage(bookId, chapterId) {
   })
 }
 
+/** 二次创作：由后端 LLM 自行判断创作形态 */
+function generateCreativeWork(options) {
+  const payload = options || {}
+  return request({
+    url: '/api/creative/generate',
+    method: 'POST',
+    data: {
+      bookId: payload.bookId || payload.book_id || payload.book || '',
+      userPrompt: payload.userPrompt || payload.prompt || payload.message || '',
+    },
+    timeout: 60000,
+  })
+}
+
 module.exports = {
   ensureLogin: ensureUserIdentity,
   getRecommendBooks,
@@ -769,5 +783,6 @@ module.exports = {
   startBuildBook,
   switchUserRole,
   generateImage,
+  generateCreativeWork,
   toAbsoluteUrl,
 }

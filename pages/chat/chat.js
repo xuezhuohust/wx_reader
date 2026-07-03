@@ -18,6 +18,9 @@ Page({
     entry: 'chat',
     scene: 'chat',
     sceneTitle: '智能伴读',
+    inputPlaceholder: '问问伴读助手...',
+    emptyWelcomeText: '',
+    thinkingText: '伴读助手正在思考',
     quickQuestions: ['总结这本书', '这本书适合谁读', '提炼三个核心观点', '帮我解释第一章'],
     playingMessageId: '',
     audioLoadingMessageId: '',
@@ -48,6 +51,7 @@ Page({
     const app = getApp()
     const entry = this.normalizeEntry((options && (options.entry || options.entrance || options.scene || options.mode)) || 'chat')
     const scene = this.normalizeScene((options && (options.scene || options.mode || entry)) || 'chat')
+    const sceneConfig = this.getSceneConfig(entry, scene)
     this.setData({
       navBarHeight: app.globalData.navBarHeight,
       menuTop: app.globalData.menuTop,
@@ -55,10 +59,11 @@ Page({
       chapterId: options.chapterId || '',
       entry,
       scene,
-      sceneTitle: scene === 'story' ? '讲故事模式' : '智能伴读',
-      quickQuestions: scene === 'story'
-        ? ['继续讲', '重讲这一段', '我讲到哪了', '跳到下一章']
-        : ['总结这本书', '这本书适合谁读', '提炼三个核心观点', '帮我解释第一章'],
+      sceneTitle: sceneConfig.title,
+      inputPlaceholder: sceneConfig.placeholder,
+      emptyWelcomeText: sceneConfig.emptyWelcome,
+      thinkingText: sceneConfig.thinkingText,
+      quickQuestions: sceneConfig.quickQuestions,
     })
     if (typeof wx.onNeedPrivacyAuthorization === 'function') {
       wx.onNeedPrivacyAuthorization((resolve) => {
@@ -122,9 +127,13 @@ Page({
 
   normalizeScene(scene) {
     const value = String(scene || '').trim().toLowerCase()
-    return ['story', 'storytelling', 'tell_story', '讲故事', '故事'].indexOf(value) >= 0
-      ? 'story'
-      : 'chat'
+    if (['story', 'storytelling', 'tell_story', '讲故事', '故事'].indexOf(value) >= 0) {
+      return 'story'
+    }
+    if (['creative', 'creation', 'rewrite', 'secondary_creation', '二次创作'].indexOf(value) >= 0) {
+      return 'creative'
+    }
+    return 'chat'
   },
 
   normalizeEntry(entry) {
@@ -138,9 +147,45 @@ Page({
     return 'chat'
   },
 
+  getSceneConfig(entry, scene) {
+    const mode = entry === 'creative' ? 'creative' : scene
+    if (mode === 'story') {
+      return {
+        title: '讲故事模式',
+        placeholder: '想听哪一段故事？',
+        emptyWelcome: '你好！我可以按情节脉络给你讲故事，也可以重讲、跳转或回顾进度。',
+        thinkingText: '故事助手正在组织情节',
+        quickQuestions: ['继续讲', '重讲这一段', '我讲到哪了', '跳到下一章'],
+      }
+    }
+    if (mode === 'creative') {
+      return {
+        title: '二次创作',
+        placeholder: '说说想怎么二创...',
+        emptyWelcome: '你好！我会参考原著和当前章节，帮你续写、改写、写番外或补一段人物对话。',
+        thinkingText: '创作助手正在构思',
+        quickQuestions: ['续写这一章', '改成角色对话', '写一个番外', '换个视角重写'],
+      }
+    }
+    return {
+      title: '智能伴读',
+      placeholder: '问问伴读助手...',
+      emptyWelcome: '你好！我是你的学术伴读助手。我已经为您研读了这本书。您可以就其核心论点、逻辑推演或特定概念提出问题。',
+      thinkingText: '伴读助手正在思考',
+      quickQuestions: ['总结这本书', '这本书适合谁读', '提炼三个核心观点', '帮我解释第一章'],
+    }
+  },
+
+  isCreativeMode() {
+    return this.chatEntry === 'creative' || this.chatScene === 'creative'
+  },
+
   getWelcomeMessage(bookTitle) {
     if (this.chatScene === 'story') {
       return `我会按《${bookTitle}》的情节脉络给你讲故事。你可以说“继续讲”“重讲这一段”，也可以让我跳到指定章节。`
+    }
+    if (this.isCreativeMode()) {
+      return `我会参考《${bookTitle}》和当前章节，帮你续写、改写、写番外或补一段人物对话。直接告诉我想怎么创作。`
     }
     return `你好，我已经了解《${bookTitle}》的内容，你可以问我关于这本书的问题。`
   },
@@ -789,7 +834,9 @@ Page({
 
   createAndSelectConversation(bookTitle) {
     /* 创建新对话并选中 */
-    const title = this.chatEntry === 'story' ? '讲故事' : undefined
+    const title = this.chatEntry === 'story'
+      ? '讲故事'
+      : (this.chatEntry === 'creative' ? '二次创作' : undefined)
     return api.createConversation(this.bookId, title, this.chatEntry, this.chatScene)
       .then((conv) => {
         const presetMessages = Array.isArray(conv && conv.messages) ? conv.messages : []
@@ -1654,6 +1701,11 @@ Page({
       this.scrollToBottom(true)
     })
 
+    if (this.isCreativeMode()) {
+      this.sendCreativeMessage(message)
+      return
+    }
+
     const convId = this.data.currentConversationId
     const chatBookId = (this.data.book && (this.data.book.bookKey || this.data.book.id)) || this.bookId
     const streamPromise = api.sendBookChatMessageStream(chatBookId, serverQuestion, {
@@ -1706,6 +1758,63 @@ Page({
         const failedContent = this._pendingStreamReply
           || (errorMessage ? `暂时无法获取回答：${errorMessage}` : '暂时无法获取回答，请稍后重试。')
         this._pendingStreamReply = failedContent
+        this.flushStreamReply(true)
+        this.setData({
+          loadingReply: false,
+          scrollWithAnimation: true,
+          audioLoadingMessageId: '',
+        }, () => {
+          this.clearStreamState()
+          if (!this.data.userHasScrolledUp) {
+            this.scrollToBottom()
+          }
+        })
+      })
+  },
+
+  sendCreativeMessage(message) {
+    const convId = this.data.currentConversationId
+    const book = this.data.book || {}
+    const bookId = this.bookId || book.id || book.bookId || ''
+    const replyFallback = '暂时没有生成内容，请换个角度再试试。'
+
+    api.generateCreativeWork({
+      bookId,
+      userPrompt: message,
+    })
+      .then((work) => {
+        const reply = String(
+          (work && (work.content || work.reply || work.answer))
+          || replyFallback
+        ).trim()
+        const finalReply = reply || replyFallback
+        this._pendingStreamReply = finalReply
+        this.flushStreamReply(true)
+        return api.appendConversationMessages(convId, [
+          { role: 'user', content: message },
+          { role: 'assistant', content: finalReply },
+        ]).catch((error) => {
+          console.warn('[chat] creative history save failed:', error)
+          return null
+        })
+      })
+      .then(() => {
+        this.setData({
+          loadingReply: false,
+          scrollWithAnimation: true,
+        }, () => {
+          this.clearStreamState()
+          if (!this.data.userHasScrolledUp) {
+            this.scrollToBottom()
+          }
+        })
+      })
+      .catch((error) => {
+        console.error('[chat] creative generate failed:', error)
+        const errorMessage = error && error.message ? String(error.message) : ''
+        this._pendingStreamReply = errorMessage
+          ? `暂时无法完成二次创作：${errorMessage}`
+          : '暂时无法完成二次创作，请稍后重试。'
         this.flushStreamReply(true)
         this.setData({
           loadingReply: false,

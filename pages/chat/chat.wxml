@@ -94,7 +94,7 @@
           <view class="chat-avatar ai-avatar">助</view>
           <view class="message-container">
             <view class="message-bubble bubble-ai">
-              <text>你好！我是你的学术伴读助手。我已经为您研读了《{{book.title}}》。您可以就其核心论点、逻辑推演或特定概念提出问题，我将协助您进行深入探讨。</text>
+              <text>{{emptyWelcomeText}}</text>
             </view>
             
             <!-- Quick Questions (Notion Chips) -->
@@ -127,7 +127,7 @@
               <view class="thinking-dot"></view>
               <view class="thinking-dot"></view>
               <view class="thinking-dot"></view>
-              <text class="thinking-text">伴读助手正在思考</text>
+              <text class="thinking-text">{{thinkingText}}</text>
             </view>
 
             <!-- 结构化渲染 Blocks -->
@@ -227,7 +227,7 @@
           wx:if="{{inputMode === 'keyboard'}}"
           class="composer-input"
           value="{{inputValue}}"
-          placeholder="问问伴读助手..."
+          placeholder="{{inputPlaceholder}}"
           placeholder-class="placeholder-text"
           bindinput="handleInput"
           bindfocus="handleFocus"

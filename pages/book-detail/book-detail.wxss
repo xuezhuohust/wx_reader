@@ -329,14 +329,18 @@
 
 .reader-actions {
   display: flex;
-  gap: 20rpx;
+  gap: 16rpx;
 }
 
 .reader-actions .action-btn-primary {
   flex: 1;
-  height: 104rpx;
-  border-radius: 30rpx;
-  font-size: 28rpx;
+  min-width: 0;
+  height: 96rpx;
+  border-radius: 28rpx;
+  font-size: 26rpx;
+  padding: 0 12rpx;
+  line-height: 96rpx;
+  white-space: nowrap;
   width: auto !important;
   box-shadow: 0 12rpx 30rpx rgba(0, 0, 0, 0.18);
 }
