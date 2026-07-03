@@ -23,7 +23,7 @@
           </view>
 
           <!-- Stripped-out Continue Reading (Not a card) -->
-          <view class="hero-reading-entry" wx:if="{{recommendBooks.length > 0}}" bindtap="handleRecommendTap" data-id="{{recommendBooks[0].id}}">
+          <view class="hero-reading-entry" wx:if="{{recommendBooks.length > 0}}" bindtap="handleRecommendTap" data-id="{{recommendBooks[0].id}}" data-from="hero">
             <view class="entry-cover-box">
               <image wx:if="{{recommendBooks[0].coverUrl}}" src="{{recommendBooks[0].coverUrl}}" mode="aspectFill" />
               <view class="cover-placeholder-mini" wx:else>{{recommendBooks[0].title[0]}}</view>

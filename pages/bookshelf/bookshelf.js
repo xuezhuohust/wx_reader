@@ -75,12 +75,17 @@ Page({
   loadBookshelf(done) {
     this.setData({ loading: true })
     const availableCategories = this.data.categories.filter((category) => category !== '全部')
+    const allProgress = wx.getStorageSync('reading_progress') || {}
+
     api.getPurchasedBooks()
       .then((books) => {
         const processedBooks = (books || []).map(book => {
+          const realProgress = allProgress[book.id] ? allProgress[book.id].bookProgress : null
+
           return Object.assign({}, book, {
             coverUrl: this.resolveCoverUrl(book),
             // Mocking some data for the UI if not present
+            progress: realProgress !== null ? realProgress : (book.progress || 0),
             rating: book.rating || (4 + Math.random()).toFixed(1),
             readersCount: book.readersCount || Math.floor(Math.random() * 5000 + 100) + (Math.random() > 0.5 ? 'k' : ''),
             isAIReady: book.isAIReady !== undefined ? book.isAIReady : Math.random() > 0.5,
@@ -170,23 +175,6 @@ Page({
     })
     
     this.setData({ books: filtered })
-  },
-
-  handleSortTap() {
-    wx.showActionSheet({
-      itemList: ['最近阅读', '评分最高', '读者最多'],
-      success: (res) => {
-        let sorted = [...this.data.books]
-        if (res.tapIndex === 1) {
-          sorted.sort((a, b) => b.rating - a.rating)
-        } else if (res.tapIndex === 2) {
-          // Simple string parser for readersCount
-          const parseCount = (s) => parseFloat(s) * (s.includes('k') ? 1000 : 1)
-          sorted.sort((a, b) => parseCount(b.readersCount) - parseCount(a.readersCount))
-        }
-        this.setData({ books: sorted })
-      }
-    })
   },
 
   handleBookTap(e) {

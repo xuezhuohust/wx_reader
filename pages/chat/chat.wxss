@@ -215,9 +215,9 @@
   z-index: 900;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center; /* 居中展示 */
   padding: 12rpx 32rpx;
-  background: transparent; /* 彻底移除背景 */
+  background: transparent;
 }
 
 .book-tag-left {
@@ -229,6 +229,8 @@
 
 /* 2026-07-02 查看背景图按钮 - 极简透明版 */
 .view-bg-icon-btn {
+  position: absolute; /* 绝对定位到右侧，不影响居中 */
+  right: 32rpx;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -298,7 +300,7 @@
 .clear-icon {
   width: 22rpx;
   height: 22rpx;
-  background-color: var(--stone);
+  background-color: #ff4d4f; /* 标红 */
   mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 6h18'/%3E%3Cpath d='M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6'/%3E%3Cpath d='M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2'/%3E%3C/svg%3E") no-repeat center;
   -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 6h18'/%3E%3Cpath d='M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6'/%3E%3Cpath d='M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2'/%3E%3C/svg%3E") no-repeat center;
   mask-size: contain;

@@ -71,10 +71,9 @@ page {
 
 .greeting-time {
   font-size: 24rpx;
-  color: #8c8c8c;
+  color: #111111ff;
   font-weight: 500;
   letter-spacing: 2rpx;
-  text-transform: uppercase;
 }
 
 .greeting-main {
@@ -402,6 +401,21 @@ page {
   margin-top: 8rpx;
   display: flex;
   align-items: center;
+  overflow: hidden;
+}
+
+.book-card-meta > text:first-child, .masonry-meta > text:first-child {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+.meta-dot, 
+.book-card-meta > text:last-child, 
+.masonry-meta > text:last-child {
+  flex-shrink: 0;
 }
 
 .meta-dot {

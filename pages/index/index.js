@@ -80,8 +80,15 @@ Page({
     this.showInitialPrivacyAgreement()
     this.updateTimeGreeting()
     this.loadBookCategories()
+  },
 
-    // Check for publisher build intent
+  onShow() {
+    // 每次回到首页都刷新一次进度
+    const app = getApp()
+    const cachedBooks = app.globalData.homeCache.libraryBooks
+    if (cachedBooks && cachedBooks.length > 0) {
+      this._distributeBooks(cachedBooks)
+    }
   },
 
   updateTimeGreeting() {
@@ -310,17 +317,24 @@ Page({
       '讲述英国青年鲁滨逊因海难流落荒岛28年，凭智慧与劳动自建家园、驯养动物、救下土著"星期五"，最终助船长平叛重返文明，歌颂人类在绝境中顽强求生与自我救赎的精神。',
     ]
 
+    // 获取本地阅读进度
+    const allProgress = wx.getStorageSync('reading_progress') || {}
+
     // 智能增强书籍元数据
-    const enhancedAllBooks = allBooks.map((book, index) => ({
-      ...book,
-      recommendReason: book.recommendReason || reasons[index % reasons.length],
-      progress: book.progress || Math.floor(Math.random() * 80) + 10,
-      isAIReady: book.isAIReady !== undefined ? book.isAIReady : Math.random() > 0.4,
-      rating: book.rating || (4 + Math.random()).toFixed(1),
-      readersCount: book.readersCount || Math.floor(Math.random() * 5000) + 100,
-      coverColor: book.coverColor || ['#f3efe8', '#f5f7f4', '#e8f3f0', '#f3e8e8'][Math.floor(Math.random() * 4)],
-      coverHeight: [320, 360, 400][index % 3] // 稍微收紧高度范围，使其更接近 1:1.4 到 1:1.6 的比例
-    }))
+    const enhancedAllBooks = allBooks.map((book, index) => {
+      const realProgress = allProgress[book.id] ? allProgress[book.id].bookProgress : null
+      return {
+        ...book,
+        recommendReason: book.recommendReason || reasons[index % reasons.length],
+        // 如果有真实进度则使用真实进度，否则使用模拟进度（为了演示美观，默认书籍给一点进度，新书为 0）
+        progress: realProgress !== null ? realProgress : (book.progress || 0),
+        isAIReady: book.isAIReady !== undefined ? book.isAIReady : Math.random() > 0.4,
+        rating: book.rating || (4 + Math.random()).toFixed(1),
+        readersCount: book.readersCount || Math.floor(Math.random() * 5000) + 100,
+        coverColor: book.coverColor || ['#f3efe8', '#f5f7f4', '#e8f3f0', '#f3e8e8'][Math.floor(Math.random() * 4)],
+        coverHeight: [320, 360, 400][index % 3] // 稍微收紧高度范围，使其更接近 1:1.4 到 1:1.6 的比例
+      }
+    })
 
     // 今日推荐：显示全部增强后的书籍（不再跳过 index 0）
     const recommendBooks = enhancedAllBooks
@@ -476,9 +490,20 @@ Page({
   },
 
   handleRecommendTap(event) {
-    const { id } = event.currentTarget.dataset
-    
-    // 直接进入详情页，不再执行可能导致数据刷新的 switchRole 逻辑
+    const { id, from } = event.currentTarget.dataset
+
+    // 如果是从顶部“继续阅读”进入，且本地有进度，则尝试直接跳转到阅读页
+    if (from === 'hero') {
+      const allProgress = wx.getStorageSync('reading_progress') || {}
+      if (allProgress[id]) {
+        wx.navigateTo({
+          url: `/pages/read/read?id=${encodeURIComponent(id)}`,
+        })
+        return
+      }
+    }
+
+    // 否则进入详情页
     wx.navigateTo({
       url: `/pages/book-detail/book-detail?id=${encodeURIComponent(id)}`,
     })

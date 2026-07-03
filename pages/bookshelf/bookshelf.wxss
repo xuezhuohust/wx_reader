@@ -334,39 +334,6 @@ page {
   background-color: #000;
 }
 
-/* Icons */
-.icon-sort {
-  width: 32rpx;
-  height: 32rpx;
-  position: relative;
-}
-
-.icon-sort::before {
-  content: '';
-  position: absolute;
-  top: 6rpx; left: 0; right: 0;
-  height: 4rpx;
-  background-color: #1b1b1b;
-  border-radius: 2rpx;
-}
-
-.icon-sort::after {
-  content: '';
-  position: absolute;
-  top: 16rpx; left: 0; right: 8rpx;
-  height: 4rpx;
-  background-color: #1b1b1b;
-  border-radius: 2rpx;
-}
-
-.icon-sort-extra {
-  position: absolute;
-  bottom: 2rpx; left: 0; right: 16rpx;
-  height: 4rpx;
-  background-color: #1b1b1b;
-  border-radius: 2rpx;
-}
-
 /* Animations */
 .fade-up {
   animation: fadeUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;

@@ -36,7 +36,17 @@ Page({
 
   onLoad(options) {
     const { id, index } = options
-    const chapterIndex = parseInt(index || 0)
+    let chapterIndex = index !== undefined ? parseInt(index) : null
+
+    // 如果没有指定章节，尝试从本地缓存读取上次进度
+    if (chapterIndex === null) {
+      const allProgress = wx.getStorageSync('reading_progress') || {}
+      if (allProgress[id]) {
+        chapterIndex = allProgress[id].chapterIndex
+      } else {
+        chapterIndex = 0
+      }
+    }
 
     const app = getApp()
     this.setData({
@@ -262,17 +272,25 @@ Page({
     const usesIndents = validLinesCount > 0 && (indentCount / validLinesCount) > 0.05;
 
     const paragraphs = [];
+    const paraSourceMap = []; // 记录每个合并后的段落对应原始 sourceLines 的范围
     let currentPara = '';
+    let paraStartIdx = 0;
+
     for (let i = 0; i < sourceLines.length; i++) {
       const raw = String(sourceLines[i] || '').replace(/\r/g, '');
       const trimmed = raw.trim();
 
       if (!trimmed) {
-        if (currentPara) { paragraphs.push(currentPara); currentPara = ''; }
+        if (currentPara) { 
+          paragraphs.push(currentPara); 
+          paraSourceMap.push(i - 1); // 记录当前段落结束的原始索引
+          currentPara = ''; 
+        }
         continue;
       }
       if (!currentPara) {
         currentPara = trimmed;
+        paraStartIdx = i;
         continue;
       }
       
@@ -280,6 +298,7 @@ Page({
       if (usesIndents) {
         if (hasIndent) {
           paragraphs.push(currentPara);
+          paraSourceMap.push(i - 1);
           currentPara = trimmed;
         } else {
           currentPara += trimmed;
@@ -288,22 +307,26 @@ Page({
         const endsWithPunct = /[。！？；：…”’"」』》】>\])）~—]$/.test(currentPara);
         if (endsWithPunct) {
           paragraphs.push(currentPara);
+          paraSourceMap.push(i - 1);
           currentPara = trimmed;
         } else {
-          // 彻底修复 Hard-wrap 合并逻辑：
-          // 如果当前行不是以句末标点结尾，且下一行不是空行且没有缩进，则强行合并
           currentPara += trimmed;
         }
       }
     }
-    if (currentPara) paragraphs.push(currentPara);
+    if (currentPara) {
+      paragraphs.push(currentPara);
+      paraSourceMap.push(sourceLines.length - 1);
+    }
 
     if (!paragraphs.length) {
       paragraphs.push('本章暂无原文内容')
+      paraSourceMap.push(0)
     }
 
     for (let i = 0; i < paragraphs.length; i++) {
       let text = paragraphs[i]
+      const sourceIdx = paraSourceMap[i] // 当前段落在原始数据中的结束位置
       const isDivider = this.isDividerLine(text)
 
       if (isDivider) {
@@ -313,6 +336,7 @@ Page({
         currentPage.push({
           text,
           progressUnits: 1,
+          sourceIdx, // 记录原始索引
           isBlank: false,
           isDivider: true,
           isSplitTop: false,
@@ -335,6 +359,7 @@ Page({
           currentPage.push({
             text,
             progressUnits: totalLinesNeeded,
+            sourceIdx, // 记录原始索引
             isBlank: false,
             isDivider: false,
             isSplitTop: text !== paragraphs[i],
@@ -347,7 +372,6 @@ Page({
           let splitLines = availableLines;
           let remainLines = totalLinesNeeded - splitLines;
           
-          // 防止出现寡行（widow/orphan），保证拆分后的段落各部分至少占据 2 行
           if (splitLines < 2) {
             flushPage();
             continue;
@@ -367,6 +391,7 @@ Page({
           currentPage.push({
             text: chunk,
             progressUnits: splitLines,
+            sourceIdx, // 记录原始索引
             isBlank: false,
             isDivider: false,
             isSplitTop: text !== paragraphs[i],
@@ -510,50 +535,66 @@ Page({
       chapterPages,
       chapterWindowOffset,
       chapterWindowLineCount,
-      chapterWindowNextOffset,
     } = this.data
 
-    // 过滤出真正的正文页
-    const contentPages = chapterPages.filter(p => p.type === 'content')
-    const totalContentPages = contentPages.length
+    if (!chapterPages || chapterPages.length === 0) return
 
-    if (totalContentPages === 0) return
-
-    // 找到当前页在正文页中的索引
     const currentPageObj = chapterPages[currentPageIndex]
     if (!currentPageObj) return
+
     let progress = 0
 
+    // 统一使用段落索引（sourceIdx）来计算进度，解决跨窗口跳变问题
     if (currentPageObj.type === 'content') {
-      const unitsBeforePage = contentPages
-        .slice(0, contentPages.indexOf(currentPageObj))
-        .reduce((sum, page) => sum + (Array.isArray(page.content)
-          ? page.content.reduce((pageSum, item) => pageSum + Number(item.progressUnits || 0), 0)
-          : 0), 0)
-      const currentPageUnits = Array.isArray(currentPageObj.content)
-        ? currentPageObj.content.reduce((sum, item) => sum + Number(item.progressUnits || 0), 0)
-        : 0
-      const readLines = Number(chapterWindowOffset || 0) + unitsBeforePage + currentPageUnits
+      // 找到当前页中最后一个元素的原始段落索引
+      const pageItems = Array.isArray(currentPageObj.content) ? currentPageObj.content : []
+      const lastItem = pageItems[pageItems.length - 1]
+      const currentParaOffset = lastItem ? (Number(lastItem.sourceIdx) || 0) : 0
+      
+      const readLines = Number(chapterWindowOffset || 0) + currentParaOffset + 1 // +1 表示已读完该行
+      
       progress = chapterWindowLineCount > 0
         ? Math.round(Math.min(1, readLines / chapterWindowLineCount) * 100)
-        : Math.round(((contentPages.indexOf(currentPageObj) + 1) / totalContentPages) * 100)
-    } else if (currentPageObj.type === 'next-window') {
-      progress = chapterWindowLineCount > 0 && chapterWindowNextOffset != null
-        ? Math.round(Math.min(1, Number(chapterWindowNextOffset) / chapterWindowLineCount) * 100)
-        : 100
-    } else if (currentPageObj.type === 'next-bridge') {
-      progress = 100
-    } else if (currentPageObj.type === 'prev-window') {
-      progress = chapterWindowLineCount > 0
-        ? Math.round(Math.min(1, Number(chapterWindowOffset || 0) / chapterWindowLineCount) * 100)
         : 0
-    } else if (currentPageObj.type === 'prev-bridge') {
+    } else if (currentPageObj.type === 'next-window' || currentPageObj.type === 'next-bridge') {
+      progress = 100
+    } else if (currentPageObj.type === 'prev-window' || currentPageObj.type === 'prev-bridge') {
       progress = 0
     }
 
     this.setData({
       readingProgress: progress
+    }, () => {
+      this.saveReadingProgress(progress)
     })
+  },
+
+  saveReadingProgress(chapterProgress) {
+    const { bookId, currentChapterIndex, totalChapters } = this.data
+    if (!bookId || totalChapters <= 0) return
+
+    // 计算全书进度：(已读完章节 + 当前章节内进度) / 总章节
+    const bookProgress = Math.min(100, Math.round(((currentChapterIndex + chapterProgress / 100) / totalChapters) * 100))
+
+    const progressData = {
+      bookId,
+      chapterIndex: currentChapterIndex,
+      chapterProgress,
+      bookProgress,
+      updateTime: Date.now()
+    }
+
+    // 保存到本地缓存
+    const allProgress = wx.getStorageSync('reading_progress') || {}
+    allProgress[bookId] = progressData
+    wx.setStorageSync('reading_progress', allProgress)
+
+    // 同时更新全局变量，方便首页即时响应
+    const app = getApp()
+    if (app.globalData) {
+      if (!app.globalData.readingProgress) app.globalData.readingProgress = {}
+      app.globalData.readingProgress[bookId] = progressData
+    }
   },
 
   handlePrevChapter() {

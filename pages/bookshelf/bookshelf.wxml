@@ -4,9 +4,6 @@
     <view class="nav-header" style="position: absolute; top: {{menuTop}}px; height: {{menuHeight}}px; left: 0; right: 0; padding-right: {{menuRight}}px;">
       <view class="nav-title">书库</view>
       <view class="nav-actions">
-        <view class="nav-btn" bindtap="handleSortTap">
-          <view class="icon-sort"></view>
-        </view>
       </view>
     </view>
   </view>
