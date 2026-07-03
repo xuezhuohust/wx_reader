@@ -359,22 +359,30 @@ function normalizeConversationMessages(data) {
   return []
 }
 
-function listConversations(bookId, scene) {
+function listConversations(bookId, entry, scene) {
   /* 获取某本书的所有活跃对话列表 */
+  const resolvedScene = scene || entry
   return request({
     url: '/api/chat/conversations',
-    data: Object.assign({ book: bookId }, scene ? { scene } : {}),
+    data: Object.assign(
+      { book: bookId },
+      entry ? { entry } : {},
+      resolvedScene ? { scene: resolvedScene } : {}
+    ),
   }).then(normalizeConversations)
 }
 
-function createConversation(bookId, title, scene) {
+function createConversation(bookId, title, entry, scene) {
   /* 创建新的对话会话 */
+  const resolvedScene = scene || entry
+  const defaultTitle = entry === 'story' ? '讲故事' : (entry === 'creative' ? '二次创作' : '新对话')
   return request({
     url: '/api/chat/conversations',
     method: 'POST',
     data: Object.assign(
-      { book: bookId, title: title || (scene === 'story' ? '讲故事' : '新对话') },
-      scene ? { scene } : {}
+      { book: bookId, title: title || defaultTitle },
+      entry ? { entry } : {},
+      resolvedScene ? { scene: resolvedScene } : {}
     ),
   }).then(normalizeConversation)
 }
@@ -387,12 +395,17 @@ function deleteConversation(conversationId) {
   }).then((data) => data.deleted)
 }
 
-function clearConversations(bookId) {
+function clearConversations(bookId, entry, scene) {
   /* 清空某本书的全部对话和对应 NovelIndex sessions */
+  const resolvedScene = scene || entry
   return request({
     url: '/api/chat/conversations',
     method: 'DELETE',
-    data: { book: bookId },
+    data: Object.assign(
+      { book: bookId },
+      entry ? { entry } : {},
+      resolvedScene ? { scene: resolvedScene } : {}
+    ),
   }).then((data) => data)
 }
 
@@ -568,6 +581,7 @@ function sendBookChatMessageStream(bookId, message, handlers) {
 
       const wantsTts = callbacks.tts === true || typeof callbacks.onTtsStream === 'function'
       const scene = callbacks.scene || callbacks.mode || ''
+      const entry = callbacks.entry || callbacks.entrance || scene || ''
       streamRequestTask = wx.request({
          url: `${BASE_URL}/api/chat/stream${wantsTts ? '?tts=1' : ''}`,
         method: 'POST',
@@ -585,6 +599,7 @@ function sendBookChatMessageStream(bookId, message, handlers) {
           enableTts: wantsTts,
           withTts: wantsTts,
           voiceReply: wantsTts,
+          entry,
           scene,
         },
         header: {

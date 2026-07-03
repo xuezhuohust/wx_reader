@@ -15,6 +15,7 @@ Page({
     loadingReply: false,
     scrollTop: 0,
     scrollWithAnimation: true,
+    entry: 'chat',
     scene: 'chat',
     sceneTitle: '智能伴读',
     quickQuestions: ['总结这本书', '这本书适合谁读', '提炼三个核心观点', '帮我解释第一章'],
@@ -45,12 +46,14 @@ Page({
 
   onLoad(options) {
     const app = getApp()
-    const scene = this.normalizeScene((options && (options.scene || options.mode)) || 'chat')
+    const entry = this.normalizeEntry((options && (options.entry || options.entrance || options.scene || options.mode)) || 'chat')
+    const scene = this.normalizeScene((options && (options.scene || options.mode || entry)) || 'chat')
     this.setData({
       navBarHeight: app.globalData.navBarHeight,
       menuTop: app.globalData.menuTop,
       menuHeight: app.globalData.menuHeight,
       chapterId: options.chapterId || '',
+      entry,
       scene,
       sceneTitle: scene === 'story' ? '讲故事模式' : '智能伴读',
       quickQuestions: scene === 'story'
@@ -68,6 +71,7 @@ Page({
       })
     }
     this.bookId = options.bookId
+    this.chatEntry = entry
     this.chatScene = scene
     this.initialText = options.initialText ? decodeURIComponent(options.initialText) : ''
     this.messageSeed = 0
@@ -121,6 +125,17 @@ Page({
     return ['story', 'storytelling', 'tell_story', '讲故事', '故事'].indexOf(value) >= 0
       ? 'story'
       : 'chat'
+  },
+
+  normalizeEntry(entry) {
+    const value = String(entry || '').trim().toLowerCase()
+    if (['story', 'storytelling', 'tell_story', '讲故事', '故事'].indexOf(value) >= 0) {
+      return 'story'
+    }
+    if (['creative', 'creation', 'rewrite', 'secondary_creation', '二次创作'].indexOf(value) >= 0) {
+      return 'creative'
+    }
+    return 'chat'
   },
 
   getWelcomeMessage(bookTitle) {
@@ -693,7 +708,7 @@ Page({
   loadConversations(book) {
     /* 加载对话列表，自动选中最近活跃的对话或新建一个 */
     const bookTitle = book && book.title ? book.title : ''
-    return api.listConversations(this.bookId, this.chatScene)
+    return api.listConversations(this.bookId, this.chatEntry, this.chatScene)
       .then((convs) => {
         if (convs && convs.length > 0) {
           // 有已有对话 → 选中最近更新的一个
@@ -774,7 +789,8 @@ Page({
 
   createAndSelectConversation(bookTitle) {
     /* 创建新对话并选中 */
-    return api.createConversation(this.bookId, this.chatScene === 'story' ? '讲故事' : undefined, this.chatScene)
+    const title = this.chatEntry === 'story' ? '讲故事' : undefined
+    return api.createConversation(this.bookId, title, this.chatEntry, this.chatScene)
       .then((conv) => {
         const presetMessages = Array.isArray(conv && conv.messages) ? conv.messages : []
         this.setData({
@@ -847,7 +863,7 @@ Page({
     }
     wx.showModal({
       title: '清空对话',
-      content: '将删除这本书的全部对话记录，并重置对应的智能会话。此操作不可恢复。',
+      content: '将删除这本书当前入口的对话记录，并重置对应的智能会话。此操作不可恢复。',
       confirmText: '清空',
       confirmColor: '#d64545',
       success: (res) => {
@@ -858,7 +874,7 @@ Page({
         const bookTitle = book && book.title ? book.title : ''
         this.resetAudioPlayback()
         wx.showLoading({ title: '清空中……', mask: true })
-        api.clearConversations(this.bookId)
+        api.clearConversations(this.bookId, this.chatEntry, this.chatScene)
           .then(() => this.createAndSelectConversation(bookTitle))
           .then(() => {
             wx.hideLoading()
@@ -1642,6 +1658,7 @@ Page({
     const chatBookId = (this.data.book && (this.data.book.bookKey || this.data.book.id)) || this.bookId
     const streamPromise = api.sendBookChatMessageStream(chatBookId, serverQuestion, {
       conversationId: convId,
+      entry: this.chatEntry,
       scene: this.chatScene,
       tts: true,
       onTtsStream: (stream) => {

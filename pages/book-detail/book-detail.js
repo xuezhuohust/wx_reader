@@ -245,7 +245,7 @@ Page({
       return
     }
     wx.navigateTo({
-      url: `/pages/chat/chat?bookId=${book.id}`,
+      url: `/pages/chat/chat?bookId=${book.id}&entry=chat`,
     })
   },
 
@@ -262,7 +262,7 @@ Page({
       return
     }
     wx.navigateTo({
-      url: `/pages/chat/chat?bookId=${book.id}&scene=story`,
+      url: `/pages/chat/chat?bookId=${book.id}&entry=story&scene=story`,
     })
   },
 
