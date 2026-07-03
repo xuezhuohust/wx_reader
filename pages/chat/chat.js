@@ -1688,11 +1688,14 @@ Page({
           })
         }
       })
-      .catch(() => {
+      .catch((error) => {
+        console.error('[chat] stream failed:', error)
         this._streamRequestTask = null
         this.streamSpeechBuffer = ''
         this._usingServerTtsStream = false
-        const failedContent = this._pendingStreamReply || '暂时无法获取回答，请稍后重试。'
+        const errorMessage = error && error.message ? String(error.message) : ''
+        const failedContent = this._pendingStreamReply
+          || (errorMessage ? `暂时无法获取回答：${errorMessage}` : '暂时无法获取回答，请稍后重试。')
         this._pendingStreamReply = failedContent
         this.flushStreamReply(true)
         this.setData({

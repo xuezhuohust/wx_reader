@@ -306,7 +306,7 @@ function getStreamEvent(payload, explicitEvent) {
     content: payload.content || payload.answer || data.content || data.answer || '',
     audioUrl: payload.audioUrl || payload.audio_url || payload.url || data.audioUrl || data.audio_url || data.url || '',
     success: typeof payload.success === 'boolean' ? payload.success : true,
-    message: payload.message || payload.error || '',
+    message: payload.message || payload.error || data.message || data.error || '',
   }
 }
 
@@ -574,6 +574,9 @@ function sendBookChatMessageStream(bookId, message, handlers) {
         enableChunked: true,
         responseType: 'arraybuffer',
         data: {
+          book: bookId,
+          book_id: bookId,
+          bookKey: bookId,
           doc_id: bookId,
           message,
           session_id: callbacks.conversationId || '',
