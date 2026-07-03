@@ -47,23 +47,34 @@ function unwrapApiResponse(data, fallbackMessage) {
 /** 底层 wx.request 封装，处理状态码和异常 */
 function rawRequest(options) {
   const requestUrl = buildUrl(options.url)
+  const requestMethod = options.method || 'GET'
+  const requestTimeout = options.timeout || 15000
+  const requestStart = Date.now()
 
   return new Promise((resolve, reject) => {
     wx.request({
       url: requestUrl,
-      method: options.method || 'GET',
+      method: requestMethod,
       data: options.data || {},
-      timeout: options.timeout || 15000, // 默认 15s 超时
+      timeout: requestTimeout, // 默认 15s 超时
       header: Object.assign({
         'Content-Type': 'application/json',
       }, options.header || {}),
       success: (res) => {
-        console.info('[request] response', res.statusCode, requestUrl)
+        const elapsedMs = Date.now() - requestStart
+        console.info('[request] response', {
+          statusCode: res.statusCode,
+          method: requestMethod,
+          url: requestUrl,
+          elapsedMs,
+          timeout: requestTimeout,
+        })
         if (res.statusCode >= 200 && res.statusCode < 300) {
           try {
             resolve(unwrapApiResponse(res.data || {}, '请求失败'))
           } catch (error) {
             error.statusCode = res.statusCode
+            error.elapsedMs = elapsedMs
             reject(error)
           }
           return
@@ -71,12 +82,38 @@ function rawRequest(options) {
 
         const error = normalizeError(res, '请求失败')
         error.statusCode = res.statusCode
-        console.error('[request] bad response', requestUrl, res.statusCode, res.data || {})
+        error.elapsedMs = elapsedMs
+        error.requestUrl = requestUrl
+        error.timeout = requestTimeout
+        console.error('[request] bad response', {
+          url: requestUrl,
+          method: requestMethod,
+          statusCode: res.statusCode,
+          elapsedMs,
+          timeout: requestTimeout,
+          data: res.data || {},
+        })
         reject(error)
       },
       fail: (error) => {
-        console.error('[request] failed', requestUrl, error)
-        reject(error)
+        const elapsedMs = Date.now() - requestStart
+        const errMsg = error && error.errMsg ? String(error.errMsg) : ''
+        const normalized = new Error(errMsg || '网络请求失败')
+        normalized.errMsg = errMsg
+        normalized.elapsedMs = elapsedMs
+        normalized.method = requestMethod
+        normalized.requestUrl = requestUrl
+        normalized.timeout = requestTimeout
+        normalized.raw = error
+        console.error('[request] failed', {
+          url: requestUrl,
+          method: requestMethod,
+          elapsedMs,
+          timeout: requestTimeout,
+          errMsg,
+          error,
+        })
+        reject(normalized)
       },
     })
   })

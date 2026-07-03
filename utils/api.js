@@ -768,7 +768,7 @@ function generateCreativeWork(options) {
       bookId: payload.bookId || payload.book_id || payload.book || '',
       userPrompt: payload.userPrompt || payload.prompt || payload.message || '',
     },
-    timeout: 60000,
+    timeout: 360000,
   })
 }
 

@@ -1938,8 +1938,19 @@ Page({
         })
       })
       .catch((error) => {
-        console.error('[chat] creative generate failed:', error)
-        const errorMessage = error && error.message ? String(error.message) : ''
+        console.error('[chat] creative generate failed:', {
+          message: error && error.message,
+          errMsg: error && error.errMsg,
+          statusCode: error && error.statusCode,
+          code: error && error.code,
+          requestId: error && error.requestId,
+          elapsedMs: error && error.elapsedMs,
+          timeout: error && error.timeout,
+          requestUrl: error && error.requestUrl,
+        }, error)
+        const errorMessage = error && (error.message || error.errMsg || error.statusCode)
+          ? String(error.message || error.errMsg || `HTTP ${error.statusCode}`)
+          : ''
         this._pendingStreamReply = errorMessage
           ? `暂时无法完成二次创作：${errorMessage}`
           : '暂时无法完成二次创作，请稍后重试。'
