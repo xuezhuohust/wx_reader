@@ -305,15 +305,15 @@
 .action-btn-primary {
   background-color: #1b1b1b;
   color: #fff;
-  font-size: 32rpx;
-  font-weight: 900;
-  height: 112rpx;
-  border-radius: 32rpx;
+  font-size: 30rpx;
+  font-weight: 600;
+  height: 100rpx;
+  border-radius: 24rpx;
   display: flex;
   align-items: center;
   justify-content: center;
   border: none;
-  box-shadow: 0 12rpx 32rpx rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1); /* 大幅减弱投影，去立体感 */
   width: 100% !important;
 }
 
@@ -325,24 +325,6 @@
 .publisher-actions {
   display: flex;
   gap: 24rpx;
-}
-
-.reader-actions {
-  display: flex;
-  gap: 16rpx;
-}
-
-.reader-actions .action-btn-primary {
-  flex: 1;
-  min-width: 0;
-  height: 96rpx;
-  border-radius: 28rpx;
-  font-size: 26rpx;
-  padding: 0 12rpx;
-  line-height: 96rpx;
-  white-space: nowrap;
-  width: auto !important;
-  box-shadow: 0 12rpx 30rpx rgba(0, 0, 0, 0.18);
 }
 
 .action-btn-secondary {

@@ -14,7 +14,8 @@ Page({
     visibleChapters: [],
     chapterCount: 0,
     hasHiddenChapters: false,
-    loading: true
+    loading: true,
+    hasProgress: false
   },
 
   onLoad(options) {
@@ -101,11 +102,17 @@ Page({
           })
           return
         }
+
+        // 检查本地进度
+        const allProgress = wx.getStorageSync('reading_progress') || {}
+        const hasProgress = !!allProgress[book.id]
+
         // 尝试从多个可能的字段中获取目录数据
         const chapters = Array.isArray(book.chapters) ? book.chapters : (Array.isArray(book.catalog) ? book.catalog : (Array.isArray(book.sections) ? book.sections : []))
         const chaptersExpanded = false
         this.setData({
           book,
+          hasProgress,
           priceText: formatPrice(book.price),
           chaptersExpanded,
           visibleChapters: this.getVisibleChapters(chapters, chaptersExpanded),
@@ -160,10 +167,44 @@ Page({
     if (!book) return
 
     if (book.purchased) {
-      this.handleStartChat()
-    } else {
-      this.handlePurchase()
+      this.handleContinueRead()
+      return
     }
+
+    wx.showLoading({ title: '正在处理...' })
+    api.purchaseBook(book.id)
+      .then(() => {
+        wx.hideLoading()
+        wx.showToast({
+          title: '解锁成功',
+          icon: 'success'
+        })
+        this.loadBook()
+      })
+      .catch((error) => {
+        wx.hideLoading()
+        wx.showToast({
+          title: error.message || '操作失败',
+          icon: 'none'
+        })
+      })
+  },
+
+  handleContinueRead() {
+    const { book } = this.data
+    if (!book) return
+
+    if (!book.purchased) {
+      wx.showToast({
+        title: '请先购买后再阅读',
+        icon: 'none',
+      })
+      return
+    }
+
+    wx.navigateTo({
+      url: `/pages/read/read?id=${encodeURIComponent(book.id)}`,
+    })
   },
 
   handleToggleOnline() {

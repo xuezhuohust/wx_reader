@@ -113,12 +113,9 @@
     <!-- Bottom Action Bar -->
     <view class="detail-footer fade-up d5">
       <block wx:if="{{!isPublisherScene}}">
-        <view wx:if="{{book.purchased}}" class="reader-actions">
-          <button class="action-btn-primary action-btn-chat" bindtap="handleStartChat">对话</button>
-          <button class="action-btn-primary action-btn-story" bindtap="handleStartStory">讲故事</button>
-          <button class="action-btn-primary action-btn-creative" bindtap="handleStartCreative">二次创作</button>
-        </view>
-        <button wx:else class="action-btn-primary" bindtap="handleAction">立即解锁全书导读</button>
+        <button class="action-btn-primary" bindtap="handleAction">
+          {{book.purchased ? (hasProgress ? '继续阅读' : '开始阅读') : '立即解锁全书'}}
+        </button>
       </block>
       <block wx:else>
         <view class="publisher-actions">
