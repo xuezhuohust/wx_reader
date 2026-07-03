@@ -5,12 +5,23 @@ Page({
   data: {
     current: 0,
     hasReadIcon: false,
-    hasUserIcon: false
+    hasUserIcon: false,
+    showDebugCodeTrigger: false
   },
 
   onLoad() {
     // 进入引导页时清除旧的登录状态，确保点击按钮才会触发登录接口
     clearIdentity()
+    let envVersion = 'release'
+    try {
+      const info = wx.getAccountInfoSync && wx.getAccountInfoSync()
+      envVersion = info && info.miniProgram && info.miniProgram.envVersion
+        ? info.miniProgram.envVersion
+        : envVersion
+    } catch (e) {}
+    this.setData({
+      showDebugCodeTrigger: envVersion !== 'release'
+    })
   },
 
   onSwiperChange(e) {
@@ -48,5 +59,30 @@ Page({
           url: '/pages/index/index'
         })
       })
+  },
+
+  handleGetWxCodeOnly() {
+    wx.login({
+      success: (res) => {
+        const code = res && res.code ? String(res.code) : ''
+        if (!code) {
+          wx.showToast({ title: '未获取到 code', icon: 'none' })
+          return
+        }
+        console.info('[auth] wx.login code', code)
+        wx.setClipboardData({
+          data: code,
+          success: () => {
+            wx.showToast({ title: 'code 已复制', icon: 'none' })
+          },
+          fail: () => {
+            wx.showToast({ title: '复制失败', icon: 'none' })
+          }
+        })
+      },
+      fail: () => {
+        wx.showToast({ title: 'wx.login 失败', icon: 'none' })
+      }
+    })
   }
 })

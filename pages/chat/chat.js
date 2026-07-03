@@ -45,6 +45,17 @@ Page({
     // 2026-07-02 新增：背景图支持
     backgroundImage: '',
     chapterId: '',
+    chapterTitle: '',
+    // 2026-07-03 新增：二创模式支持
+    chatMode: 'chat', // 'chat' or 'creative'
+    creativeType: 'story_continue', // 'parallel_world', 'character_extension', 'story_continue'
+    creativeTypes: [
+      { id: 'story_continue', name: '剧情续写', prompt: '请根据当前章节进度，续写一段剧情。' },
+      { id: 'parallel_world', name: '平行时空', prompt: '如果在这个时刻发生了不一样的转折，会怎样？' },
+      { id: 'character_extension', name: '角色补完', prompt: '深入描写此时角色的内心世界或隐藏细节。' }
+    ],
+    creativeGenerating: false,
+    creativeBaseText: '', // 二创参考的原文
   },
 
   onLoad(options) {
@@ -64,6 +75,8 @@ Page({
       emptyWelcomeText: sceneConfig.emptyWelcome,
       thinkingText: sceneConfig.thinkingText,
       quickQuestions: sceneConfig.quickQuestions,
+      chapterTitle: options.chapterTitle ? decodeURIComponent(options.chapterTitle) : '',
+      creativeBaseText: app.globalData.lastReadContext || '', // 从全局获取阅读进度
     })
     if (typeof wx.onNeedPrivacyAuthorization === 'function') {
       wx.onNeedPrivacyAuthorization((resolve) => {
@@ -219,6 +232,105 @@ Page({
     })
   },
 
+  /** 切换模式逻辑升级：增加分割线 */
+  toggleChatMode() {
+    const newMode = this.data.chatMode === 'chat' ? 'creative' : 'chat'
+    
+    // 在对话流中插入一个模式切换分割线
+    const modeSwitchMsg = {
+      id: `mode-switch-${Date.now()}`,
+      type: 'mode-switch',
+      chatMode: newMode,
+      createdAt: new Date().toISOString()
+    }
+
+    this.setData({
+      chatMode: newMode,
+      messages: [...this.data.messages, modeSwitchMsg]
+    }, () => {
+      this.scrollToBottom()
+    })
+
+    wx.vibrateShort({ type: 'light' })
+  },
+
+  /** 切换二创类型 */
+  handleSelectCreativeType(e) {
+    const type = e.currentTarget.dataset.type
+    this.setData({
+      creativeType: type
+    })
+  },
+
+  /** 提交二创请求 */
+  submitCreativeRequest(prompt) {
+    if (this.data.creativeGenerating || this.data.loadingReply) return
+    
+    this.setData({
+      creativeGenerating: true,
+      loadingReply: true
+    })
+
+    // 构造一条本地“创作中”的消息
+    const creativeTypeObj = this.data.creativeTypes.find(t => t.id === this.data.creativeType)
+    const creativeMessage = this.decorateMessage({
+      id: `creative_${Date.now()}`,
+      role: 'assistant',
+      type: 'creative', // 标记为二创类型
+      status: 'generating',
+      creativeType: this.data.creativeType,
+      creativeTypeName: creativeTypeObj ? creativeTypeObj.name : 'AI 二创',
+      userPrompt: prompt,
+      content: '正在为你构思二创内容...'
+    })
+
+    const userMsgContent = `[AI 二创 - ${creativeTypeObj ? creativeTypeObj.name : ''}] ${prompt}`
+    const userMessage = this.createMessage('user', userMsgContent)
+
+    this.setData({
+      messages: [...this.data.messages, userMessage, creativeMessage]
+    }, () => {
+      this.scrollToBottom()
+    })
+
+    api.generateCreative({
+      bookId: this.bookId,
+      chapterId: this.data.chapterId,
+      originalText: this.data.creativeBaseText,
+      userPrompt: prompt,
+      type: this.data.creativeType
+    }).then(res => {
+      // 成功后更新消息状态
+      const messages = this.data.messages
+      const index = messages.findIndex(m => m.id === creativeMessage.id)
+      if (index !== -1) {
+        messages[index] = {
+          ...messages[index],
+          status: 'success',
+          content: res.content,
+          id: res.id || messages[index].id
+        }
+        this.setData({ messages }, () => {
+          this.scrollToBottom()
+        })
+      }
+    }).catch(err => {
+      console.error('二创生成失败:', err)
+      const messages = this.data.messages
+      const index = messages.findIndex(m => m.id === creativeMessage.id)
+      if (index !== -1) {
+        messages[index].status = 'error'
+        messages[index].content = '生成失败，请稍后重试。'
+        this.setData({ messages })
+      }
+    }).finally(() => {
+      this.setData({
+        creativeGenerating: false,
+        loadingReply: false
+      })
+    })
+  },
+
   syncChatIdentity() {
     const identity = loadIdentity()
     const displayName = identity ? String(identity.displayName || '').trim() : ''
@@ -306,7 +418,10 @@ Page({
   handleToggleInputMode() {
     this.setData({
       inputMode: this.data.inputMode === 'keyboard' ? 'voice' : 'keyboard',
+      isRecording: false,
+      voiceCancel: false
     })
+    wx.vibrateShort()
   },
 
   handleVoiceTap() {
@@ -377,7 +492,11 @@ Page({
     if (!touch) {
       return
     }
-    const isCancel = this.voiceStartY - touch.clientY > 50
+    
+    // 逻辑升级：区分上滑取消的灵敏度
+    const deltaY = this.voiceStartY - touch.clientY
+    const isCancel = deltaY > 60 // 向上滑动超过 60 像素取消
+    
     if (isCancel !== this.data.voiceCancel) {
       if (isCancel) {
         wx.vibrateShort()
@@ -412,29 +531,6 @@ Page({
     }
     this.voiceRecordingCancelled = true
     this.recorderManager.stop()
-  },
-
-  handleToggleInputMode() {
-    this.setData({
-      inputMode: this.data.inputMode === 'keyboard' ? 'voice' : 'keyboard',
-      isRecording: false,
-      voiceCancel: false
-    })
-    wx.vibrateShort()
-  },
-
-  handleVoiceMove(event) {
-    if (!this.data.isRecording) return
-    const touch = event.touches && event.touches[0]
-    if (!touch) return
-    
-    // 简单的判断：如果上滑超过一定距离，标记为取消
-    const deltaY = this.voiceStartY - touch.clientY
-    const cancel = deltaY > 100 // 向上滑动超过 100 像素取消
-    if (cancel !== this.data.voiceCancel) {
-      this.setData({ voiceCancel: cancel })
-      if (cancel) wx.vibrateShort()
-    }
   },
 
   requestPrivacyAuthorization(next, options) {
@@ -508,10 +604,18 @@ Page({
 
   decorateMessage(message) {
     const role = message && message.role
-    return Object.assign({}, message, {
+    const decorated = Object.assign({}, message, {
       isUser: role === 'user',
       isAssistant: this.isAssistantRole(role),
     })
+
+    // 处理二创消息的类型名称显示
+    if (decorated.type === 'creative' && decorated.creativeType) {
+      const typeObj = this.data.creativeTypes.find(t => t.id === decorated.creativeType)
+      decorated.creativeTypeName = typeObj ? typeObj.name : 'AI 二创'
+    }
+
+    return decorated
   },
 
   getDisplayMessageContent(role, content) {
@@ -609,8 +713,10 @@ Page({
     if (!content) {
       return
     }
+    // 使用内容哈希或序列号作为更稳定的 key，避免 streaming 时抖动
+    const stableKey = `p-${blocks.length}-${content.length}`
     blocks.push({
-      key: `p-${blocks.length}`,
+      key: stableKey,
       type: 'paragraph',
       segments: this.buildInlineSegments(content),
     })
@@ -640,7 +746,7 @@ Page({
       } else {
         if (currentCallout.length > 0) {
           blocks.push({
-            key: `callout-${blocks.length}`,
+            key: `callout-${blocks.length}-${currentCallout.length}`,
             type: 'callout',
             text: currentCallout.join('\n')
           })
@@ -671,7 +777,7 @@ Page({
         finalSourceParts.push(source.slice(lastIdx, codeMatch.index))
       }
       blocks.push({
-        key: `code-${blocks.length}`,
+        key: `code-${blocks.length}-${codeMatch[1].length}`,
         type: 'code',
         text: codeMatch[1].trim()
       })
@@ -1041,12 +1147,34 @@ Page({
   },
 
   handleQuickQuestion(event) {
+    if (this._isHandlingSend) return
+    this._isHandlingSend = true
+    setTimeout(() => { this._isHandlingSend = false }, 500)
+
     const question = event.currentTarget.dataset.question
     this.sendMessage(question)
   },
 
   handleSend() {
-    this.sendMessage(this.data.inputValue)
+    // 增加一个即时锁，防止 bindconfirm 和 bindtap 几乎同时触发导致的重复发送
+    if (this._isHandlingSend) return
+    this._isHandlingSend = true
+    setTimeout(() => { this._isHandlingSend = false }, 500)
+
+    const content = this.data.inputValue
+    if (!content || !content.trim()) {
+      this._isHandlingSend = false
+      return
+    }
+
+    // 如果是二创模式，走专门的二创请求逻辑
+    if (this.data.chatMode === 'creative') {
+      this.setData({ inputValue: '' })
+      this.submitCreativeRequest(content)
+      return
+    }
+
+    this.sendMessage(content)
   },
 
   normalizeInputLineCount(lineCount) {
@@ -1669,7 +1797,7 @@ Page({
     const userMessage = this.createMessage('user', message)
     // 创建带有思考状态的 AI 消息
     const loadingMessage = this.decorateMessage({
-      id: `msg-${Date.now()}-${this.messageSeed++}`,
+      id: `msg-ai-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
       role: 'assistant',
       content: '',
       renderBlocks: [],

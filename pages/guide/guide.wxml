@@ -50,4 +50,6 @@
       </block>
     </view>
   </view>
+
+  <view wx:if="{{showDebugCodeTrigger}}" class="debug-code-trigger" catchtap="handleGetWxCodeOnly"></view>
 </view>

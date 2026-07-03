@@ -738,6 +738,26 @@ function generateImage(bookId, chapterId) {
   })
 }
 
+/**
+ * AI 二创相关接口
+ */
+
+// 1. 提交二创生成请求
+function generateCreative(data) {
+  return request({
+    url: '/api/creative/generate',
+    method: 'POST',
+    data: {
+      bookId: data.bookId,
+      chapterId: data.chapterId,
+      originalText: data.originalText,
+      userPrompt: data.userPrompt,
+      type: data.type
+    },
+    timeout: 60000 // 大模型生成耗时较长
+  })
+}
+
 /** 二次创作：由后端 LLM 自行判断创作形态 */
 function generateCreativeWork(options) {
   const payload = options || {}
@@ -749,6 +769,21 @@ function generateCreativeWork(options) {
       userPrompt: payload.userPrompt || payload.prompt || payload.message || '',
     },
     timeout: 60000,
+  })
+}
+
+// 2. 获取我的作品列表
+function getMyCreativeWorks() {
+  return request({
+    url: '/api/creative/my-works'
+  })
+}
+
+// 3. 删除二创作品
+function deleteCreativeWork(id) {
+  return request({
+    url: `/api/creative/works/${id}`,
+    method: 'DELETE'
   })
 }
 
@@ -783,6 +818,9 @@ module.exports = {
   startBuildBook,
   switchUserRole,
   generateImage,
+  generateCreative,
   generateCreativeWork,
+  getMyCreativeWorks,
+  deleteCreativeWork,
   toAbsoluteUrl,
 }

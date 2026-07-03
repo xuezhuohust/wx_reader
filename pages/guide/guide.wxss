@@ -172,3 +172,14 @@
   background-size: contain;
   background-repeat: no-repeat;
 }
+
+.debug-code-trigger {
+  position: fixed;
+  right: 20rpx;
+  bottom: 20rpx;
+  width: 44rpx;
+  height: 44rpx;
+  border-radius: 50%;
+  background: rgba(60, 105, 43, 0.06);
+  opacity: 0.18;
+}

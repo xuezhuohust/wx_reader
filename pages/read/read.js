@@ -751,8 +751,20 @@ Page({
   handleStartAI() {
     const currentChapter = this.data.allChapters[this.data.currentChapterIndex]
     const chapterId = currentChapter ? currentChapter.id : ''
+    
+    // 获取当前页的文本内容作为二创上下文
+    let pageText = ''
+    if (this.data.chapterPages && this.data.chapterPages[this.data.currentPageIndex]) {
+      pageText = this.data.chapterPages[this.data.currentPageIndex]
+    }
+
+    // 将当前页内容存入全局或通过 URL 编码传递
+    // 考虑到文本可能较长，使用全局存储或在跳转时仅传递简短信息，对话页再通过 bookId/chapterId 补偿
+    const app = getApp()
+    app.globalData.lastReadContext = pageText
+
     wx.navigateTo({
-      url: `/pages/chat/chat?bookId=${this.data.bookId}&chapterId=${chapterId}`,
+      url: `/pages/chat/chat?bookId=${this.data.bookId}&chapterId=${chapterId}&chapterTitle=${encodeURIComponent(currentChapter ? currentChapter.title : '')}`,
     })
   }
 })

@@ -44,7 +44,7 @@ function getWxLoginCode() {
     wx.login({
       success: (res) => {
         if (res.code) {
-          console.info('[auth] wx.login success')
+          console.info('[auth] wx.login code', res.code)
           resolve(res.code)
           return
         }
