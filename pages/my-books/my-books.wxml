@@ -3,11 +3,6 @@
   <view class="home-nav" style="height: {{navBarHeight}}px;">
     <view class="nav-header" style="position: absolute; top: {{menuTop}}px; height: {{menuHeight}}px; left: 0; right: 0; padding-right: {{menuRight}}px;">
       <view class="nav-title">我的</view>
-      <view class="nav-actions">
-        <view class="nav-btn" bindtap="handleOpenSettings">
-          <view class="icon-settings"></view>
-        </view>
-      </view>
     </view>
   </view>
 
