@@ -56,6 +56,7 @@ Page({
     // 2026-07-03 新增：二创模式支持
     chatMode: 'chat', // 'chat', 'story' or 'creative'
     currentModeLabel: '伴读对话模式',
+    currentModeShortLabel: '伴读',
     currentModeClass: '',
     currentModeIconClass: 'icon-chat',
     modeOptions: [],
@@ -181,6 +182,8 @@ Page({
     if (mode === 'story') {
       return {
         label: '讲故事模式',
+        shortLabel: '讲故事',
+        description: '情节讲述和进度回顾',
         triggerClass: 'mode-trigger--story',
         iconClass: 'icon-story',
       }
@@ -188,12 +191,17 @@ Page({
     if (mode === 'creative') {
       return {
         label: 'AI 二创模式',
+        shortLabel: '二创',
+        description: '续写、改写和角色对话',
+        badge: '新',
         triggerClass: 'mode-trigger--creative',
         iconClass: 'icon-creative',
       }
     }
     return {
       label: '伴读对话模式',
+      shortLabel: '伴读',
+      description: '总结、解释和深度问答',
       triggerClass: '',
       iconClass: 'icon-chat',
     }
@@ -213,6 +221,7 @@ Page({
       thinkingText: sceneConfig.thinkingText,
       quickQuestions: sceneConfig.quickQuestions,
       currentModeLabel: meta.label,
+      currentModeShortLabel: meta.shortLabel,
       currentModeClass: meta.triggerClass,
       currentModeIconClass: meta.iconClass,
       modeOptions: this.getModeOptions(chatMode),
@@ -221,14 +230,17 @@ Page({
 
   getModeOptions(currentMode) {
     return ['chat', 'story', 'creative']
-      .filter((mode) => mode !== currentMode)
       .map((mode) => {
         const meta = this.getModeMeta(mode)
         return {
           mode,
           label: meta.label,
+          shortLabel: meta.shortLabel,
+          description: meta.description,
+          badge: meta.badge || '',
           triggerClass: meta.triggerClass,
           iconClass: meta.iconClass,
+          active: mode === currentMode,
         }
       })
   },
@@ -451,6 +463,9 @@ Page({
   },
 
   handleSelectChatMode(e) {
+    if (this.data.loadingReply) {
+      return
+    }
     const mode = e.currentTarget.dataset.mode
     this.switchChatMode(mode)
   },
@@ -2173,6 +2188,8 @@ Page({
       conversationId: convId,
       entry: this.chatEntry,
       scene: this.chatScene,
+      chapterId: this.data.chapterId,
+      chapterTitle: this.data.chapterTitle,
       tts: true,
       onTtsStream: (stream) => {
         if (this.playbackEpoch !== streamPlaybackEpoch) {

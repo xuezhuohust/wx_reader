@@ -591,6 +591,8 @@ function sendBookChatMessageStream(bookId, message, handlers) {
       const wantsTts = callbacks.tts === true || typeof callbacks.onTtsStream === 'function'
       const scene = callbacks.scene || callbacks.mode || ''
       const entry = callbacks.entry || callbacks.entrance || scene || ''
+      const chapterId = callbacks.chapterId || callbacks.chapter_id || ''
+      const chapterTitle = callbacks.chapterTitle || callbacks.chapter_title || ''
       streamRequestTask = wx.request({
          url: `${BASE_URL}/api/chat/stream${wantsTts ? '?tts=1' : ''}`,
         method: 'POST',
@@ -604,6 +606,10 @@ function sendBookChatMessageStream(bookId, message, handlers) {
           message,
           session_id: callbacks.conversationId || '',
           user_id: identity.userId || identity.openid || 'default',
+          chapterId,
+          chapter_id: chapterId,
+          chapterTitle,
+          chapter_title: chapterTitle,
           tts: wantsTts,
           enableTts: wantsTts,
           withTts: wantsTts,

@@ -235,7 +235,7 @@
         </block>
       </block>
 
-      <view class="bottom-space" style="height: {{keyboardHeight + 132}}rpx;"></view>
+      <view class="bottom-space" style="height: {{keyboardHeight + 176}}rpx;"></view>
     </view>
   </scroll-view>
 
@@ -258,19 +258,26 @@
           <view
             wx:for="{{modeOptions}}"
             wx:key="mode"
-            class="mode-menu-item {{item.triggerClass}}"
+            class="mode-menu-item {{item.active ? 'mode-menu-item--active' : ''}}"
             data-mode="{{item.mode}}"
             bindtap="handleSelectChatMode"
           >
-            <view class="mode-trigger-icon {{item.iconClass}}"></view>
-            <text>{{item.label}}</text>
+            <view class="mode-menu-icon {{item.iconClass}}"></view>
+            <view class="mode-menu-copy">
+              <view class="mode-menu-title-line">
+                <text class="mode-menu-title">{{item.shortLabel}}</text>
+                <text wx:if="{{item.badge}}" class="mode-menu-badge">{{item.badge}}</text>
+              </view>
+              <text class="mode-menu-desc">{{item.description}}</text>
+            </view>
+            <view wx:if="{{item.active}}" class="mode-menu-check"></view>
           </view>
         </view>
 
         <!-- 模式切换触发器 -->
-        <view class="mode-trigger {{currentModeClass}} {{showModeMenu ? 'mode-trigger--open' : ''}}" bindtap="toggleChatMode">
+        <view class="mode-trigger {{showModeMenu ? 'mode-trigger--open' : ''}}" bindtap="toggleChatMode">
           <view class="mode-trigger-icon {{currentModeIconClass}}"></view>
-          <text>{{currentModeLabel}}</text>
+          <text>{{currentModeShortLabel}}</text>
           <view class="mode-trigger-arrow"></view>
         </view>
       </view>

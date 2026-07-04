@@ -76,7 +76,7 @@ page {
 
   background: var(--bg-canvas);
   color: var(--ink);
-  font-family: "Noto Serif SC", "Source Han Serif SC", "STSong", "Songti SC", serif;
+  font-family: "PingFang SC", "HarmonyOS Sans SC", "MiSans", "Noto Sans CJK SC", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   line-height: 1.55;
 }

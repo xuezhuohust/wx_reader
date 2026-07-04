@@ -761,8 +761,9 @@ Page({
     const text = this.data.selectedParaText
     const currentChapter = this.data.allChapters[this.data.currentChapterIndex]
     const chapterId = currentChapter ? currentChapter.id : ''
+    const chapterTitle = currentChapter ? currentChapter.title : ''
     wx.navigateTo({
-      url: `/pages/chat/chat?bookId=${this.data.bookId}&chapterId=${chapterId}&initialText=${encodeURIComponent(text)}`,
+      url: `/pages/chat/chat?bookId=${this.data.bookId}&chapterId=${chapterId}&chapterTitle=${encodeURIComponent(chapterTitle)}&initialText=${encodeURIComponent(text)}`,
     })
     this.handleCloseSelectionMenu()
   },
