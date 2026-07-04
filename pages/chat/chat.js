@@ -517,6 +517,9 @@ Page({
   /** 提交二创请求 */
   submitCreativeRequest(prompt) {
     if (this.data.creativeGenerating || this.data.loadingReply) return
+
+    this.resetAudioPlayback()
+    this.ensureAudioContext()
     
     this.setData({
       creativeGenerating: true,
@@ -553,23 +556,28 @@ Page({
       type: this.data.creativeType
     }).then(res => {
       // 成功后更新消息状态
+      const fallbackContent = '暂时没有生成内容，请换个角度再试试。'
       const finalContent = String((res && (res.content || res.reply || res.answer)) || '').trim()
       const messages = this.data.messages
       const index = messages.findIndex(m => m.id === creativeMessage.id)
+      let finalMessageId = creativeMessage.id
+      const spokenContent = finalContent || fallbackContent
       if (index !== -1) {
+        finalMessageId = (res && res.id) || messages[index].id
         messages[index] = {
           ...messages[index],
           status: 'success',
-          content: finalContent || '暂时没有生成内容，请换个角度再试试。',
-          id: (res && res.id) || messages[index].id
+          content: spokenContent,
+          id: finalMessageId
         }
         this.setData({ messages }, () => {
           this.scrollToBottom()
+          this.enqueueAssistantSpeech(finalMessageId, spokenContent)
         })
       }
       return api.appendConversationMessages(this.data.currentConversationId, [
         { role: 'user', content: userMsgContent },
-        { role: 'assistant', content: finalContent || '暂时没有生成内容，请换个角度再试试。' },
+        { role: 'assistant', content: spokenContent },
       ]).catch((error) => {
         console.warn('[chat] creative history save failed:', error)
         return null
@@ -1848,6 +1856,24 @@ Page({
     }
   },
 
+  enqueueAssistantSpeech(messageId, text) {
+    const content = String(text || '').trim()
+    if (!messageId || !content) {
+      return
+    }
+    this.ensureAudioContext()
+    const chunks = this._splitIntoSpeechChunks(content)
+    console.info('[chat] assistant speech enqueue', {
+      messageId,
+      chars: content.length,
+      chunks: chunks.length,
+    })
+    for (let i = 0; i < chunks.length; i += 1) {
+      this.speechSegmentCount += 1
+      this.enqueueAudioChunk(messageId, chunks[i])
+    }
+  },
+
   /**
    * 直接将已生成的音频 URL 入队播放（服务端 TTS 模式）。
    * 跳过前端 TTS 请求，直接放入 readyMap。
@@ -2057,7 +2083,7 @@ Page({
     }
 
     this.resetAudioPlayback()
-    this.enqueueAudioChunk(id, content)
+    this.enqueueAssistantSpeech(id, content)
   },
 
   handleCopyMessage(event) {
@@ -2232,8 +2258,6 @@ Page({
           if (result && result.state) {
             this._storyStateAppliedForStream = true
             this.applyStoryProgressState(result.state)
-          } else {
-            this.scheduleStoryProgressSyncAfterReply(1200)
           }
         }
         this._pendingStreamReply = finalReply
@@ -2290,8 +2314,10 @@ Page({
           || replyFallback
         ).trim()
         const finalReply = reply || replyFallback
+        const messageId = this._streamingMessageId
         this._pendingStreamReply = finalReply
         this.flushStreamReply(true)
+        this.enqueueAssistantSpeech(messageId, finalReply)
         return api.appendConversationMessages(convId, [
           { role: 'user', content: message },
           { role: 'assistant', content: finalReply },
