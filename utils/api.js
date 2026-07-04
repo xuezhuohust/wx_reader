@@ -779,7 +779,7 @@ function generateCreative(data) {
       userPrompt: data.userPrompt,
       type: data.type
     },
-    timeout: 60000 // 大模型生成耗时较长
+    timeout: 360000 // 大模型生成耗时较长
   })
 }
 
