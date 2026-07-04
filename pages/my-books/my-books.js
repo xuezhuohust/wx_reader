@@ -24,6 +24,8 @@ Page({
     books: [],
     identity: null,
     showProfileModal: false,
+    profilePrivacyAgreed: false,
+    privacyContractName: '用户隐私保护指引',
     nicknameDraft: '',
     profileSaving: false,
     avatarUploading: false,
@@ -49,6 +51,7 @@ Page({
     const app = getApp()
     const menuButtonInfo = wx.getMenuButtonBoundingClientRect()
     const systemInfo = wx.getSystemInfoSync()
+    this.registerProfilePrivacyAuthorization()
     
     // 设置问候语
     const hour = new Date().getHours()
@@ -68,6 +71,7 @@ Page({
       menuRight: systemInfo.windowWidth - menuButtonInfo.left + 10,
       greeting
     })
+    this.refreshProfilePrivacyState()
   },
 
   onShow() {
@@ -118,10 +122,64 @@ Page({
       return
     }
 
+    this.refreshProfilePrivacyState()
     this.setData({
       showProfileModal: true,
     })
     this.setProfileTabBarHidden(true)
+  },
+
+  registerProfilePrivacyAuthorization() {
+    if (typeof wx.onNeedPrivacyAuthorization !== 'function') {
+      return
+    }
+
+    wx.onNeedPrivacyAuthorization((resolve) => {
+      getApp().globalData._privacyResolve = resolve
+      this.setData({
+        profilePrivacyAgreed: false,
+        showProfileModal: true,
+      })
+      this.setProfileTabBarHidden(true)
+    })
+  },
+
+  refreshProfilePrivacyState() {
+    if (typeof wx.getPrivacySetting !== 'function') {
+      this.setData({ profilePrivacyAgreed: true })
+      return
+    }
+
+    wx.getPrivacySetting({
+      success: (res) => {
+        this.setData({
+          profilePrivacyAgreed: !res.needAuthorization,
+          privacyContractName: res.privacyContractName || '用户隐私保护指引',
+        })
+      },
+      fail: () => {
+        this.setData({ profilePrivacyAgreed: true })
+      },
+    })
+  },
+
+  handleOpenPrivacyContract() {
+    if (typeof wx.openPrivacyContract !== 'function') {
+      return
+    }
+
+    wx.openPrivacyContract({
+      fail: (error) => {
+        console.error('open privacy contract failed:', error)
+      },
+    })
+  },
+
+  handleAgreeProfilePrivacy(event) {
+    wx.setStorageSync('privacy_agreed', true)
+    wx.setStorageSync('profile_privacy_agreed', true)
+    this.setData({ profilePrivacyAgreed: true })
+    getApp().resolvePrivacy(true, event)
   },
 
   onChooseAvatar(event) {

@@ -115,6 +115,10 @@
   border: none;
 }
 
+.avatar-row--privacy {
+  min-height: 96rpx;
+}
+
 .avatar-preview {
   width: 88rpx;
   height: 88rpx;
@@ -162,6 +166,29 @@
 .avatar-hint {
   font-size: 22rpx;
   color: var(--stone);
+}
+
+.privacy-inline-btn {
+  width: 116rpx;
+  height: 58rpx;
+  margin: 0 0 0 16rpx;
+  padding: 0;
+  border-radius: 16rpx;
+  background: var(--accent, #2f6b3f);
+  color: #fff;
+  font-size: 24rpx;
+  font-weight: 700;
+  line-height: 58rpx;
+}
+
+.privacy-inline-btn::after {
+  border: none;
+}
+
+.privacy-contract-link {
+  margin: 16rpx 0 0 112rpx;
+  font-size: 22rpx;
+  color: var(--link-blue);
 }
 
 /* Row separator */

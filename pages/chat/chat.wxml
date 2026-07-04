@@ -90,7 +90,10 @@
       <block wx:else>
         <!-- 伴读欢迎消息 -->
         <view class="message-row row-ai" wx:if="{{messages.length === 0}}">
-          <view class="chat-avatar ai-avatar">助</view>
+          <view class="chat-avatar ai-avatar">
+            <image wx:if="{{agentAvatarUrl}}" class="avatar-image" src="{{agentAvatarUrl}}" mode="aspectFill" />
+            <text wx:else>助</text>
+          </view>
           <view class="message-container">
             <view class="message-bubble bubble-ai">
               <text>{{emptyWelcomeText}}</text>
@@ -134,7 +137,8 @@
             class="message-row {{item.isUser ? 'row-user' : 'row-ai'}}"
           >
             <view class="chat-avatar {{item.isUser ? 'user-avatar' : 'ai-avatar'}}">
-              {{item.isUser ? '我' : '助'}}
+              <image wx:if="{{!item.isUser && agentAvatarUrl}}" class="avatar-image" src="{{agentAvatarUrl}}" mode="aspectFill" />
+              <text wx:else>{{item.isUser ? '我' : '助'}}</text>
             </view>
             <view class="message-container">
               <view class="message-bubble {{item.isUser ? 'bubble-user' : 'bubble-ai'}}">

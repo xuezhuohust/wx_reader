@@ -1,10 +1,13 @@
 const api = require('../../utils/api')
 const { loadIdentity } = require('../../utils/storage')
 
+const AGENT_AVATAR_URL = api.toAbsoluteUrl('/uploads/cover_5f40aae0502c.jpg')
+
 Page({
   data: {
     book: null,
     identity: null,
+    agentAvatarUrl: AGENT_AVATAR_URL,
     userAvatarText: '我',
     messages: [],
     loadingMessages: true, // 新增：控制骨架屏显示
@@ -98,7 +101,9 @@ Page({
     this.currentAudioMessageId = ''
     this.currentAudioStartedAt = 0
     this.isAudioPlaying = false
+    this.isAudioLoading = false
     this.ignoreNextStopEvent = false
+    this.audioPlayToken = 0
     this.playbackEpoch = 0
     this._streamRequestTask = null
     this.audioQueue = []        // {messageId, text} 待生成
@@ -1516,10 +1521,25 @@ Page({
     audio.obeyMuteSwitch = false
 
     audio.onCanplay(() => {
+      if (
+        audio !== this.audioContext
+        || !this.isAudioLoading
+        || !this.currentAudioMessageId
+      ) {
+        return
+      }
       audio.play()
     })
 
     audio.onPlay(() => {
+      if (audio !== this.audioContext || !this.currentAudioMessageId) {
+        try {
+          audio.stop()
+        } catch (error) {
+          console.warn('[chat] stale audio stop failed', error)
+        }
+        return
+      }
       this.isAudioPlaying = true
       this.isAudioLoading = false
       clearTimeout(this._audioLoadTimeout)
@@ -1531,10 +1551,16 @@ Page({
     })
 
     audio.onEnded(() => {
+      if (audio !== this.audioContext) {
+        return
+      }
       this.finishCurrentAudio(true)
     })
 
     audio.onStop(() => {
+      if (audio !== this.audioContext) {
+        return
+      }
       if (this.ignoreNextStopEvent) {
         return
       }
@@ -1542,6 +1568,9 @@ Page({
     })
 
     audio.onPause(() => {
+      if (audio !== this.audioContext) {
+        return
+      }
       if (this.ignoreNextStopEvent) {
         return
       }
@@ -1549,6 +1578,9 @@ Page({
     })
 
     audio.onError((error) => {
+      if (audio !== this.audioContext) {
+        return
+      }
       console.error('[chat] audio error', error)
       // 出错后销毁当前实例，下次播放时重建，避免复用损坏的 context
       this.audioContext.destroy()
@@ -1575,6 +1607,7 @@ Page({
     this.currentAudioStartedAt = 0
     this.isAudioPlaying = false
     this.isAudioLoading = false
+    clearTimeout(this._audioLoadTimeout)
 
     // 如果还有待播放的段或正在生成的段，保持 loading 状态不变
     const pendingCount = (this.pendingTTSQueue && this.pendingTTSQueue.length) || 0
@@ -1619,6 +1652,8 @@ Page({
     this.streamSpeechBuffer = ''
     this.speechSegmentCount = 0
     this._usingServerTtsStream = false
+    clearTimeout(this._audioLoadTimeout)
+    this.audioPlayToken += 1
     this.setData({
       playingMessageId: '',
       audioLoadingMessageId: '',
@@ -1642,9 +1677,22 @@ Page({
     this.streamSpeechBuffer = ''
     this.speechSegmentCount = 0
     this._usingServerTtsStream = false
-    if (this.audioContext && (this.isAudioPlaying || this.currentAudioMessageId)) {
+    clearTimeout(this._audioLoadTimeout)
+    this.audioPlayToken += 1
+    if (this.audioContext) {
+      const audio = this.audioContext
       this.ignoreNextStopEvent = true
-      this.audioContext.stop()
+      try {
+        audio.stop()
+      } catch (error) {
+        console.warn('[chat] audio stop failed during reset', error)
+      }
+      try {
+        audio.destroy()
+      } catch (error) {
+        console.warn('[chat] audio destroy failed during reset', error)
+      }
+      this.audioContext = null
       // 延迟清除标记，确保 onStop 和 onPause（无论触发顺序）都被拦截
       clearTimeout(this._ignoreStopTimer)
       this._ignoreStopTimer = setTimeout(() => {
@@ -1654,6 +1702,7 @@ Page({
     this.currentAudioMessageId = ''
     this.currentAudioStartedAt = 0
     this.isAudioPlaying = false
+    this.isAudioLoading = false
     this.setData({
       playingMessageId: '',
       audioLoadingMessageId: '',
@@ -1798,6 +1847,8 @@ Page({
     }
 
     const audio = this.ensureAudioContext()
+    const token = this.audioPlayToken + 1
+    this.audioPlayToken = token
     this.currentAudioMessageId = messageId
     this.isAudioLoading = true
     this.setData({
@@ -1808,10 +1859,20 @@ Page({
     audio.src = src
     clearTimeout(this._audioLoadTimeout)
     this._audioLoadTimeout = setTimeout(() => {
-      if (this.isAudioLoading && this.currentAudioMessageId === messageId) {
+      if (
+        this.audioPlayToken === token
+        && this.isAudioLoading
+        && this.currentAudioMessageId === messageId
+      ) {
         console.warn('[chat] streaming audio load timeout')
+        this.currentAudioMessageId = ''
+        this.currentAudioStartedAt = 0
+        this.isAudioPlaying = false
         this.isAudioLoading = false
-        this.setData({ audioLoadingMessageId: '' })
+        this.setData({
+          playingMessageId: '',
+          audioLoadingMessageId: '',
+        })
       }
     }, 15000)
   },
@@ -1921,6 +1982,8 @@ Page({
 
     this.isAudioLoading = true
     const audio = this.ensureAudioContext()
+    const token = this.audioPlayToken + 1
+    this.audioPlayToken = token
     this.currentAudioMessageId = next.messageId
     this.setData({
       playingMessageId: next.messageId,
@@ -1931,9 +1994,16 @@ Page({
     // 超时保护：流式 TTS 冷启动可能需要等待首个音频包。
     clearTimeout(this._audioLoadTimeout)
     this._audioLoadTimeout = setTimeout(() => {
-      if (this.isAudioLoading) {
+      if (this.audioPlayToken === token && this.isAudioLoading) {
         console.warn('[chat] audio load timeout, skipping')
+        this.currentAudioMessageId = ''
+        this.currentAudioStartedAt = 0
+        this.isAudioPlaying = false
         this.isAudioLoading = false
+        this.setData({
+          playingMessageId: '',
+          audioLoadingMessageId: '',
+        })
         this.playNextIfIdle()
       }
     }, 15000)
@@ -2092,12 +2162,16 @@ Page({
 
     const convId = this.data.currentConversationId
     const chatBookId = (this.data.book && (this.data.book.bookKey || this.data.book.id)) || this.bookId
+    const streamPlaybackEpoch = this.playbackEpoch
     const streamPromise = api.sendBookChatMessageStream(chatBookId, serverQuestion, {
       conversationId: convId,
       entry: this.chatEntry,
       scene: this.chatScene,
       tts: true,
       onTtsStream: (stream) => {
+        if (this.playbackEpoch !== streamPlaybackEpoch) {
+          return
+        }
         this._usingServerTtsStream = true
         this.streamSpeechBuffer = ''
         this.pendingTTSQueue = []
@@ -2106,6 +2180,9 @@ Page({
         this.playStreamingAudio(loadingMessage.id, stream.audioUrl)
       },
       onTtsEnd: () => {
+        if (this.playbackEpoch !== streamPlaybackEpoch) {
+          return
+        }
         this._streamRequestTask = null
       },
       onState: (state) => {

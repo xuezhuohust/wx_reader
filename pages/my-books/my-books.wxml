@@ -126,7 +126,22 @@
     <view class="profile-sheet" catchtap="handleStopPropagation">
       <view class="sheet-bar"></view>
       <view class="sheet-title">完善个人资料</view>
-      <button class="avatar-uploader" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar" disabled="{{avatarUploading}}">
+      <view wx:if="{{!profilePrivacyAgreed}}" class="profile-privacy-box">
+        <view class="profile-privacy-title">设置头像前需要隐私授权</view>
+        <view class="profile-privacy-text">
+          头像会用于个人资料展示。请先阅读并同意{{privacyContractName}}，同意后可选择微信头像。
+        </view>
+        <view class="profile-privacy-actions">
+          <button class="profile-privacy-link" bindtap="handleOpenPrivacyContract">查看指引</button>
+          <button
+            id="profile-privacy-agree"
+            class="profile-privacy-agree"
+            open-type="agreePrivacyAuthorization"
+            bindagreeprivacyauthorization="handleAgreeProfilePrivacy"
+          >同意并继续</button>
+        </view>
+      </view>
+      <button wx:else class="avatar-uploader" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar" disabled="{{avatarUploading}}">
         <view class="uploader-inner">
           <image wx:if="{{identity && identity.avatarUrl}}" src="{{identity.avatarUrl}}" mode="aspectFill" />
           <view class="uploader-placeholder" wx:else>+</view>
@@ -137,12 +152,13 @@
         <view class="input-label">昵称</view>
         <input
           class="input-field"
-          type="nickname"
+          type="text"
           value="{{nicknameDraft}}"
           placeholder="请输入您的昵称"
           placeholder-class="search-placeholder"
           bindinput="handleNicknameDraftInput"
           bindblur="handleNicknameDraftInput"
+          maxlength="20"
         />
       </view>
       <view class="btn-primary" bindtap="handleProfileSubmit">保存设置</view>

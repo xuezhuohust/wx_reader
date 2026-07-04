@@ -24,7 +24,21 @@
     <view class="section">
       <view class="section-label">个人资料</view>
       <view class="card-base">
-        <button class="avatar-row" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar" disabled="{{avatarUploading}}">
+        <view wx:if="{{!profilePrivacyAgreed}}" class="avatar-row avatar-row--privacy">
+          <view class="avatar-preview">
+            <image wx:if="{{identity && identity.avatarUrl}}" src="{{identity.avatarUrl}}" mode="aspectFill" />
+            <view wx:else class="avatar-placeholder">
+              <text class="avatar-placeholder-text">{{placeholderInitial}}</text>
+            </view>
+          </view>
+          <view class="avatar-meta">
+            <text class="avatar-label">修改头像</text>
+            <text class="avatar-hint">同意{{privacyContractName}}后可选择微信头像</text>
+          </view>
+          <button class="privacy-inline-btn" open-type="agreePrivacyAuthorization" bindagreeprivacyauthorization="handleAgreeProfilePrivacy">同意</button>
+        </view>
+
+        <button wx:else class="avatar-row" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar" disabled="{{avatarUploading}}">
           <view class="avatar-preview">
             <image wx:if="{{identity && identity.avatarUrl}}" src="{{identity.avatarUrl}}" mode="aspectFill" />
             <view wx:else class="avatar-placeholder">
@@ -37,6 +51,7 @@
           </view>
           <view class="chevron-right"></view>
         </button>
+        <view wx:if="{{!profilePrivacyAgreed}}" class="privacy-contract-link" bindtap="handleOpenPrivacyContract">查看隐私保护指引</view>
 
         <view class="row-separator"></view>
 

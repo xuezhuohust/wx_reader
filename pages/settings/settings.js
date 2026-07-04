@@ -7,6 +7,8 @@ Page({
     nicknameDraft: '',
     saving: false,
     avatarUploading: false,
+    profilePrivacyAgreed: false,
+    privacyContractName: '用户隐私保护指引',
     navBarHeight: 0,
     menuTop: 0,
     menuHeight: 0,
@@ -19,6 +21,7 @@ Page({
     const app = getApp()
     const identity = loadIdentity()
     const displayName = identity ? String(identity.displayName || '').trim() : ''
+    this.registerProfilePrivacyAuthorization()
     this.setData({
       identity,
       nicknameDraft: displayName,
@@ -29,6 +32,7 @@ Page({
       menuWidth: app.globalData.menuWidth,
       menuRight: app.globalData.menuRight,
     })
+    this.refreshProfilePrivacyState()
   },
 
   onShow() {
@@ -49,6 +53,55 @@ Page({
 
   handleScroll(e) {
     this.setData({ scrolled: e.detail.scrollTop > 10 })
+  },
+
+  registerProfilePrivacyAuthorization() {
+    if (typeof wx.onNeedPrivacyAuthorization !== 'function') {
+      return
+    }
+
+    wx.onNeedPrivacyAuthorization((resolve) => {
+      getApp().globalData._privacyResolve = resolve
+      this.setData({ profilePrivacyAgreed: false })
+    })
+  },
+
+  refreshProfilePrivacyState() {
+    if (typeof wx.getPrivacySetting !== 'function') {
+      this.setData({ profilePrivacyAgreed: true })
+      return
+    }
+
+    wx.getPrivacySetting({
+      success: (res) => {
+        this.setData({
+          profilePrivacyAgreed: !res.needAuthorization,
+          privacyContractName: res.privacyContractName || '用户隐私保护指引',
+        })
+      },
+      fail: () => {
+        this.setData({ profilePrivacyAgreed: true })
+      },
+    })
+  },
+
+  handleOpenPrivacyContract() {
+    if (typeof wx.openPrivacyContract !== 'function') {
+      return
+    }
+
+    wx.openPrivacyContract({
+      fail: (error) => {
+        console.error('open privacy contract failed:', error)
+      },
+    })
+  },
+
+  handleAgreeProfilePrivacy(event) {
+    wx.setStorageSync('privacy_agreed', true)
+    wx.setStorageSync('profile_privacy_agreed', true)
+    this.setData({ profilePrivacyAgreed: true })
+    getApp().resolvePrivacy(true, event)
   },
 
   onChooseAvatar(event) {
