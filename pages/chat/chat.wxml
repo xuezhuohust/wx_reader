@@ -252,7 +252,22 @@
   <!-- Chat Footer -->
   <view class="chat-footer">
     <!-- 二创模式功能栏 -->
-    <view class="chat-footer-tools">
+    <view wx:if="{{chatMode === 'creative'}}" class="chat-footer-tools">
+      <!-- 二创类型选择（仅二创模式显示） -->
+      <view class="creative-type-selector">
+        <view
+          wx:for="{{creativeTypes}}"
+          wx:key="id"
+          class="creative-type-chip {{creativeType === item.id ? 'creative-type-chip--active' : ''}}"
+          data-type="{{item.id}}"
+          bindtap="handleSelectCreativeType"
+        >
+          {{item.name}}
+        </view>
+      </view>
+    </view>
+
+    <view class="composer-wrap">
       <view class="mode-picker">
         <view wx:if="{{showModeMenu}}" class="mode-menu">
           <view
@@ -274,7 +289,6 @@
           </view>
         </view>
 
-        <!-- 模式切换触发器 -->
         <view class="mode-trigger {{showModeMenu ? 'mode-trigger--open' : ''}}" bindtap="toggleChatMode">
           <view class="mode-trigger-icon {{currentModeIconClass}}"></view>
           <text>{{currentModeShortLabel}}</text>
@@ -282,28 +296,13 @@
         </view>
       </view>
 
-      <!-- 二创类型选择（仅二创模式显示） -->
-      <view wx:if="{{chatMode === 'creative'}}" class="creative-type-selector">
-        <view 
-          wx:for="{{creativeTypes}}" 
-          wx:key="id" 
-          class="creative-type-chip {{creativeType === item.id ? 'creative-type-chip--active' : ''}}"
-          data-type="{{item.id}}"
-          bindtap="handleSelectCreativeType"
-        >
-          {{item.name}}
-        </view>
-      </view>
-    </view>
-
-    <view class="composer-wrap">
-      <!-- 模式切换按钮 -->
-      <view class="mode-toggle-btn" bindtap="handleToggleInputMode">
-        <view class="{{inputMode === 'keyboard' ? 'icon-mic' : 'icon-keyboard'}}"></view>
-      </view>
-
       <!-- 输入区域 -->
       <view class="input-container {{inputMode === 'voice' ? 'voice-mode' : ''}}">
+        <!-- 模式切换按钮 -->
+        <view class="mode-toggle-btn" bindtap="handleToggleInputMode">
+          <view class="{{inputMode === 'keyboard' ? 'icon-mic' : 'icon-keyboard'}}"></view>
+        </view>
+
         <!-- 文本输入模式 -->
         <textarea
           wx:if="{{inputMode === 'keyboard'}}"
