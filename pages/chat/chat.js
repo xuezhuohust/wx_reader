@@ -8,6 +8,7 @@ Page({
     book: null,
     identity: null,
     agentAvatarUrl: AGENT_AVATAR_URL,
+    userAvatarUrl: '',
     userAvatarText: '我',
     messages: [],
     loadingMessages: true, // 新增：控制骨架屏显示
@@ -578,11 +579,16 @@ Page({
   syncChatIdentity() {
     const identity = loadIdentity()
     const displayName = identity ? String(identity.displayName || '').trim() : ''
+    const rawAvatarUrl = identity ? String(identity.avatarUrl || '').trim() : ''
+    const userAvatarUrl = rawAvatarUrl && rawAvatarUrl.indexOf('/uploads/') === 0
+      ? api.toAbsoluteUrl(rawAvatarUrl)
+      : rawAvatarUrl
     const avatarText = displayName && displayName !== '微信用户'
       ? (Array.from(displayName)[0] || '我')
       : '我'
     this.setData({
       identity,
+      userAvatarUrl,
       userAvatarText: avatarText,
     })
   },
