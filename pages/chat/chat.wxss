@@ -1175,7 +1175,7 @@
 /* Input Bar Optimization */
 .chat-footer {
   background: var(--bg-canvas);
-  padding: 4rpx 32rpx calc(env(safe-area-inset-bottom) - 24rpx);
+  padding: 16rpx 0 calc(env(safe-area-inset-bottom) + 16rpx);
   flex-shrink: 0;
   z-index: 100;
   overflow: visible;
@@ -1221,9 +1221,9 @@
 
 .composer-wrap {
   display: flex;
-  align-items: flex-end; /* 保持底部对齐，但通过统一高度解决错位 */
+  align-items: center;
   gap: 12rpx;
-  padding: 6rpx 32rpx 0;
+  padding: 0 32rpx;
   background: transparent;
 }
 
