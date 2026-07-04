@@ -126,12 +126,12 @@
     <view class="profile-sheet" catchtap="handleStopPropagation">
       <view class="sheet-bar"></view>
       <view class="sheet-title">完善个人资料</view>
-      <button class="avatar-uploader" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
+      <button class="avatar-uploader" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar" disabled="{{avatarUploading}}">
         <view class="uploader-inner">
           <image wx:if="{{identity && identity.avatarUrl}}" src="{{identity.avatarUrl}}" mode="aspectFill" />
           <view class="uploader-placeholder" wx:else>+</view>
         </view>
-        <view class="uploader-hint">点击更换头像</view>
+        <view class="uploader-hint">{{avatarUploading ? '头像上传中...' : '点击更换头像'}}</view>
       </button>
       <view class="input-group">
         <view class="input-label">昵称</view>

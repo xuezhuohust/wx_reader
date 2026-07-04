@@ -202,10 +202,10 @@
 }
 
 .message-list {
-  padding: 40rpx 32rpx 100rpx;
+  padding: 24rpx 32rpx 56rpx;
   display: flex;
   flex-direction: column;
-  gap: 40rpx;
+  gap: 24rpx;
 }
 
 /* Fixed Book Tag Bar - Optimized for De-cardification */
@@ -233,12 +233,12 @@
 .view-bg-icon-btn {
   position: absolute; /* 绝对定位到右侧，不影响居中 */
   top: 60rpx;
-  right: 32rpx;
+  right: 40rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 56rpx;
-  height: 56rpx;
+  width: 44rpx;
+  height: 44rpx;
   background: rgba(250, 248, 245, 0.72);
   border-radius: 50%;
   backdrop-filter: blur(10px);
@@ -252,8 +252,8 @@
 }
 
 .view-bg-icon {
-  width: 28rpx;
-  height: 28rpx;
+  width: 22rpx;
+  height: 22rpx;
   background-color: currentColor;
   mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z'%3E%3C/path%3E%3Ccircle cx='12' cy='12' r='3'%3E%3C/circle%3E%3C/svg%3E") no-repeat center;
   -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z'%3E%3C/path%3E%3Ccircle cx='12' cy='12' r='3'%3E%3C/circle%3E%3C/svg%3E") no-repeat center;
@@ -321,8 +321,8 @@
 }
 
 .chat-avatar {
-  width: 60rpx;
-  height: 60rpx;
+  width: 52rpx;
+  height: 52rpx;
   border-radius: 8rpx; /* Notion-like slightly rounded square */
   display: flex;
   align-items: center;
@@ -354,15 +354,15 @@
 .suggestion-chips {
   display: flex;
   flex-wrap: wrap;
-  gap: 12rpx;
-  margin-top: 16rpx;
+  gap: 10rpx;
+  margin-top: 10rpx;
 }
 
 .chip-item {
-  padding: 10rpx 24rpx;
+  padding: 8rpx 20rpx;
   background: rgba(60, 105, 43, 0.04);
   border-radius: 99rpx;
-  font-size: 24rpx;
+  font-size: 22rpx;
   color: var(--slate);
   font-weight: 500;
   transition: all 0.2s ease;
@@ -400,7 +400,7 @@
 
 .message-row {
   display: flex;
-  gap: 20rpx;
+  gap: 14rpx;
   max-width: 90%;
 }
 
@@ -416,7 +416,7 @@
 .message-container {
   display: flex;
   flex-direction: column;
-  gap: 12rpx;
+  gap: 8rpx;
 }
 
 .row-user .message-container {
@@ -424,9 +424,9 @@
 }
 
 .message-bubble {
-  padding: 12rpx 0; /* 垂直内边距，移除水平内边距以去卡片化 */
-  font-size: 30rpx;
-  line-height: 1.6;
+  padding: 6rpx 0; /* 垂直内边距，移除水平内边距以去卡片化 */
+  font-size: 29rpx;
+  line-height: 1.55;
   position: relative;
 }
 
@@ -440,19 +440,19 @@
 .skeleton-container {
   display: flex;
   flex-direction: column;
-  gap: 48rpx;
-  padding: 20rpx 0;
+  gap: 28rpx;
+  padding: 12rpx 0;
 }
 
 .skeleton-row {
   display: flex;
-  gap: 20rpx;
+  gap: 14rpx;
   animation: pulse 1.5s infinite ease-in-out;
 }
 
 .skeleton-avatar {
-  width: 68rpx;
-  height: 68rpx;
+  width: 52rpx;
+  height: 52rpx;
   border-radius: 50%;
   background: #f0f0f0;
   flex-shrink: 0;
@@ -462,11 +462,11 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 16rpx;
+  gap: 10rpx;
 }
 
 .skeleton-line {
-  height: 32rpx;
+  height: 24rpx;
   background: #f0f0f0;
   border-radius: 8rpx;
 }
@@ -478,7 +478,7 @@
 
 /* Markdown Blocks */
 .message-block {
-  margin-bottom: 24rpx;
+  margin-bottom: 16rpx;
 }
 
 .message-block:last-child {
@@ -497,7 +497,7 @@
 .block-list {
   display: flex;
   flex-direction: column;
-  gap: 16rpx;
+  gap: 10rpx;
 }
 
 .list-item {
@@ -523,9 +523,9 @@
 
 .block-callout {
   display: flex;
-  gap: 16rpx;
+  gap: 12rpx;
   background: rgba(60, 105, 43, 0.04);
-  padding: 24rpx;
+  padding: 18rpx;
   border-radius: 12rpx;
 }
 
@@ -559,7 +559,7 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 16rpx;
+  gap: 12rpx;
 }
 
 .creative-card-header {
@@ -592,7 +592,7 @@
 
 .creative-card-body {
   background: rgba(60, 105, 43, 0.03);
-  padding: 24rpx 32rpx;
+  padding: 18rpx 24rpx;
   border-radius: 8rpx;
 }
 
@@ -618,7 +618,7 @@
 /* 模式切换分割线 - 重构为横向长条 */
 .mode-switch-row {
   width: 100%;
-  margin: 80rpx 0;
+  margin: 36rpx 0;
   display: flex;
   justify-content: center;
 }
@@ -685,17 +685,48 @@
 
 /* 底部功能栏 - 极简去卡片化 */
 .chat-footer-tools {
-  padding: 16rpx 32rpx;
+  padding: 8rpx 32rpx 6rpx;
   display: flex;
   align-items: center;
   justify-content: space-between;
   background: transparent;
+  position: relative;
+  overflow: visible;
+}
+
+.mode-picker {
+  position: relative;
+  z-index: 2;
+  overflow: visible;
+}
+
+.mode-menu {
+  position: absolute;
+  left: 0;
+  bottom: 48rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+  padding-bottom: 10rpx;
+  min-width: 220rpx;
+}
+
+.mode-menu-item {
+  display: flex;
+  align-items: center;
+  padding: 8rpx 0;
+  background: transparent;
+  transition: all 0.2s ease;
+}
+
+.mode-menu-item:active {
+  transform: scale(0.98);
 }
 
 .mode-trigger {
   display: flex;
   align-items: center;
-  padding: 8rpx 0;
+  padding: 6rpx 0;
   background: transparent;
   transition: all 0.2s ease;
 }
@@ -709,11 +740,11 @@
 }
 
 .mode-trigger-icon {
-  width: 24rpx;
-  height: 24rpx;
+  width: 22rpx;
+  height: 22rpx;
   margin-right: 8rpx;
-  background-color: var(--stone);
-  opacity: 0.6;
+  background-color: var(--primary);
+  opacity: 1;
 }
 
 .mode-trigger--creative .mode-trigger-icon {
@@ -722,33 +753,36 @@
 }
 
 .mode-trigger--story .mode-trigger-icon {
-  background-color: #2f6f73;
+  background-color: var(--primary);
   opacity: 1;
 }
 
-.mode-trigger text {
+.mode-trigger text,
+.mode-menu-item text {
   font-size: 22rpx;
-  color: var(--stone);
+  color: var(--primary);
   font-weight: 600;
   letter-spacing: 0.5rpx;
 }
 
-.mode-trigger--creative text {
+.mode-trigger--creative text,
+.mode-menu-item.mode-trigger--creative text {
   color: var(--primary);
 }
 
-.mode-trigger--story text {
-  color: #2f6f73;
+.mode-trigger--story text,
+.mode-menu-item.mode-trigger--story text {
+  color: var(--primary);
 }
 
 .mode-trigger-arrow {
   width: 8rpx;
   height: 8rpx;
-  border-right: 2rpx solid var(--stone);
-  border-bottom: 2rpx solid var(--stone);
+  border-right: 2rpx solid var(--primary);
+  border-bottom: 2rpx solid var(--primary);
   transform: rotate(-45deg);
   margin-left: 8rpx;
-  opacity: 0.4;
+  opacity: 0.8;
 }
 
 .mode-trigger--creative .mode-trigger-arrow {
@@ -757,18 +791,36 @@
 }
 
 .mode-trigger--story .mode-trigger-arrow {
-  border-color: #2f6f73;
+  border-color: var(--primary);
   opacity: 0.8;
+}
+
+.mode-menu-item .mode-trigger-icon,
+.mode-menu-item.mode-trigger--creative .mode-trigger-icon,
+.mode-menu-item.mode-trigger--story .mode-trigger-icon {
+  background-color: var(--stone);
+  opacity: 0.6;
+}
+
+.mode-menu-item text,
+.mode-menu-item.mode-trigger--creative text,
+.mode-menu-item.mode-trigger--story text {
+  color: var(--stone);
+}
+
+.mode-trigger--open .mode-trigger-arrow {
+  transform: rotate(45deg);
+  margin-top: -4rpx;
 }
 
 .creative-type-selector {
   display: flex;
-  gap: 12rpx;
+  gap: 8rpx;
   overflow-x: auto;
 }
 
 .creative-type-chip {
-  padding: 8rpx 20rpx;
+  padding: 6rpx 16rpx;
   background: rgba(0, 0, 0, 0.03);
   border-radius: 8rpx;
   font-size: 20rpx;
@@ -785,8 +837,8 @@
 .thinking-container {
   display: flex;
   align-items: center;
-  gap: 12rpx;
-  padding: 8rpx 0;
+  gap: 10rpx;
+  padding: 4rpx 0;
 }
 
 .thinking-dot {
@@ -806,7 +858,7 @@
 }
 
 .thinking-text {
-  font-size: 26rpx;
+  font-size: 24rpx;
   color: #3c692b;
   font-weight: 500;
   margin-left: 8rpx;
@@ -815,7 +867,7 @@
 .bubble-user {
   background: rgba(60, 105, 43, 0.08); /* 极简淡绿背景 */
   color: var(--primary);
-  padding: 16rpx 28rpx;
+  padding: 12rpx 22rpx;
   border-radius: 20rpx;
   border-top-right-radius: 4rpx;
   font-weight: 500;
@@ -1073,9 +1125,10 @@
 /* Input Bar Optimization */
 .chat-footer {
   background: var(--bg-canvas);
-  padding: 24rpx 32rpx calc(env(safe-area-inset-bottom) + 24rpx);
+  padding: 4rpx 32rpx calc(env(safe-area-inset-bottom) - 24rpx);
   flex-shrink: 0;
   z-index: 100;
+  overflow: visible;
 }
 
 /* (Quick tips moved to suggestion chips in message area) */
@@ -1119,16 +1172,16 @@
 .composer-wrap {
   display: flex;
   align-items: flex-end; /* 保持底部对齐，但通过统一高度解决错位 */
-  gap: 16rpx;
-  padding: 16rpx 32rpx 32rpx;
+  gap: 12rpx;
+  padding: 6rpx 32rpx 0;
   background: transparent;
 }
 
 .mode-toggle-btn {
-  width: 80rpx;
-  height: 80rpx;
+  width: 68rpx;
+  height: 68rpx;
   background: rgba(0, 0, 0, 0.03);
-  border-radius: 16rpx;
+  border-radius: 14rpx;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1137,8 +1190,8 @@
 }
 
 .icon-mic, .icon-keyboard {
-  width: 36rpx;
-  height: 36rpx;
+  width: 32rpx;
+  height: 32rpx;
   background: #8c8c8c;
 }
 
@@ -1160,7 +1213,7 @@
 
 .voice-bar {
   width: 100%;
-  height: 80rpx;
+  height: 68rpx;
   background: #ffffff;
   border: 1rpx solid rgba(0, 0, 0, 0.05);
   border-radius: 16rpx;
@@ -1187,9 +1240,9 @@
 .input-container {
   flex: 1;
   background: rgba(0, 0, 0, 0.02);
-  border-radius: 16rpx;
-  padding: 16rpx 24rpx;
-  min-height: 80rpx;
+  border-radius: 14rpx;
+  padding: 12rpx 20rpx;
+  min-height: 68rpx;
   box-sizing: border-box;
   display: flex;
   align-items: center;
@@ -1198,8 +1251,8 @@
 .composer-input {
   width: 100%;
   min-height: 40rpx;
-  max-height: 200rpx;
-  font-size: 28rpx;
+  max-height: 160rpx;
+  font-size: 27rpx;
   line-height: 40rpx;
   color: var(--ink);
   padding: 0;
@@ -1208,7 +1261,7 @@
 
 .placeholder-text {
   color: var(--stone);
-  font-size: 28rpx;
+  font-size: 27rpx;
   line-height: 40rpx;
   display: flex;
   align-items: center;
@@ -1216,10 +1269,10 @@
 
 /* 发送按钮 - 调优为温润的学术雅绿，对齐高度 */
 .send-btn {
-  width: 80rpx;
-  height: 80rpx;
+  width: 68rpx;
+  height: 68rpx;
   background: #4b7a3d;
-  border-radius: 16rpx;
+  border-radius: 14rpx;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1239,8 +1292,8 @@
 }
 
 .send-icon {
-  width: 38rpx;
-  height: 38rpx;
+  width: 32rpx;
+  height: 32rpx;
   background: #ffffff;
   mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M22 2L11 13'/%3E%3Cpath d='M22 2L15 22L11 13L2 9L22 2Z'/%3E%3C/svg%3E") no-repeat center;
   -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M22 2L11 13'/%3E%3Cpath d='M22 2L15 22L11 13L2 9L22 2Z'/%3E%3C/svg%3E") no-repeat center;

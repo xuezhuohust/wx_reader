@@ -42,15 +42,19 @@ Page({
     currentConversationId: '',
     currentConversationTitle: '新对话',
     showConversationList: false,
+    showModeMenu: false,
     // 2026-07-02 新增：背景图支持
     backgroundImage: '',
+    backgroundChapterId: '',
     chapterId: '',
     chapterTitle: '',
+    storyProgress: null,
     // 2026-07-03 新增：二创模式支持
     chatMode: 'chat', // 'chat', 'story' or 'creative'
     currentModeLabel: '伴读对话模式',
     currentModeClass: '',
     currentModeIconClass: 'icon-chat',
+    modeOptions: [],
     creativeType: 'story_continue', // 'parallel_world', 'character_extension', 'story_continue'
     creativeTypes: [
       { id: 'story_continue', name: '剧情续写', prompt: '请根据当前章节进度，续写一段剧情。' },
@@ -205,7 +209,22 @@ Page({
       currentModeLabel: meta.label,
       currentModeClass: meta.triggerClass,
       currentModeIconClass: meta.iconClass,
+      modeOptions: this.getModeOptions(chatMode),
     }
+  },
+
+  getModeOptions(currentMode) {
+    return ['chat', 'story', 'creative']
+      .filter((mode) => mode !== currentMode)
+      .map((mode) => {
+        const meta = this.getModeMeta(mode)
+        return {
+          mode,
+          label: meta.label,
+          triggerClass: meta.triggerClass,
+          iconClass: meta.iconClass,
+        }
+      })
   },
 
   getSceneConfig(entry, scene) {
@@ -241,6 +260,10 @@ Page({
     return this.data.chatMode === 'creative' || this.chatEntry === 'creative' || this.chatScene === 'creative'
   },
 
+  isStoryMode() {
+    return this.data.chatMode === 'story' || this.chatEntry === 'story' || this.chatScene === 'story'
+  },
+
   getWelcomeMessage(bookTitle) {
     const mode = this.data.chatMode || this.resolveChatMode(this.chatEntry, this.chatScene)
     if (mode === 'story') {
@@ -254,14 +277,25 @@ Page({
 
   /** 生成章节意境背景图 */
   generateChatBackground(bookId, chapterId) {
-    console.log('[chat] generating background for:', bookId, chapterId)
-    api.generateImage(bookId, chapterId)
+    const targetChapterId = String(chapterId || '').trim()
+    if (!bookId || !targetChapterId) {
+      return
+    }
+
+    const requestKey = `${bookId}:${targetChapterId}:${Date.now()}`
+    this._backgroundRequestKey = requestKey
+    console.log('[chat] generating background for:', bookId, targetChapterId)
+    api.generateImage(bookId, targetChapterId)
       .then((res) => {
+        if (this._backgroundRequestKey !== requestKey) {
+          return
+        }
         // res 已经是解包后的 data.data
         if (res && res.imageUrl) {
           console.log('[chat] background generated:', res.imageUrl)
           this.setData({
-            backgroundImage: res.imageUrl
+            backgroundImage: res.imageUrl,
+            backgroundChapterId: targetChapterId,
           })
         } else {
           console.warn('[chat] background response missing imageUrl:', res)
@@ -270,6 +304,124 @@ Page({
       .catch((err) => {
         console.error('[chat] generate background failed:', err)
       })
+  },
+
+  firstStoryValue() {
+    for (let i = 0; i < arguments.length; i += 1) {
+      const value = arguments[i]
+      if (value !== undefined && value !== null && value !== '') {
+        return value
+      }
+    }
+    return ''
+  },
+
+  normalizeStoryProgressState(state) {
+    const story = state && state.story ? state.story : {}
+    const cursor = story && story.cursor ? story.cursor : {}
+    const currentEventWrapper = state && state.currentEvent ? state.currentEvent : {}
+    const currentEvent = currentEventWrapper.event || currentEventWrapper.currentEvent || currentEventWrapper
+    const progress = state && state.progress ? state.progress : null
+    const chapterId = String(this.firstStoryValue(
+      state && state.chapterId,
+      state && state.chapter_id,
+      cursor.chapterId,
+      cursor.chapter_id,
+      currentEvent.chapterId,
+      currentEvent.chapter_id
+    ) || '').trim()
+    let chapterTitle = String(this.firstStoryValue(
+      state && state.chapterTitle,
+      state && state.chapter_title,
+      cursor.chapterTitle,
+      cursor.chapter_title,
+      currentEvent.chapterTitle,
+      currentEvent.chapter_title
+    ) || '').trim()
+
+    if (!chapterTitle && chapterId && state && state.outline && Array.isArray(state.outline.chapters)) {
+      const matchedChapter = state.outline.chapters.find((chapter) => String(chapter.id || '') === chapterId)
+      chapterTitle = matchedChapter ? String(matchedChapter.title || '').trim() : ''
+    }
+
+    return {
+      chapterId,
+      chapterTitle,
+      progress,
+    }
+  },
+
+  applyStoryProgressState(state) {
+    const normalized = this.normalizeStoryProgressState(state)
+    const displayedChapterId = this.data.backgroundChapterId
+      || (this.data.backgroundImage ? this.data.chapterId : '')
+    const nextData = {
+      storyProgress: normalized.progress,
+    }
+
+    const chapterChanged = normalized.chapterId && normalized.chapterId !== this.data.chapterId
+    if (chapterChanged) {
+      nextData.chapterId = normalized.chapterId
+    }
+    if (chapterChanged || (normalized.chapterTitle && normalized.chapterTitle !== this.data.chapterTitle)) {
+      nextData.chapterTitle = normalized.chapterTitle
+    }
+
+    this.setData(nextData)
+
+    if (
+      normalized.chapterId
+      && normalized.chapterId !== displayedChapterId
+    ) {
+      const bookId = (this.data.book && (this.data.book.bookId || this.data.book.id || this.data.book.bookKey))
+        || this.bookId
+      this.generateChatBackground(bookId, normalized.chapterId)
+    }
+
+    return normalized
+  },
+
+  syncStoryProgressAfterReply() {
+    if (!this.isStoryMode()) {
+      return Promise.resolve(null)
+    }
+
+    const bookId = (this.data.book && (this.data.book.bookKey || this.data.book.id || this.data.book.bookId))
+      || this.bookId
+    if (!bookId) {
+      return Promise.resolve(null)
+    }
+
+    const syncId = (this._storyProgressSyncId || 0) + 1
+    this._storyProgressSyncId = syncId
+    return api.getStoryState(bookId)
+      .then((state) => {
+        if (this._storyProgressSyncId !== syncId) {
+          return null
+        }
+        return this.applyStoryProgressState(state)
+      })
+      .catch((error) => {
+        console.warn('[chat] sync story progress failed:', error)
+        return null
+      })
+  },
+
+  scheduleStoryProgressSyncAfterReply(delay) {
+    if (!this.isStoryMode() || this._storyStateAppliedForStream) {
+      return
+    }
+    const syncId = this._storyProgressSyncId || 0
+    clearTimeout(this._storyProgressSyncTimer)
+    this._storyProgressSyncTimer = setTimeout(() => {
+      if (
+        this._storyProgressSyncId !== syncId
+        || this._storyStateAppliedForStream
+      ) {
+        return
+      }
+      this.syncStoryProgressAfterReply()
+    }, delay || 1200)
   },
 
   /** 预览背景图 */
@@ -287,20 +439,20 @@ Page({
       return
     }
 
-    const modes = ['chat', 'story', 'creative']
-    const labels = ['伴读对话模式', '讲故事模式', 'AI 二创模式']
-    wx.showActionSheet({
-      itemList: labels,
-      success: (res) => {
-        const nextMode = modes[res.tapIndex] || 'chat'
-        this.switchChatMode(nextMode)
-      },
+    this.setData({
+      showModeMenu: !this.data.showModeMenu,
     })
+  },
+
+  handleSelectChatMode(e) {
+    const mode = e.currentTarget.dataset.mode
+    this.switchChatMode(mode)
   },
 
   switchChatMode(mode) {
     const nextMode = this.normalizeEntry(mode)
     if (nextMode === this.data.chatMode) {
+      this.setData({ showModeMenu: false })
       return
     }
 
@@ -315,6 +467,7 @@ Page({
       currentConversationId: '',
       currentConversationTitle: '新对话',
       showConversationList: false,
+      showModeMenu: false,
       messages: [],
       loadingMessages: true,
       creativeGenerating: false,
@@ -505,7 +658,8 @@ Page({
     this.setData({
       inputMode: this.data.inputMode === 'keyboard' ? 'voice' : 'keyboard',
       isRecording: false,
-      voiceCancel: false
+      voiceCancel: false,
+      showModeMenu: false,
     })
     wx.vibrateShort()
   },
@@ -670,6 +824,7 @@ Page({
     clearTimeout(this._streamFlushTimer)
     clearTimeout(this._autoScrollTimer)
     clearTimeout(this._ignoreStopTimer)
+    clearTimeout(this._storyProgressSyncTimer)
     if (this._streamRequestTask && typeof this._streamRequestTask.abort === 'function') {
       this._streamRequestTask.abort()
       this._streamRequestTask = null
@@ -1077,6 +1232,7 @@ Page({
     /* 展开/收起对话切换面板 */
     this.setData({
       showConversationList: !this.data.showConversationList,
+      showModeMenu: false,
     })
   },
 
@@ -1241,6 +1397,7 @@ Page({
     if (this._isHandlingSend) return
     this._isHandlingSend = true
     setTimeout(() => { this._isHandlingSend = false }, 500)
+    this.setData({ showModeMenu: false })
 
     const question = event.currentTarget.dataset.question
     if (this.data.chatMode === 'creative') {
@@ -1261,6 +1418,7 @@ Page({
       this._isHandlingSend = false
       return
     }
+    this.setData({ showModeMenu: false })
 
     // 如果是二创模式，走专门的二创请求逻辑
     if (this.data.chatMode === 'creative') {
@@ -1326,7 +1484,8 @@ Page({
 
   handleFocus() {
     this.setData({
-      isInputFocused: true
+      isInputFocused: true,
+      showModeMenu: false,
     })
   },
 
@@ -1886,6 +2045,8 @@ Page({
 
     this.resetAudioPlayback()
     this.ensureAudioContext()
+    this._storyProgressSyncId = (this._storyProgressSyncId || 0) + 1
+    this._storyStateAppliedForStream = false
 
     // 文本输入和语音识别最终都走此入口；讲故事模式不附加精简提示，避免压缩叙事。
     const serverQuestion = this.chatScene === 'story' ? message : `${message}\n回复精简`
@@ -1947,6 +2108,13 @@ Page({
       onTtsEnd: () => {
         this._streamRequestTask = null
       },
+      onState: (state) => {
+        if (this.isStoryMode()) {
+          this._storyProgressSyncId = (this._storyProgressSyncId || 0) + 1
+          this._storyStateAppliedForStream = true
+          this.applyStoryProgressState(state)
+        }
+      },
       onSegment: (segment, fullReply) => {
         this._pendingStreamReply = fullReply
         this.scheduleStreamFlush()
@@ -1960,6 +2128,14 @@ Page({
           this._streamRequestTask = null
         }
         const finalReply = result.reply || ''
+        if (this.isStoryMode() && !this._storyStateAppliedForStream) {
+          if (result && result.state) {
+            this._storyStateAppliedForStream = true
+            this.applyStoryProgressState(result.state)
+          } else {
+            this.scheduleStoryProgressSyncAfterReply(1200)
+          }
+        }
         this._pendingStreamReply = finalReply
         this.flushStreamReply(true)
         this.setData({

@@ -475,6 +475,7 @@ function sendBookChatMessageStream(bookId, message, handlers) {
       const decode = createStreamDecoder()
       let buffer = ''
       let reply = ''
+      let finalState = null
       let tokenReceived = false
       let settled = false
 
@@ -483,7 +484,7 @@ function sendBookChatMessageStream(bookId, message, handlers) {
           return
         }
         settled = true
-        resolve({ reply })
+        resolve({ reply, state: finalState })
       }
 
       const finishReject = (error) => {
@@ -557,6 +558,14 @@ function sendBookChatMessageStream(bookId, message, handlers) {
           if (streamEvent.event === 'tts_end') {
             if (typeof callbacks.onTtsEnd === 'function') {
               callbacks.onTtsEnd(payload)
+            }
+            return
+          }
+
+          if (streamEvent.event === 'state') {
+            finalState = payload
+            if (typeof callbacks.onState === 'function') {
+              callbacks.onState(payload)
             }
             return
           }
@@ -729,12 +738,28 @@ function switchUserRole(role) {
 }
 
 /** 智能伴读：生成章节意境背景图 */
+function normalizeBackendBookId(bookId) {
+  const value = String(bookId || '').trim()
+  if (value.indexOf('local_book_') === 0) {
+    return `book_${value.slice('local_book_'.length)}`
+  }
+  return value
+}
+
 function generateImage(bookId, chapterId) {
+  const resolvedBookId = normalizeBackendBookId(bookId)
   return request({
     url: '/api/image-generation',
     method: 'POST',
-    data: { bookId, chapterId },
+    data: { bookId: resolvedBookId, chapterId },
     timeout: 60000, // 图片生成耗时较长，手动设置 60s 超时
+  })
+}
+
+/** 讲故事：获取当前用户在本书的讲述进度 */
+function getStoryState(bookId) {
+  return request({
+    url: `/api/story/${encodeURIComponent(bookId)}/state`,
   })
 }
 
@@ -821,6 +846,7 @@ module.exports = {
   startBuildBook,
   switchUserRole,
   generateImage,
+  getStoryState,
   generateCreative,
   generateCreativeWork,
   getMyCreativeWorks,

@@ -1,4 +1,4 @@
-const { syncProfileIdentity } = require('../../services/user')
+const { syncProfileIdentity, uploadProfileAvatar } = require('../../services/user')
 const { loadIdentity, saveIdentity } = require('../../utils/storage')
 
 Page({
@@ -6,6 +6,7 @@ Page({
     identity: null,
     nicknameDraft: '',
     saving: false,
+    avatarUploading: false,
     navBarHeight: 0,
     menuTop: 0,
     menuHeight: 0,
@@ -52,22 +53,24 @@ Page({
 
   onChooseAvatar(event) {
     const { avatarUrl } = event.detail
-    const { identity } = this.data
+    const { identity, avatarUploading } = this.data
 
-    if (!identity || !avatarUrl) return
+    if (!identity || !avatarUrl || avatarUploading) return
 
-    syncProfileIdentity({ avatarUrl })
+    this.setData({ avatarUploading: true })
+
+    uploadProfileAvatar(avatarUrl)
       .then((nextIdentity) => {
-        this.setData({ identity: nextIdentity })
+        this.setData({
+          identity: nextIdentity,
+          avatarUploading: false,
+        })
         wx.showToast({ title: '头像已更新', icon: 'success' })
       })
-      .catch(() => {
-        const nextIdentity = saveIdentity(Object.assign({}, identity, {
-          avatarUrl,
-          updatedAt: Date.now(),
-        }))
-        this.setData({ identity: nextIdentity })
-        wx.showToast({ title: '头像已更新', icon: 'success' })
+      .catch((error) => {
+        console.error('upload avatar failed:', error)
+        this.setData({ avatarUploading: false })
+        wx.showToast({ title: '头像上传失败', icon: 'none' })
       })
   },
 

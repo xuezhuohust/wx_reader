@@ -38,6 +38,28 @@ function getDefaultDisplayName(openid) {
   return DEFAULT_DISPLAY_NAME
 }
 
+/** 将后端返回的上传路径转成小程序可加载的完整地址 */
+function toAbsoluteUrl(path) {
+  const rawPath = String(path || '').trim()
+  if (!rawPath) {
+    return ''
+  }
+  if (/^(https?:|wxfile:|http:\/\/tmp\/|https:\/\/tmp\/)/.test(rawPath)) {
+    return rawPath
+  }
+  return `${BASE_URL}${rawPath.startsWith('/') ? rawPath : `/${rawPath}`}`
+}
+
+function normalizeIdentityAvatar(identity) {
+  if (!identity || typeof identity !== 'object') {
+    return identity
+  }
+
+  return Object.assign({}, identity, {
+    avatarUrl: toAbsoluteUrl(identity.avatarUrl),
+  })
+}
+
 /** 调用 wx.login 获取临时 code */
 function getWxLoginCode() {
   return new Promise((resolve, reject) => {
@@ -116,7 +138,8 @@ function loginWithWechat() {
       const displayName = isSameUser && String(previousIdentity.displayName || '').trim()
         ? String(previousIdentity.displayName || '').trim()
         : (String(data.displayName || '').trim() || getDefaultDisplayName(openid))
-      const avatarUrl = isSameUser ? (previousIdentity.avatarUrl || data.avatarUrl || '') : (data.avatarUrl || '')
+      const backendAvatarUrl = toAbsoluteUrl(data.avatarUrl)
+      const avatarUrl = isSameUser ? (previousIdentity.avatarUrl || backendAvatarUrl) : backendAvatarUrl
       const roles = Array.isArray(data.roles) && data.roles.length ? data.roles : (previousIdentity.roles || ['reader'])
       const activeRole = String(data.activeRole || previousIdentity.activeRole || 'reader')
 
@@ -211,7 +234,27 @@ function syncProfileIdentity(payload) {
     data: payload || {},
   }).then((data) => {
     const currentIdentity = loadIdentity() || {}
-    const nextIdentity = saveIdentity(Object.assign({}, currentIdentity, data.identity || {}))
+    const nextIdentity = saveIdentity(normalizeIdentityAvatar(Object.assign({}, currentIdentity, data.identity || {})))
+    syncGlobalIdentity(nextIdentity)
+    return nextIdentity
+  })
+}
+
+/** 上传用户选择的微信头像，并同步为长期可访问头像地址 */
+function uploadProfileAvatar(filePath) {
+  const { uploadFile } = require('../utils/request')
+
+  return uploadFile('/api/auth/me/avatar', filePath, {}).then((data) => {
+    const currentIdentity = loadIdentity() || {}
+    const responseIdentity = normalizeIdentityAvatar(data.identity || {})
+    const avatarUrl = toAbsoluteUrl(
+      responseIdentity.avatarUrl
+        || data.avatarUrl
+        || filePath
+    )
+    const nextIdentity = saveIdentity(Object.assign({}, currentIdentity, responseIdentity, {
+      avatarUrl,
+    }))
     syncGlobalIdentity(nextIdentity)
     return nextIdentity
   })
@@ -239,5 +282,6 @@ module.exports = {
   ensureUserIdentity,
   loginWithWechat,
   syncProfileIdentity,
+  uploadProfileAvatar,
   switchActiveRole,
 }

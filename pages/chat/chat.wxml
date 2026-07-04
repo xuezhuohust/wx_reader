@@ -73,7 +73,7 @@
     bindtouchstart="handleChatTouchStart"
     bindtouchend="handleChatTouchEnd"
     bindtouchcancel="handleChatTouchEnd"
-    style="padding-top: {{navBarHeight + 44}}px;"
+    style="padding-top: {{navBarHeight + 36}}px;"
   >
     <view class="message-list">
       <!-- 骨架屏加载状态 -->
@@ -230,7 +230,7 @@
         </block>
       </block>
 
-      <view class="bottom-space" style="height: {{keyboardHeight + 200}}rpx;"></view>
+      <view class="bottom-space" style="height: {{keyboardHeight + 132}}rpx;"></view>
     </view>
   </scroll-view>
 
@@ -248,11 +248,26 @@
   <view class="chat-footer">
     <!-- 二创模式功能栏 -->
     <view class="chat-footer-tools">
-      <!-- 模式切换触发器 -->
-      <view class="mode-trigger {{currentModeClass}}" bindtap="toggleChatMode">
-        <view class="mode-trigger-icon {{currentModeIconClass}}"></view>
-        <text>{{currentModeLabel}}</text>
-        <view class="mode-trigger-arrow"></view>
+      <view class="mode-picker">
+        <view wx:if="{{showModeMenu}}" class="mode-menu">
+          <view
+            wx:for="{{modeOptions}}"
+            wx:key="mode"
+            class="mode-menu-item {{item.triggerClass}}"
+            data-mode="{{item.mode}}"
+            bindtap="handleSelectChatMode"
+          >
+            <view class="mode-trigger-icon {{item.iconClass}}"></view>
+            <text>{{item.label}}</text>
+          </view>
+        </view>
+
+        <!-- 模式切换触发器 -->
+        <view class="mode-trigger {{currentModeClass}} {{showModeMenu ? 'mode-trigger--open' : ''}}" bindtap="toggleChatMode">
+          <view class="mode-trigger-icon {{currentModeIconClass}}"></view>
+          <text>{{currentModeLabel}}</text>
+          <view class="mode-trigger-arrow"></view>
+        </view>
       </view>
 
       <!-- 二创类型选择（仅二创模式显示） -->

@@ -24,7 +24,7 @@
     <view class="section">
       <view class="section-label">个人资料</view>
       <view class="card-base">
-        <button class="avatar-row" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
+        <button class="avatar-row" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar" disabled="{{avatarUploading}}">
           <view class="avatar-preview">
             <image wx:if="{{identity && identity.avatarUrl}}" src="{{identity.avatarUrl}}" mode="aspectFill" />
             <view wx:else class="avatar-placeholder">
@@ -33,7 +33,7 @@
           </view>
           <view class="avatar-meta">
             <text class="avatar-label">修改头像</text>
-            <text class="avatar-hint">支持 JPG、PNG 格式</text>
+            <text class="avatar-hint">{{avatarUploading ? '头像上传中...' : '支持 JPG、PNG、WebP 格式'}}</text>
           </view>
           <view class="chevron-right"></view>
         </button>
