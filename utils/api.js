@@ -201,6 +201,15 @@ function speechToText(filePath) {
   })
 }
 
+/** 图片理解：上传图片并返回 caption 结果 */
+function captionImage(filePath, options) {
+  const payload = options || {}
+  return uploadFile('/api/image-understanding', filePath, {
+    prompt: payload.prompt || payload.question || '',
+    model: payload.model || '',
+  })
+}
+
 /** 上报语音播放时长 */
 function reportVoicePlay(duration) {
   return requestWithoutAuth({
@@ -842,6 +851,7 @@ module.exports = {
   appendConversationMessages,
   requestSpeech,
   speechToText,
+  captionImage,
   reportVoicePlay,
   uploadCover,
   getPublisherStats,

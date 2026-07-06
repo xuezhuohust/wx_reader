@@ -44,6 +44,38 @@ function unwrapApiResponse(data, fallbackMessage) {
   throw error
 }
 
+/** 修复 wx.uploadFile 偶发把 UTF-8 中文按 Latin-1 解码导致的乱码 */
+function repairMojibakeText(value) {
+  const text = String(value || '')
+  if (!/[ÃÂÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝàáâãäåæçèéêëìíîïðñòóôõöøùúûüýþÿ]/.test(text)) {
+    return text
+  }
+
+  try {
+    return decodeURIComponent(escape(text))
+  } catch (error) {
+    return text
+  }
+}
+
+function repairMojibake(value) {
+  if (typeof value === 'string') {
+    return repairMojibakeText(value)
+  }
+
+  if (Array.isArray(value)) {
+    return value.map(repairMojibake)
+  }
+
+  if (value && typeof value === 'object') {
+    Object.keys(value).forEach((key) => {
+      value[key] = repairMojibake(value[key])
+    })
+  }
+
+  return value
+}
+
 /** 底层 wx.request 封装，处理状态码和异常 */
 function rawRequest(options) {
   const requestUrl = buildUrl(options.url)
@@ -188,7 +220,7 @@ function uploadFile(url, filePath, formData, hasRetriedAfterAuth) {
           let data = {}
 
           try {
-            data = JSON.parse(res.data || '{}')
+            data = repairMojibake(JSON.parse(res.data || '{}'))
           } catch (error) {
             reject(error)
             return

@@ -303,6 +303,10 @@
           <view class="{{inputMode === 'keyboard' ? 'icon-mic' : 'icon-keyboard'}}"></view>
         </view>
 
+        <view class="image-upload-btn {{imageUploading ? 'image-upload-btn--loading' : ''}}" bindtap="handleChooseImage">
+          <view class="icon-image-upload"></view>
+        </view>
+
         <!-- 文本输入模式 -->
         <textarea
           wx:if="{{inputMode === 'keyboard'}}"

@@ -31,6 +31,7 @@ Page({
     isRecording: false,
     voiceCancel: false,
     inputMode: 'keyboard', // 'keyboard' or 'voice'
+    imageUploading: false,
     keyboardHeight: 0,
     navBarHeight: 0,
     menuTop: 0,
@@ -696,6 +697,53 @@ Page({
       showModeMenu: false,
     })
     wx.vibrateShort()
+  },
+
+  handleChooseImage() {
+    if (this.data.imageUploading || this.data.isRecording || this.voiceRecordStarting) {
+      return
+    }
+    this.setData({ showModeMenu: false })
+    wx.chooseImage({
+      count: 1,
+      sizeType: ['compressed'],
+      sourceType: ['album', 'camera'],
+      success: (res) => {
+        const filePath = res.tempFilePaths && res.tempFilePaths[0]
+        if (!filePath) {
+          return
+        }
+        this.handleImageCaptionUpload(filePath)
+      },
+      fail: (err) => {
+        const errMsg = String((err && err.errMsg) || '')
+        if (errMsg.indexOf('cancel') === -1) {
+          console.warn('[chat] choose image failed', err)
+          wx.showToast({ title: '选择图片失败', icon: 'none' })
+        }
+      },
+    })
+  },
+
+  handleImageCaptionUpload(filePath) {
+    this.setData({ imageUploading: true })
+    wx.showLoading({ title: '正在识别图片……', mask: true })
+    api.captionImage(filePath)
+      .then((result) => {
+        console.log('[chat] image caption result', result)
+        wx.showToast({ title: '图片结果已打印', icon: 'none' })
+      })
+      .catch((err) => {
+        console.error('[chat] image caption failed', err)
+        wx.showToast({
+          title: err.message || '图片识别失败',
+          icon: 'none',
+        })
+      })
+      .finally(() => {
+        wx.hideLoading()
+        this.setData({ imageUploading: false })
+      })
   },
 
   handleVoiceTap() {
