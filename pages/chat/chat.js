@@ -542,29 +542,63 @@ Page({
 
     const userMsgContent = `[AI 二创 - ${creativeTypeObj ? creativeTypeObj.name : ''}] ${prompt}`
     const userMessage = this.createMessage('user', userMsgContent)
+    const nextMessages = [...this.data.messages, userMessage, creativeMessage]
+    this._streamingMessageIndex = nextMessages.length - 1
+    this._streamingMessageId = creativeMessage.id
+    this._pendingStreamReply = ''
+    this._lastFlushedStreamReply = ''
+    clearTimeout(this._streamFlushTimer)
+    clearTimeout(this._autoScrollTimer)
 
     this.setData({
-      messages: [...this.data.messages, userMessage, creativeMessage]
+      messages: nextMessages,
+      scrollWithAnimation: false,
+      userHasScrolledUp: false,
+      showScrollDownBtn: false,
     }, () => {
       this.scrollToBottom()
     })
 
-    api.generateCreative({
+    const creativePromise = api.generateCreativeWorkStream({
       bookId: this.bookId,
       chapterId: this.data.chapterId,
       originalText: this.data.creativeBaseText,
       userPrompt: prompt,
       type: this.data.creativeType
-    }).then(res => {
+    }, {
+      onPhase: (phase) => {
+        const message = String((phase && phase.message) || '正在检索原著素材...')
+        if (!this._pendingStreamReply) {
+          this._pendingStreamReply = message
+          this.flushStreamReply(true)
+          this._pendingStreamReply = ''
+          this._lastFlushedStreamReply = ''
+        }
+      },
+      onSegment: (segment, fullReply) => {
+        this._pendingStreamReply = fullReply
+        this.scheduleStreamFlush()
+      },
+    })
+    this._streamRequestTask = creativePromise
+
+    creativePromise.then(res => {
       // 成功后更新消息状态
       const fallbackContent = '暂时没有生成内容，请换个角度再试试。'
-      const finalContent = String((res && (res.content || res.reply || res.answer)) || '').trim()
+      const work = res && res.work
+      const finalContent = String(
+        (res && (res.reply || res.answer))
+        || (work && work.content)
+        || ''
+      ).trim()
       const messages = this.data.messages
       const index = messages.findIndex(m => m.id === creativeMessage.id)
       let finalMessageId = creativeMessage.id
       const spokenContent = finalContent || fallbackContent
+      this._pendingStreamReply = spokenContent
+      this.flushStreamReply(true)
       if (index !== -1) {
-        finalMessageId = (res && res.id) || messages[index].id
+        finalMessageId = (work && work.id) || (res && res.id) || messages[index].id
         messages[index] = {
           ...messages[index],
           status: 'success',
@@ -589,13 +623,19 @@ Page({
       const index = messages.findIndex(m => m.id === creativeMessage.id)
       if (index !== -1) {
         messages[index].status = 'error'
-        messages[index].content = '生成失败，请稍后重试。'
+        messages[index].content = err && err.message
+          ? `生成失败：${err.message}`
+          : '生成失败，请稍后重试。'
         this.setData({ messages })
       }
     }).finally(() => {
+      this._streamRequestTask = null
       this.setData({
         creativeGenerating: false,
-        loadingReply: false
+        loadingReply: false,
+        scrollWithAnimation: true,
+      }, () => {
+        this.clearStreamState()
       })
     })
   },
@@ -2349,16 +2389,35 @@ Page({
     const bookId = this.bookId || book.id || book.bookId || ''
     const replyFallback = '暂时没有生成内容，请换个角度再试试。'
 
-    api.generateCreativeWork({
+    const creativePromise = api.generateCreativeWorkStream({
       bookId,
       userPrompt: message,
       chapterId: this.data.chapterId,
       originalText: this.data.creativeBaseText,
       type: this.data.creativeType,
+    }, {
+      onPhase: (phase) => {
+        if (this._pendingStreamReply) {
+          return
+        }
+        this._pendingStreamReply = String((phase && phase.message) || '正在检索原著素材...')
+        this.flushStreamReply(true)
+        this._pendingStreamReply = ''
+        this._lastFlushedStreamReply = ''
+      },
+      onSegment: (segment, fullReply) => {
+        this._pendingStreamReply = fullReply
+        this.scheduleStreamFlush()
+      },
     })
+    this._streamRequestTask = creativePromise
+
+    creativePromise
       .then((work) => {
+        const savedWork = work && work.work
         const reply = String(
-          (work && (work.content || work.reply || work.answer))
+          (work && (work.reply || work.answer))
+          || (savedWork && savedWork.content)
           || replyFallback
         ).trim()
         const finalReply = reply || replyFallback
@@ -2375,6 +2434,7 @@ Page({
         })
       })
       .then(() => {
+        this._streamRequestTask = null
         this.setData({
           loadingReply: false,
           scrollWithAnimation: true,
@@ -2396,6 +2456,7 @@ Page({
           timeout: error && error.timeout,
           requestUrl: error && error.requestUrl,
         }, error)
+        this._streamRequestTask = null
         const errorMessage = error && (error.message || error.errMsg || error.statusCode)
           ? String(error.message || error.errMsg || `HTTP ${error.statusCode}`)
           : ''

@@ -674,6 +674,197 @@ function sendBookChatMessageStream(bookId, message, handlers) {
   return promise
 }
 
+/** 流式二次创作 - 使用 SSE/chunked 传输逐段返回生成正文 */
+function generateCreativeWorkStream(options, handlers) {
+  const payload = options || {}
+  const callbacks = handlers || {}
+  let streamRequestTask = null
+
+  const promise = ensureUserIdentity().then((identity) => {
+    if (!identity || !identity.openid || !identity.token) {
+      throw new Error('登录失败，请稍后重试')
+    }
+
+    return new Promise((resolve, reject) => {
+      const decode = createStreamDecoder()
+      let buffer = ''
+      let reply = ''
+      let finalWork = null
+      let finalContext = null
+      let tokenReceived = false
+      let settled = false
+
+      const finishResolve = () => {
+        if (settled) {
+          return
+        }
+        settled = true
+        resolve({
+          reply,
+          answer: reply,
+          work: finalWork,
+          context: finalContext,
+        })
+      }
+
+      const finishReject = (error) => {
+        if (settled) {
+          return
+        }
+        settled = true
+        reject(error)
+      }
+
+      const processBuffer = () => {
+        const parts = buffer.split('\n\n')
+        buffer = parts.pop() || ''
+
+        parts.forEach((part) => {
+          const eventLine = part.split('\n').find((line) => line.indexOf('event:') === 0)
+          const explicitEvent = eventLine ? eventLine.replace(/^event:\s*/, '').trim() : ''
+          const lines = part.split('\n').filter((line) => line.indexOf('data:') === 0)
+          if (!lines.length) {
+            return
+          }
+
+          const payloadText = lines.map((line) => line.replace(/^data:\s*/, '')).join('\n')
+          if (!payloadText) {
+            return
+          }
+
+          let eventPayload = null
+          try {
+            eventPayload = JSON.parse(payloadText)
+          } catch (error) {
+            console.error('[creative stream] invalid payload', payloadText, error)
+            return
+          }
+
+          const streamEvent = getStreamEvent(eventPayload, explicitEvent)
+          if (typeof callbacks.onEvent === 'function') {
+            callbacks.onEvent(streamEvent, eventPayload)
+          }
+
+          if (!streamEvent.success || streamEvent.event === 'error') {
+            finishReject(new Error(streamEvent.content || streamEvent.message || '二创生成失败'))
+            return
+          }
+
+          if (streamEvent.event === 'phase') {
+            if (typeof callbacks.onPhase === 'function') {
+              callbacks.onPhase(eventPayload)
+            }
+            return
+          }
+
+          if (streamEvent.event === 'context') {
+            finalContext = eventPayload
+            if (typeof callbacks.onContext === 'function') {
+              callbacks.onContext(eventPayload)
+            }
+            return
+          }
+
+          if (streamEvent.event === 'token' || streamEvent.event === 'segment') {
+            const segment = String(streamEvent.content || '')
+            if (!segment) {
+              return
+            }
+            tokenReceived = true
+            reply += segment
+            if (typeof callbacks.onSegment === 'function') {
+              callbacks.onSegment(segment, reply)
+            }
+            return
+          }
+
+          if (streamEvent.event === 'result') {
+            const data = eventPayload.data && typeof eventPayload.data === 'object'
+              ? eventPayload.data
+              : {}
+            finalWork = eventPayload.work || data.work || finalWork
+            const finalAnswer = String(streamEvent.content || (finalWork && finalWork.content) || '')
+            if (finalAnswer && !tokenReceived) {
+              reply = finalAnswer
+              if (typeof callbacks.onSegment === 'function') {
+                callbacks.onSegment(finalAnswer, reply)
+              }
+            }
+            if (typeof callbacks.onResult === 'function') {
+              callbacks.onResult(eventPayload)
+            }
+            finishResolve()
+            return
+          }
+
+          if (streamEvent.event === 'done' || streamEvent.event === 'end') {
+            finishResolve()
+          }
+        })
+      }
+
+      streamRequestTask = wx.request({
+        url: `${BASE_URL}/api/creative/generate/stream`,
+        method: 'POST',
+        enableChunked: true,
+        responseType: 'arraybuffer',
+        timeout: callbacks.timeout || 180000,
+        data: {
+          bookId: payload.bookId || payload.book_id || payload.book || '',
+          userPrompt: payload.userPrompt || payload.prompt || payload.message || '',
+          chapterId: payload.chapterId || payload.chapter_id || '',
+          originalText: payload.originalText || payload.original_text || '',
+          type: payload.type || '',
+          stream: true,
+        },
+        header: {
+          'Content-Type': 'application/json',
+          Accept: 'text/event-stream',
+          Authorization: `Bearer ${identity.token}`,
+          'X-Openid': identity.openid,
+        },
+        success: (res) => {
+          if (res.statusCode < 200 || res.statusCode >= 300) {
+            const responseData = parseResponseData(res.data)
+            const error = new Error(
+              (responseData && (responseData.error || responseData.message))
+                || '二创生成失败'
+            )
+            error.statusCode = res.statusCode
+            if (responseData && typeof responseData === 'object') {
+              error.code = responseData.code
+              error.requestId = responseData.requestId
+              error.details = responseData.details
+            }
+            finishReject(error)
+            return
+          }
+          processBuffer()
+          finishResolve()
+        },
+        fail: (error) => {
+          finishReject(error)
+        },
+      })
+
+      if (streamRequestTask && typeof streamRequestTask.onChunkReceived === 'function') {
+        streamRequestTask.onChunkReceived((chunk) => {
+          buffer += decode(chunk.data)
+          processBuffer()
+        })
+      }
+    })
+  })
+
+  promise.abort = () => {
+    if (streamRequestTask && typeof streamRequestTask.abort === 'function') {
+      streamRequestTask.abort()
+    }
+  }
+
+  return promise
+}
+
 /** 获取出版方统计数据 */
 function getPublisherStats() {
   return request({
@@ -865,6 +1056,7 @@ module.exports = {
   getStoryState,
   generateCreative,
   generateCreativeWork,
+  generateCreativeWorkStream,
   getMyCreativeWorks,
   deleteCreativeWork,
   toAbsoluteUrl,
