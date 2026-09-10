@@ -18,6 +18,9 @@ function translateCategory(raw) {
     "小说": "Fiction",
     "传记": "Biography",
     "管理": "Management",
+    "教育": "Education",
+    "其他": "Other",
+    "其它": "Other",
     "全部": "All"
   };
   return categoryMap[str] || str;
@@ -115,6 +118,9 @@ function normalizeBookCategories(data) {
     "社会": "Social Sciences",
     "心理": "Psychology",
     "科普": "Popular Science",
+    "教育": "Education",
+    "其他": "Other",
+    "其它": "Other",
     "全部": "All"
   };
   return source
