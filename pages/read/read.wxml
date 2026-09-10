@@ -171,9 +171,7 @@
             </view>
           </view>
           <view class="nav-progress-meta">
-            <text class="progress-pct">Section {{readingProgress}}%</text>
-            <text class="progress-sep">·</text>
-            <text class="progress-chapter">Chapter {{currentChapterIndex + 1}} of {{totalChapters}}</text>
+            <text class="progress-pct font-mono">{{readingProgress}}%</text><text class="progress-sep">·</text><text class="progress-chapter">Ch.{{currentChapterIndex + 1}}/{{totalChapters}}</text>
           </view>
         </view>
       </view>
