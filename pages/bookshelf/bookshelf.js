@@ -109,7 +109,7 @@ Page({
             readersCount: book.readersCount || Math.floor(Math.random() * 5000 + 100) + (Math.random() > 0.5 ? 'k' : ''),
             isAIReady: book.isAIReady !== undefined ? book.isAIReady : Math.random() > 0.5,
             status: book.status || ['reading', 'wishlist', 'finished'][Math.floor(Math.random() * 3)],
-            category: book.category || availableCategories[Math.floor(Math.random() * availableCategories.length)] || ''
+            category: book.category || (availableCategories.length ? availableCategories[Math.floor(Math.random() * availableCategories.length)] : "General Corpus")
           })
         })
         this.setData({

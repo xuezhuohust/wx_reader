@@ -1,3 +1,34 @@
+
+function translateCategory(raw) {
+  if (!raw) return "General Corpus";
+  const str = String(raw).trim();
+  const categoryMap = {
+    "哲学": "Philosophy",
+    "文学": "Literature",
+    "历史": "History",
+    "科技": "Computer Science",
+    "计算机": "Computer Science",
+    "经济": "Economics",
+    "艺术": "Arts & Design",
+    "社会": "Social Sciences",
+    "社会学": "Social Sciences",
+    "心理": "Psychology",
+    "心理学": "Psychology",
+    "科普": "Popular Science",
+    "小说": "Fiction",
+    "传记": "Biography",
+    "管理": "Management",
+    "全部": "All"
+  };
+  return categoryMap[str] || str;
+}
+
+function normalizeBook(book) {
+  if (!book || typeof book !== "object") return book;
+  return Object.assign({}, book, {
+    category: translateCategory(book.category)
+  });
+}
 // API 接口封装模块 - 提供所有后端 API 调用方法
 
 const { ensureUserIdentity } = require("../services/user");
@@ -54,14 +85,14 @@ function pollBuildStatus(id, onProgress) {
 function getRecommendBooks() {
   return request({
     url: "/api/books/recommend",
-  }).then((data) => data.books || []);
+  }).then((data) => (data.books || []).map(normalizeBook));
 }
 
 /** 获取全部书籍列表 */
 function getAllBooks() {
   return request({
     url: "/api/books",
-  }).then((data) => data.books || []);
+  }).then((data) => (data.books || []).map(normalizeBook));
 }
 
 function normalizeBookCategories(data) {
@@ -152,14 +183,14 @@ function getBookCategoryPicker(selectedCategory) {
 function getPurchasedBooks() {
   return request({
     url: "/api/books/purchased",
-  }).then((data) => data.books || []);
+  }).then((data) => (data.books || []).map(normalizeBook));
 }
 
 /** 根据 ID 获取单本书籍信息 */
 function getBookById(id) {
   return request({
     url: `/api/books/${encodeURIComponent(id)}`,
-  }).then((data) => data.book || data);
+  }).then((data) => normalizeBook(data.book || data));
 }
 
 /** 获取书籍指定章节的内容 */

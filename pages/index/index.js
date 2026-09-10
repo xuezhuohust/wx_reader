@@ -36,8 +36,8 @@ Page({
     timeGreeting: "你好",
     // Library Data
     searchValue: "",
-    activeCategory: "全部",
-    categories: ["全部"],
+    activeCategory: "All",
+    categories: ["All"],
     books: [],
     filteredBooks: [],
     loadError: false,
@@ -358,7 +358,7 @@ Page({
     const now = Date.now();
 
     // 只要有书籍列表缓存且未过期，就使用缓存
-    if (cache.libraryBooks && now - cache.lastUpdated < 5 * 60 * 1000) {
+    if (false && cache.libraryBooks) {
       this._distributeBooks(cache.libraryBooks);
 
       // 后台静默刷新
@@ -437,7 +437,7 @@ Page({
         const activeCategory =
           categories.indexOf(this.data.activeCategory) >= 0
             ? this.data.activeCategory
-            : "全部";
+            : "All";
 
         this.setData({
           categories,
@@ -519,7 +519,7 @@ Page({
       .trim()
       .toLowerCase();
     const filteredBooks = (books || []).filter((item) => {
-      const matchedCategory = category === "全部" || item.category === category;
+      const matchedCategory = category === "All" || item.category === category;
       const matchedKeyword =
         !searchText || this.filterByKeyword([item], searchText).length > 0;
       return matchedCategory && matchedKeyword;
