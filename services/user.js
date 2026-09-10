@@ -35,7 +35,7 @@ function hasValidIdentity(identity) {
 
 /** 根据 openid 生成默认显示名称 */
 function getDefaultDisplayName(openid) {
-  return DEFAULT_DISPLAY_NAME
+  return 'Research Fellow'
 }
 
 /** 将后端返回的上传路径转成小程序可加载的完整地址 */

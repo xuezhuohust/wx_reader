@@ -2,7 +2,7 @@
 
 /** 本地存储中用户身份信息对应的 key */
 const IDENTITY_STORAGE_KEY = 'user_identity'
-const DEFAULT_DISPLAY_NAME = 'AI伴读助手'
+const DEFAULT_DISPLAY_NAME = 'Research Fellow'
 
 /** 获取全局 App 实例 */
 function getAppInstance() {
@@ -56,7 +56,7 @@ function shouldUseDefaultDisplayName(displayName) {
   const normalizedName = String(displayName || '').trim()
   return (
     !normalizedName
-    || normalizedName === '微信用户'
+    || normalizedName === '微信用户' || normalizedName === 'AI伴读助手'
     || normalizedName.startsWith('微信用户 ')
     || normalizedName === '测试用户'
     || normalizedName.startsWith('测试用户 ')

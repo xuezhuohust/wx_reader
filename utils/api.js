@@ -8,7 +8,7 @@ const {
   uploadFile,
 } = require("./request");
 
-const ALL_BOOK_CATEGORY = "全部";
+const ALL_BOOK_CATEGORY = "All";
 let cachedBookCategories = null;
 
 /** 将相对路径转为完整的 URL */
@@ -73,8 +73,24 @@ function normalizeBookCategories(data) {
         ? data.options.map((item) => item && (item.value || item.label || item))
         : [];
 
+  const categoryMap = {
+    "哲学": "Philosophy",
+    "文学": "Literature",
+    "历史": "History",
+    "科技": "Computer Science",
+    "计算机": "Computer Science",
+    "经济": "Economics",
+    "艺术": "Arts & Design",
+    "社会": "Social Sciences",
+    "心理": "Psychology",
+    "科普": "Popular Science",
+    "全部": "All"
+  };
   return source
-    .map((item) => String(item || "").trim())
+    .map((item) => {
+      const raw = String(item || "").trim();
+      return categoryMap[raw] || raw;
+    })
     .filter((item, index, list) => item && list.indexOf(item) === index);
 }
 
