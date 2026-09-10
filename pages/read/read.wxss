@@ -1,10 +1,304 @@
 .reader-page {
   background-color: #faf8f5;
   color: #1b1b1b;
-  height: 100vh;
+  height: 100%;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+}
+
+/*
+ * 横向 Pad 使用双栏工作区。每个 scroll-view 都放在有明确高度的 flex
+ * 容器中，避免 swiper 分页模式在大屏上既无法纵向阅读、又容易被 footer
+ * 覆盖的问题。
+ */
+.reader-page--landscape .reader-workspace {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  gap: 1px;
+  background: rgba(27, 27, 27, 0.08);
+}
+
+/* 横屏同样是固定阅读工作区。不能用 JS windowHeight，因为开发者工具
+ * 在旋转首帧会保留上一方向的尺寸，导致底部栏落到可视区外。 */
+.reader-page--landscape {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  width: auto;
+  height: auto;
+  min-height: 0;
+  box-sizing: border-box;
+  z-index: 1;
+}
+
+.reader-page--landscape .reader-source-pane,
+.reader-page--landscape .reader-chat-pane {
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #faf8f5;
+}
+
+.reader-page--landscape .reader-source-pane {
+  flex: 11;
+}
+
+.reader-page--landscape .reader-chat-pane {
+  flex: 9;
+  background: #ffffff;
+}
+
+.reader-page--landscape .reader-chat-component {
+  display: block;
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+
+.reader-page--landscape .reader-chat-loading {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #8c8c8c;
+  font-size: 14px;
+}
+
+.reader-page--landscape .reader-pane-header {
+  min-height: 64px;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border-bottom: 1px solid rgba(27, 27, 27, 0.08);
+  flex-shrink: 0;
+}
+
+.reader-page--landscape .reader-pane-back {
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #f3efe8;
+  flex-shrink: 0;
+}
+
+.reader-page--landscape .reader-pane-back .icon-back {
+  width: 10px;
+  height: 10px;
+  border-left-width: 2px;
+  border-bottom-width: 2px;
+}
+
+.reader-page--landscape .reader-pane-heading {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.reader-page--landscape .reader-pane-kicker {
+  color: #8c8c8c;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+}
+
+.reader-page--landscape .reader-pane-title {
+  color: #1b1b1b;
+  font-size: 17px;
+  font-weight: 800;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.reader-page--landscape .reader-pane-description {
+  color: #8c8c8c;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.reader-page--landscape .reader-pane-action {
+  color: #3c692b;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(60, 105, 43, 0.08);
+  flex-shrink: 0;
+}
+
+.reader-page--landscape .reader-source-scroll {
+  flex: 1;
+  height: 0;
+  min-height: 0;
+}
+
+.reader-page--landscape .reader-source-swiper {
+  flex: 1;
+  height: 0;
+  min-height: 0;
+}
+
+.reader-page--landscape .reader-source-page-content {
+  position: relative;
+  height: 100%;
+  min-height: 0;
+  box-sizing: border-box;
+  padding: 20px 30px 16px;
+  overflow: hidden;
+}
+
+/* 两侧透明热区只负责翻页，正文中央仍可长按选择。 */
+.reader-page--landscape .reader-source-turn-zone {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 22%;
+  z-index: 3;
+}
+
+.reader-page--landscape .reader-source-turn-zone--prev { left: 0; }
+.reader-page--landscape .reader-source-turn-zone--next { right: 0; }
+
+.reader-page--landscape .reader-source-page-content .reader-article {
+  height: 100%;
+  box-sizing: border-box;
+  padding: 0;
+  overflow: hidden;
+}
+
+.reader-page--landscape .reader-source-content {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 20px 30px 32px;
+}
+
+.reader-page--landscape .reader-source-loading {
+  color: #8c8c8c;
+  font-size: 14px;
+  text-align: center;
+  padding: 40px 0;
+}
+
+.reader-page--landscape .reader-source-more-hint {
+  padding: 8px 0 28px;
+  color: #9a9e95;
+  font-size: 13px;
+  text-align: center;
+}
+
+.reader-page--landscape .paragraph {
+  font-size: 16px;
+  line-height: 1.72;
+  margin: 0 0 10px;
+  padding: 0;
+  margin-left: 0;
+  margin-right: 0;
+  text-shadow: none;
+}
+
+.reader-page--landscape .paragraph.is-blank-line {
+  height: 18px;
+  min-height: 18px;
+}
+
+.reader-page--landscape .paragraph.is-divider-line {
+  margin: 8px 0 16px;
+}
+
+/* Pad 竖屏仍是平板，不应回退到手机的超大 rpx 正文字号。固定阅读密度后，
+ * 分页预算与实际行数一致，单页不再留下大块空白。 */
+.reader-page--pad-portrait .reader-page-content {
+  padding-left: 28px;
+  padding-right: 28px;
+}
+
+.reader-page--pad-portrait {
+  /* 不使用 JS 的 windowHeight：开发者工具旋转后该值会短暂保留横屏高度。
+   * 阅读页是“翻页视口”而不是普通长页，四边固定可阻止外层 page 滚动。 */
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  width: auto;
+  height: auto;
+  min-height: 0;
+  box-sizing: border-box;
+  z-index: 1;
+}
+
+.reader-page--pad-portrait .reader-swiper {
+  /* 原生 swiper 需要确定的 flex 高度；height: 0 避免 100% 撑出父视口。 */
+  flex: 1;
+  height: 0;
+  min-height: 0;
+}
+
+.reader-page--pad-portrait .reader-page-content {
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.reader-page--pad-portrait .reader-article {
+  padding-top: 6px;
+  /* 正文可用高度已按 footer 的真实 top 坐标计算，不能再重复留白。 */
+  padding-bottom: 16px;
+}
+
+.reader-page--pad-portrait .paragraph {
+  font-size: 20px;
+  line-height: 1.72;
+  margin-bottom: 10px;
+}
+
+.reader-page--pad-portrait .paragraph.is-blank-line {
+  height: 18px;
+  min-height: 18px;
+}
+
+.reader-page--landscape .chapter-end-hint {
+  padding: 24px 0;
+  color: #8c8c8c;
+  text-align: center;
+  font-size: 14px;
+}
+
+.reader-page--landscape .reader-source-footer {
+  min-height: 48px;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid rgba(27, 27, 27, 0.08);
+  color: #8c8c8c;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.reader-page--landscape .reader-source-nav {
+  color: #3c692b;
+  font-weight: 700;
+  padding: 8px 0;
+}
+
+.reader-page--landscape .reader-source-nav.is-disabled {
+  color: #bfbfbf;
+  pointer-events: none;
 }
 
 .reader-swiper {
@@ -25,36 +319,10 @@
   transition: opacity 0.3s ease, visibility 0.3s ease;
 }
 
-.reader-header-ai {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 90;
-  background-color: transparent;
-  transition: opacity 0.3s ease, visibility 0.3s ease;
-}
-
-.reader-header.hidden, .reader-header-ai.hidden {
+.reader-header.hidden {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-}
-
-.ai-guide-entry-compact {
-  display: flex;
-  align-items: center;
-  gap: 12rpx;
-  background-color: rgba(60, 105, 43, 0.06);
-  padding: 8rpx 24rpx;
-  border-radius: 99rpx;
-  border: 1rpx solid rgba(60, 105, 43, 0.15);
-  transition: all 0.2s ease;
-}
-
-.ai-guide-entry-compact:active {
-  background-color: rgba(60, 105, 43, 0.1);
-  transform: scale(0.98);
 }
 
 .fade-in {
@@ -63,12 +331,58 @@
   pointer-events: auto;
 }
 
+.reader-ai-fab {
+  position: fixed;
+  right: 28rpx;
+  bottom: calc(48rpx + env(safe-area-inset-bottom));
+  z-index: 150;
+  min-width: 176rpx;
+  min-height: 88rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10rpx;
+  padding: 0 24rpx;
+  border-radius: 99rpx;
+  border: 1rpx solid rgba(60, 105, 43, 0.2);
+  background-color: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 8rpx 24rpx rgba(27, 27, 27, 0.16);
+  color: #3c692b;
+  font-size: 24rpx;
+  font-weight: 700;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.reader-ai-fab--above-footer {
+  /* footer 的内容高度约为 190rpx；额外留出间距，确保入口不遮挡底部操作。 */
+  bottom: calc(220rpx + env(safe-area-inset-bottom));
+}
+
+.reader-ai-fab:active {
+  background-color: #f0f6ed;
+  transform: scale(0.98);
+}
+
+.reader-ai-fab-icon {
+  width: 30rpx;
+  height: 30rpx;
+}
+
 .nav-inner {
   display: flex;
   align-items: center;
   justify-content: flex-start;
   padding-left: 32rpx;
   box-sizing: border-box;
+}
+
+/* chat wxss is imported for the shared composer; keep reader navigation independent. */
+.reader-page .nav-inner {
+  position: relative;
+  left: auto;
+  right: auto;
+  justify-content: flex-start;
+  padding-left: 32rpx;
 }
 
 .nav-left {

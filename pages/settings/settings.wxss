@@ -1,6 +1,9 @@
 .settings-page {
   background: var(--bg-canvas);
-  height: 100vh;
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
 }
 
@@ -58,7 +61,9 @@
 
 /* Scrollable body */
 .content-body {
-  height: 100vh;
+  flex: 1;
+  height: 0;
+  min-height: 0;
   box-sizing: border-box;
 }
 
@@ -291,4 +296,152 @@
 
 .btn-logout:active {
   background: rgba(231, 76, 60, 0.06);
+}
+
+/* 横屏 Pad：账号设置不再让手机稿 rpx 随窗口宽度放大。 */
+.settings-page--large .nav-inner {
+  padding: 0 24px;
+}
+
+.settings-page--large .nav-back {
+  margin-left: 0;
+}
+
+.settings-page--large .back-arrow {
+  width: 10px;
+  height: 10px;
+  margin-left: 0;
+  border-left-width: 2px;
+  border-bottom-width: 2px;
+}
+
+.settings-page--large .nav-title {
+  font-size: 16px;
+  margin-right: 40px;
+}
+
+.settings-page--large .settings-content {
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0 24px;
+  box-sizing: border-box;
+}
+
+.settings-page--large .page-header {
+  padding: 0 8px 20px;
+}
+
+.settings-page--large .page-heading {
+  font-size: 26px;
+  letter-spacing: -0.4px;
+}
+
+.settings-page--large .page-subtitle {
+  margin-top: 5px;
+  font-size: 14px;
+}
+
+.settings-page--large .section {
+  padding: 0;
+  margin-bottom: 0;
+}
+
+.settings-page--large .section-label {
+  margin: 0 0 8px 6px;
+  font-size: 12px;
+  letter-spacing: 0.8px;
+}
+
+.settings-page--large .card-base {
+  padding: 18px;
+  border-radius: 12px;
+}
+
+.settings-page--large .avatar-row--privacy {
+  min-height: 56px;
+}
+
+.settings-page--large .avatar-preview {
+  width: 52px;
+  height: 52px;
+}
+
+.settings-page--large .avatar-placeholder-text {
+  font-size: 22px;
+}
+
+.settings-page--large .avatar-meta {
+  margin-left: 14px;
+  gap: 1px;
+}
+
+.settings-page--large .avatar-label,
+.settings-page--large .nickname-label,
+.settings-page--large .nickname-input {
+  font-size: 16px;
+}
+
+.settings-page--large .avatar-hint,
+.settings-page--large .privacy-contract-link {
+  font-size: 12px;
+}
+
+.settings-page--large .privacy-inline-btn {
+  width: 62px;
+  height: 34px;
+  margin-left: 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 34px;
+}
+
+.settings-page--large .privacy-contract-link {
+  margin: 10px 0 0 66px;
+}
+
+.settings-page--large .row-separator {
+  margin: 12px 0;
+}
+
+.settings-page--large .nickname-row {
+  padding: 2px 0;
+}
+
+.settings-page--large .nickname-label {
+  width: 60px;
+}
+
+.settings-page--large .nickname-input-wrap {
+  margin-left: 12px;
+}
+
+.settings-page--large .nickname-input {
+  padding: 5px 0;
+}
+
+.settings-page--large .chevron-right {
+  width: 7px;
+  height: 7px;
+  border-right-width: 1.5px;
+  border-top-width: 1.5px;
+}
+
+.settings-page--large .save-area {
+  padding: 20px 0 14px;
+}
+
+.settings-page--large .btn-save,
+.settings-page--large .btn-logout {
+  height: 46px;
+  border-radius: 10px;
+  font-size: 16px;
+}
+
+.settings-page--large .logout-area {
+  padding: 0;
+}
+
+.settings-page--large .bottom-safe {
+  height: calc(64px + env(safe-area-inset-bottom));
 }

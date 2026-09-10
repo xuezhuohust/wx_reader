@@ -9,6 +9,8 @@
 }
 
 page {
+  height: 100%;
+  min-height: 100%;
   overflow-x: hidden;
   /* Primary - Sage Green */
   --primary: #3c692b;
@@ -151,8 +153,8 @@ view, text, button, input, textarea, picker, scroll-view {
 
 /* Page Shell */
 .page-shell {
-  min-height: 100vh;
-  height: 100vh;
+  height: 100%;
+  min-height: 0;
   overflow: hidden;
 }
 

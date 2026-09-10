@@ -7,7 +7,10 @@
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-top: 1rpx solid rgba(0, 0, 0, 0.05);
-  z-index: 9999;
+  /* 高于 enhanced scroll-view 的合成层，旋转重排后仍保持在最前。 */
+  z-index: 2147483647;
+  transform: translateZ(0);
+  will-change: transform;
   padding-bottom: env(safe-area-inset-bottom);
 }
 
@@ -48,4 +51,19 @@
 .tab-item--active .tab-label {
   color: var(--primary);
   font-weight: 600;
+}
+
+/* Pad 上 rpx 会按更宽的窗口放大，底栏保持接近手机的可触达高度。 */
+.tab-shell--large .tab-inner {
+  height: 64px;
+}
+
+.tab-shell--large .tab-icon {
+  width: 22px;
+  height: 22px;
+}
+
+.tab-shell--large .tab-label {
+  font-size: 12px;
+  margin-top: 2px;
 }

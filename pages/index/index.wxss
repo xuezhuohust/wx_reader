@@ -5,15 +5,20 @@ page {
 .home-page {
   background-color: #faf8f5;
   color: #1b1b1b;
-  min-height: 100vh; /* 改为 min-height，允许页面根据内容自动撑开 */
+  height: 100%;
+  min-height: 0;
   display: flex;
   flex-direction: column;
+  /* 自定义 TabBar 使用 fixed 定位；不能被页面壳裁切。 */
+  overflow: visible;
 }
 
 /* Scroll Area */
 .scroll-area {
   width: 100%;
-  height: 100vh; /* 确保 scroll-view 有明确的高度 */
+  flex: 1;
+  height: 0;
+  min-height: 0;
 }
 
 /* Hero Header Section */
@@ -474,6 +479,10 @@ page {
 }
 
 .masonry-cover {
+  width: 100%;
+  height: 0;
+  /* 与今日推荐 240:336 保持相同的 5:7 书籍封面比例。 */
+  padding-top: 140%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -481,7 +490,13 @@ page {
   overflow: hidden;
 }
 
-.masonry-cover image {
+.masonry-cover image,
+.masonry-cover .book-placeholder-inner-flat {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
   width: 100%;
   height: 100%;
 }
@@ -685,3 +700,321 @@ page {
 .safe-area-bottom {
   height: calc(140rpx + env(safe-area-inset-bottom));
 }
+
+/*
+ * rpx 以窗口宽度为基准。在横向 Pad 上，手机设计稿里的 560rpx 会变成
+ * 接近 800px 的首屏高度，导致推荐内容看起来“消失”。大屏保持手机的
+ * 阅读密度，使用 px 锁定关键尺寸；手机端不进入该 class，原有样式不变。
+ */
+.home-page--large .home-hero-header {
+  /* 横屏可用高度有限，首屏要优先露出推荐内容，而不是放大手机 Hero。 */
+  min-height: 212px;
+  height: 212px;
+}
+
+.home-page--large .hero-body {
+  padding: 0 32px 14px;
+}
+
+.home-page--large .hero-top-nav {
+  margin-bottom: 12px;
+}
+
+.home-page--large .greeting-time {
+  font-family: "PingFang SC", "HarmonyOS Sans SC", "MiSans", "Microsoft YaHei", sans-serif;
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: 0;
+  color: #2f4030;
+}
+
+.home-page--large .greeting-main {
+  margin-top: 2px;
+  justify-content: center;
+}
+
+.home-page--large .app-title {
+  font-size: 30px;
+  letter-spacing: -1px;
+}
+
+.home-page--large .hero-reading-entry {
+  padding: 0;
+}
+
+.home-page--large .entry-cover-box {
+  width: 52px;
+  height: 72px;
+  margin-right: 16px;
+  border-radius: 6px;
+}
+
+.home-page--large .entry-meta {
+  margin-bottom: 4px;
+}
+
+.home-page--large .entry-tag {
+  font-size: 12px;
+  letter-spacing: 1px;
+}
+
+.home-page--large .entry-pct {
+  font-size: 14px;
+}
+
+.home-page--large .entry-title-row {
+  margin-bottom: 6px;
+}
+
+.home-page--large .entry-book-title {
+  font-size: 21px;
+}
+
+.home-page--large .entry-arrow-icon {
+  width: 7px;
+  height: 7px;
+  border-top-width: 2px;
+  border-right-width: 2px;
+  margin-left: 8px;
+}
+
+.home-page--large .entry-progress-bar {
+  height: 4px;
+  margin-top: 2px;
+}
+
+.home-page--large .main-sections {
+  padding: 0 32px;
+}
+
+.home-page--large .scroll-content {
+  padding: 8px 0 32px;
+}
+
+.home-page--large .home-search-section {
+  padding: 0 32px;
+  margin-top: 18px;
+  margin-bottom: 18px;
+}
+
+.home-page--large .home-search-bar {
+  height: 40px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  background-color: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 12px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.03);
+}
+
+.home-page--large .icon-search-small {
+  width: 17px;
+  height: 17px;
+  border: 2px solid #8c8c8c;
+  border-radius: 50%;
+  position: relative;
+  margin-right: 10px;
+  flex-shrink: 0;
+}
+
+.home-page--large .icon-search-small::after {
+  content: '';
+  position: absolute;
+  width: 6px;
+  height: 2px;
+  background-color: #8c8c8c;
+  bottom: -3px;
+  right: -4px;
+  transform: rotate(45deg);
+}
+
+.home-page--large .home-search-input {
+  flex: 1;
+  min-width: 0;
+  font-size: 15px;
+  font-weight: 500;
+  color: #1b1b1b;
+}
+
+.home-page--large .search-placeholder {
+  color: #8c8c8c;
+  opacity: 0.6;
+}
+
+.home-page--large .home-search-clear {
+  width: 20px;
+  height: 20px;
+  margin-left: 8px;
+  border-radius: 50%;
+  background: #e7e5e1;
+  color: #777;
+  font-size: 17px;
+  line-height: 18px;
+  text-align: center;
+}
+
+.home-page--large .section-header {
+  margin-bottom: 14px;
+}
+
+.home-page--large .section-mt {
+  margin-top: 28px;
+}
+
+.home-page--large .section-title {
+  font-size: 20px;
+}
+
+.home-page--large .section-link {
+  font-size: 15px;
+}
+
+.home-page--large .book-scroll {
+  margin: 0 -32px;
+  width: calc(100% + 64px);
+}
+
+.home-page--large .book-row {
+  gap: 16px;
+  padding: 0 32px 12px;
+}
+
+.home-page--large .book-card {
+  width: 160px;
+}
+
+.home-page--large .book-card-cover {
+  height: 224px;
+  border-radius: 10px;
+}
+
+.home-page--large .book-card-info {
+  height: 58px;
+  box-sizing: border-box;
+  padding: 10px 4px 0;
+  text-align: center;
+}
+
+.home-page--large .book-card-title,
+.home-page--large .masonry-title {
+  font-size: 15px;
+  line-height: 20px;
+}
+
+.home-page--large .book-card-meta,
+.home-page--large .masonry-meta {
+  font-size: 13px;
+  margin-top: 4px;
+  line-height: 18px;
+  justify-content: center;
+}
+
+.home-page--large .masonry-grid {
+  /* 所有封面固定为比今日推荐 160px 略大的 180px，不再被四列网格拉宽。 */
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 180px);
+  column-count: unset;
+  gap: 18px;
+  margin-top: 6px;
+}
+
+.home-page--large .masonry-item,
+.home-page--large .masonry-item-skeleton {
+  width: auto;
+  margin-bottom: 0;
+  border-radius: 14px;
+}
+
+.home-page--large .masonry-cover {
+  height: 0 !important;
+  padding-top: 140%;
+}
+
+.home-page--large .masonry-info {
+  height: 64px;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  text-align: center;
+}
+
+.home-page--large .masonry-badge {
+  top: 10px;
+  right: 10px;
+  font-size: 11px;
+  letter-spacing: 1px;
+  padding: 3px 8px;
+}
+
+.home-page--large .safe-area-bottom {
+  height: calc(100px + env(safe-area-inset-bottom));
+}
+
+.home-page--large .home-search-empty {
+  padding: 24px 0 8px;
+  color: #8c8c8c;
+  text-align: center;
+  font-size: 14px;
+}
+
+/* Pad 竖屏的 rpx 会按平板宽度放大近一倍。首页顶部改用与手机设计稿
+ * 等值的 px 尺寸，避免问候、标题和继续阅读区被无意放大。 */
+.home-page--pad-portrait .home-hero-header {
+  min-height: 280px;
+  height: 280px;
+}
+
+.home-page--pad-portrait .hero-body {
+  padding: 0 20px 50px;
+}
+
+.home-page--pad-portrait .hero-top-nav {
+  margin-bottom: 36px;
+}
+
+.home-page--pad-portrait .greeting-time {
+  font-size: 12px;
+  letter-spacing: 1px;
+}
+
+.home-page--pad-portrait .greeting-main {
+  margin-top: 6px;
+}
+
+.home-page--pad-portrait .app-title {
+  font-size: 28px;
+  letter-spacing: -0.75px;
+}
+
+.home-page--pad-portrait .hero-reading-entry {
+  padding: 12px 0;
+}
+
+.home-page--pad-portrait .entry-cover-box {
+  width: 45px;
+  height: 63px;
+  margin-right: 16px;
+  border-radius: 4px;
+}
+
+.home-page--pad-portrait .entry-meta { margin-bottom: 4px; }
+.home-page--pad-portrait .entry-tag { font-size: 9px; letter-spacing: 1px; }
+.home-page--pad-portrait .entry-pct { font-size: 11px; }
+.home-page--pad-portrait .entry-title-row { margin-bottom: 6px; }
+.home-page--pad-portrait .entry-book-title { font-size: 16px; }
+.home-page--pad-portrait .entry-arrow-icon {
+  width: 5px;
+  height: 5px;
+  border-top-width: 1.5px;
+  border-right-width: 1.5px;
+  margin-left: 6px;
+}
+.home-page--pad-portrait .entry-progress-bar { height: 4px; margin-top: 2px; }
+
+.home-page--pad-portrait .main-sections { padding: 0 20px; }
+.home-page--pad-portrait .scroll-content { padding: 20px 0 24px; }
+.home-page--pad-portrait .section-header { margin-bottom: 14px; }
+.home-page--pad-portrait .section-mt { margin-top: 24px; }
+.home-page--pad-portrait .section-title { font-size: 17px; }
+.home-page--pad-portrait .section-link { font-size: 13px; }

@@ -20,8 +20,10 @@
     "navigationBarTitleText": "AI 伴读",
     "navigationBarTextStyle": "black",
     "backgroundColor": "#faf8f5",
-    "backgroundTextStyle": "light"
+    "backgroundTextStyle": "light",
+    "pageOrientation": "auto"
   },
+  "resizable": true,
   "style": "v2",
   "__usePrivacyCheck__": true,
   "permission": {

@@ -1,12 +1,18 @@
-<view class="page-container bookshelf-page">
-  <!-- Sticky Header -->
-  <view class="home-nav" style="height: {{navBarHeight}}px; background-color: #faf8f5;">
+<view class="page-container bookshelf-page {{isLargeScreen ? 'bookshelf-page--large' : ''}}" style="{{windowHeight ? 'height: ' + windowHeight + 'px;' : ''}}">
+  <!-- 手机端保留原页头；横屏 Pad 交由状态栏安全留白承接内容。 -->
+  <view class="home-nav" wx:if="{{!isLargeScreen}}" style="height: {{navBarHeight}}px; background-color: #faf8f5;">
     <view class="nav-header" style="position: absolute; top: {{menuTop}}px; height: {{menuHeight}}px; left: 0; right: 0; padding-right: {{menuRight}}px;">
       <view class="nav-title">书库</view>
       <view class="nav-actions">
       </view>
     </view>
   </view>
+
+  <view
+    class="large-top-safe-area"
+    wx:if="{{isLargeScreen}}"
+    style="height: {{statusBarHeight + 16}}px;"
+  ></view>
 
   <scroll-view 
     class="scroll-area" 
@@ -17,8 +23,8 @@
     style="padding-top: 20rpx;"
   >
     <view class="scroll-content">
-      <!-- Search Bar -->
-      <view class="search-bar fade-up d1">
+      <!-- 搜索入口迁至横屏 Pad 首页；手机端仍保留原入口。 -->
+      <view class="search-bar fade-up d1" wx:if="{{!isLargeScreen}}">
         <view class="icon-search-small"></view>
         <input
           class="search-input"

@@ -16,7 +16,11 @@ Page({
     hasHiddenChapters: false,
     loading: true,
     hasProgress: false,
-    displayCopyright: ''
+    displayCopyright: '',
+    displayWordCount: '暂无',
+    displayRating: '暂无',
+    isLargeScreen: false,
+    windowHeight: 0,
   },
 
   onLoad(options) {
@@ -38,6 +42,7 @@ Page({
     const pageTitle = '书本详情'
     
     const app = getApp()
+    const layout = app.refreshLayout('book-detail:onLoad')
     this.setData({
       scene,
       isPublisherScene,
@@ -47,10 +52,26 @@ Page({
       menuTop: app.globalData.menuTop,
       menuHeight: app.globalData.menuHeight,
       menuWidth: app.globalData.menuWidth,
+      isLargeScreen: layout.isLandscapePad,
+      windowHeight: layout.height,
     })
     wx.setNavigationBarTitle({
       title: pageTitle,
     })
+  },
+
+  onResize(res) {
+    const nextIsLargeScreen = getApp()
+      .refreshLayout('book-detail:onResize', res && res.size)
+      .isLandscapePad
+    const layout = getApp().globalData.layout
+    if (nextIsLargeScreen !== this.data.isLargeScreen || layout.height !== this.data.windowHeight) {
+      this.setData({ isLargeScreen: nextIsLargeScreen, windowHeight: layout.height })
+    }
+  },
+
+  handleAppLayoutChange(size) {
+    this.onResize({ size })
   },
 
   handleBack() {
@@ -116,6 +137,10 @@ Page({
           hasProgress,
           priceText: formatPrice(book.price),
           displayCopyright: this.normalizeDisplayCopyright(book.copyright),
+          displayWordCount: this.formatWordCount(
+            book.wordCount || book.word_count || book.words || book.totalWords
+          ),
+          displayRating: this.formatRating(book.rating || book.score || book.ratingScore),
           chaptersExpanded,
           visibleChapters: this.getVisibleChapters(chapters, chaptersExpanded),
           chapterCount: chapters.length,
@@ -149,6 +174,36 @@ Page({
       return ''
     }
     return text
+  },
+
+  formatWordCount(value) {
+    if (value === null || value === undefined || value === '') {
+      return '暂无'
+    }
+
+    const count = Number(value)
+    if (Number.isFinite(count) && count >= 0) {
+      if (count >= 10000) {
+        const formatted = (count / 10000).toFixed(count % 10000 === 0 ? 0 : 1)
+        return `${formatted} 万字`
+      }
+      return `${Math.round(count)} 字`
+    }
+
+    return String(value).trim() || '暂无'
+  },
+
+  formatRating(value) {
+    if (value === null || value === undefined || value === '') {
+      return '暂无'
+    }
+
+    const rating = Number(value)
+    if (Number.isFinite(rating)) {
+      return `${rating.toFixed(Number.isInteger(rating) ? 0 : 1)} 分`
+    }
+
+    return String(value).trim() || '暂无'
   },
 
   getVisibleChapters(chapters, expanded) {

@@ -1,4 +1,4 @@
-<view class="page-container detail-page">
+<view class="page-container detail-page {{isLargeScreen ? 'detail-page--large' : ''}}" style="{{windowHeight ? 'height: ' + windowHeight + 'px;' : ''}}">
   <!-- Custom Navigation Bar -->
   <view class="detail-nav {{scrolled ? 'nav--scrolled' : ''}}" style="height: {{navBarHeight}}px;">
     <view class="nav-inner" style="top: {{menuTop}}px; height: {{menuHeight}}px;">
@@ -23,7 +23,7 @@
       show-scrollbar="{{false}}" 
       bindscroll="onPageScroll"
     >
-      <view class="scroll-content" style="padding-top: {{navBarHeight + 20}}px;">
+      <view class="scroll-content" style="padding-top: {{isLargeScreen ? navBarHeight + 32 : navBarHeight + 20}}px;">
         <!-- Hero Section: Left Aligned -->
         <view class="book-hero-new fade-up d1">
           <view class="hero-cover-part">
@@ -57,6 +57,14 @@
               <view class="prop-item">
                 <view class="prop-label">章节</view>
                 <view class="prop-value">{{chapterCount}} 章节</view>
+              </view>
+              <view class="prop-item" wx:if="{{isLargeScreen}}">
+                <view class="prop-label">字数</view>
+                <view class="prop-value">{{displayWordCount}}</view>
+              </view>
+              <view class="prop-item" wx:if="{{isLargeScreen}}">
+                <view class="prop-label">评分</view>
+                <view class="prop-value">{{displayRating}}</view>
               </view>
             </view>
           </view>

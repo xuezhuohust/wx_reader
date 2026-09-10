@@ -1,5 +1,9 @@
 {
   "disableScroll": true,
+  "pageOrientation": "auto",
   "navigationBarTitleText": "书中对话",
-  "navigationStyle": "custom"
+  "navigationStyle": "custom",
+  "usingComponents": {
+    "book-chat": "../../components/book-chat/book-chat"
+  }
 }

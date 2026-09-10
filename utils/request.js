@@ -11,13 +11,21 @@ function buildUrl(url) {
   return `${BASE_URL}${url}`
 }
 
+/**
+ * 为异常的 304 响应创建一次性 URL，避免小程序运行时只返回状态码而不回填缓存正文。
+ */
+function appendCacheBust(url) {
+  const separator = url.indexOf('?') >= 0 ? '&' : '?'
+  return `${url}${separator}_requestTime=${Date.now()}`
+}
+
 /** 从响应对象中提取错误信息，生成标准 Error */
 function normalizeError(res, fallbackMessage) {
   const data = res && res.data
   const error = new Error(
-    (data && (data.error || data.message))
-      || fallbackMessage
-      || '请求失败'
+    (data && (data.message || data.error))
+    || fallbackMessage
+    || '请求失败'
   )
   if (data && typeof data === 'object') {
     error.code = data.code
@@ -89,6 +97,8 @@ function rawRequest(options) {
       method: requestMethod,
       data: options.data || {},
       timeout: requestTimeout, // 默认 15s 超时
+      // 明确禁用小程序请求缓存，避免动态接口被错误地复用为 304 空响应。
+      enableCache: false,
       header: Object.assign({
         'Content-Type': 'application/json',
       }, options.header || {}),
@@ -109,6 +119,20 @@ function rawRequest(options) {
             error.elapsedMs = elapsedMs
             reject(error)
           }
+          return
+        }
+
+        // 少数运行时会把缓存命中的 GET 直接透传为 304，却不会附带对应的
+        // 缓存正文。该响应无法解包为 API 数据，因此绕过缓存重试一次。
+        if (
+          res.statusCode === 304
+          && requestMethod.toUpperCase() === 'GET'
+          && !options.__retriedAfterNotModified
+        ) {
+          rawRequest(Object.assign({}, options, {
+            url: appendCacheBust(options.url),
+            __retriedAfterNotModified: true,
+          })).then(resolve).catch(reject)
           return
         }
 

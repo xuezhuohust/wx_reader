@@ -14,11 +14,14 @@ Page({
     menuHeight: 0,
     menuWidth: 0,
     menuRight: 0,
+    isLargeScreen: false,
+    windowHeight: 0,
     scrolled: false,
   },
 
   onLoad() {
     const app = getApp()
+    const layout = app.refreshLayout('settings:onLoad')
     const identity = loadIdentity()
     const displayName = identity ? String(identity.displayName || '').trim() : ''
     this.registerProfilePrivacyAuthorization()
@@ -31,6 +34,8 @@ Page({
       menuHeight: app.globalData.menuHeight,
       menuWidth: app.globalData.menuWidth,
       menuRight: app.globalData.menuRight,
+      isLargeScreen: layout.isLandscapePad,
+      windowHeight: layout.height,
     })
     this.refreshProfilePrivacyState()
   },
@@ -45,6 +50,25 @@ Page({
         placeholderInitial: displayName ? displayName.charAt(0).toUpperCase() : '?',
       })
     }
+  },
+
+  onResize(res) {
+    const app = getApp()
+    const layout = app.refreshLayout('settings:onResize', res && res.size)
+    app.setupNavBar()
+    this.setData({
+      isLargeScreen: layout.isLandscapePad,
+      navBarHeight: app.globalData.navBarHeight,
+      menuTop: app.globalData.menuTop,
+      menuHeight: app.globalData.menuHeight,
+      menuWidth: app.globalData.menuWidth,
+      menuRight: app.globalData.menuRight,
+      windowHeight: layout.height,
+    })
+  },
+
+  handleAppLayoutChange(size) {
+    this.onResize({ size })
   },
 
   handleBack() {

@@ -71,10 +71,25 @@ function normalizePagePath(path) {
   return String(path || '').replace(/^\//, '')
 }
 
+function isLargeScreen() {
+  const app = getAppInstance()
+  if (app && app.globalData) {
+    return !!app.globalData.isLandscapePad
+  }
+  return false
+}
+
 /** 根据用户角色获取对应的导航项列表 */
-function getTabsByRole(role) {
+function getTabsByRole(role, largeScreen) {
   const source = role === 'publisher' ? PUBLISHER_TAB_ITEMS : READER_TAB_ITEMS
-  return source.map((item) => Object.assign({}, item))
+  const items = source.map((item) => Object.assign({}, item))
+
+  // 横屏 Pad 的主入口放在最左侧；手机端沿用既有的书库—首页—我的顺序。
+  if (role !== 'publisher' && largeScreen) {
+    return [items[1], items[0], items[2]]
+  }
+
+  return items
 }
 
 /** 解析用户身份信息（参数优先 > 全局数据 > 本地存储） */
@@ -105,10 +120,12 @@ function syncRoleTabBar(page, pagePath, identity) {
   const nextIdentity = resolveIdentity(identity)
   const role = getUserRole(nextIdentity)
 
+  const largeScreen = isLargeScreen()
   tabBar.setData({
     currentRole: role,
-    items: getTabsByRole(role),
+    items: getTabsByRole(role, largeScreen),
     selectedPath: normalizePagePath(pagePath || page.route),
+    isLargeScreen: largeScreen,
   })
 }
 

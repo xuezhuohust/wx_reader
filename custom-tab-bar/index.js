@@ -4,6 +4,7 @@ Component({
     items: [],
     selectedPath: '',
     hidden: false,
+    isLargeScreen: false,
   },
 
   methods: {

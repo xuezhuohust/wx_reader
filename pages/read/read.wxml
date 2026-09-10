@@ -1,20 +1,16 @@
-<view class="reader-page" wx:if="{{book}}">
-  <!-- Permanent AI Entry (Shown when controls are hidden) -->
-  <view 
-    class="reader-header-ai {{showControls ? 'fade-in' : 'hidden'}}"
-    style="top: {{navBarHeight + 8}}px; height: {{menuHeight}}px;"
+<view class="reader-page {{isLandscapeReader ? 'reader-page--landscape' : ''}} {{isPadPortraitReader ? 'reader-page--pad-portrait' : ''}}" wx:if="{{book}}">
+  <!-- AI 入口不挂在顶部导航上：阅读时始终可见，也不会落到状态栏或被 swiper 截获。 -->
+  <view
+    wx:if="{{!isLandscapeReader && !showTocSheet && !showSelectionMenu}}"
+    class="reader-ai-fab {{showFooterBar ? 'reader-ai-fab--above-footer' : ''}}"
+    catchtap="handleStartAI"
   >
-    <view class="nav-inner" style="height: {{menuHeight}}px;">
-      <view class="ai-guide-entry-compact" bindtap="handleStartAI">
-        <view class="icon-ai-sparkle"></view>
-        <text class="ai-guide-text">AI 伴读已就绪，点击开始解析</text>
-        <view class="icon-arrow-right"></view>
-      </view>
-    </view>
+    <view class="icon-ai-sparkle reader-ai-fab-icon"></view>
+    <text>AI 伴读</text>
   </view>
 
   <!-- Custom Navigation Bar -->
-  <view class="reader-header {{showControls ? 'fade-in' : 'hidden'}}" style="height: {{navBarHeight}}px; padding-top: {{menuTop}}px;">
+  <view wx:if="{{!isLandscapeReader}}" class="reader-header {{showControls ? 'fade-in' : 'hidden'}}" style="height: {{navBarHeight}}px; padding-top: {{menuTop}}px;">
     <view class="nav-inner" style="height: {{menuHeight}}px; position: relative;">
       <view class="nav-left" bindtap="handleBack">
         <view class="icon-back"></view>
@@ -28,8 +24,87 @@
     </view>
   </view>
 
-  <!-- Reading Content (Swiper Mode) -->
+  <!-- Pad 横屏工作区：原文和伴读对话并列，两个区域独立滚动。 -->
+  <view wx:if="{{isLandscapeReader}}" class="reader-workspace">
+    <view class="reader-source-pane">
+      <view class="reader-pane-header reader-source-header">
+        <view class="reader-pane-back" bindtap="handleBack">
+          <view class="icon-back"></view>
+        </view>
+        <view class="reader-pane-heading">
+          <text class="reader-pane-title">{{currentChapterName || '正在加载...'}}</text>
+        </view>
+      </view>
+
+      <view wx:if="{{loading}}" class="reader-source-loading">正在加载原文…</view>
+      <swiper
+        wx:else
+        class="reader-source-swiper"
+        current="{{currentPageIndex}}"
+        bindchange="onPageChange"
+        duration="{{swiperDuration}}"
+        disable-touch="{{true}}"
+      >
+        <swiper-item wx:for="{{chapterPages}}" wx:key="index" wx:for-index="pageIdx">
+          <view class="reader-source-page-content">
+            <view class="reader-article" wx:if="{{item.type === 'content'}}">
+              <view
+                wx:for="{{item.content}}"
+                wx:for-item="paraObj"
+                wx:for-index="paraIdx"
+                wx:key="paraIdx"
+                class="paragraph {{paraObj.text && selectedParaText === paraObj.text ? 'para-selected' : ''}} {{paraObj.isSplitTop ? 'is-split-top' : ''}} {{paraObj.isSplitBottom ? 'is-split-bottom' : ''}} {{paraObj.isBlank ? 'is-blank-line' : ''}} {{paraObj.isDivider ? 'is-divider-line' : ''}}"
+                bindlongpress="handleLongPressPara"
+                data-text="{{paraObj.text}}"
+              >{{paraObj.text}}</view>
+              <view class="chapter-end-hint" wx:if="{{item.showChapterEnd}}">
+                <text>— 本章完 —</text>
+              </view>
+            </view>
+            <view class="reader-bridge-page" wx:else>
+              <view class="bridge-loader">
+                <view class="loading-dots">
+                  <view class="dot"></view>
+                  <view class="dot"></view>
+                  <view class="dot"></view>
+                </view>
+                <text class="bridge-text">{{item.text}}</text>
+              </view>
+            </view>
+            <view class="reader-source-turn-zone reader-source-turn-zone--prev" catchtap="handleLandscapePrevPage"></view>
+            <view class="reader-source-turn-zone reader-source-turn-zone--next" catchtap="handleLandscapeNextPage"></view>
+          </view>
+        </swiper-item>
+      </swiper>
+
+      <view class="reader-source-footer">
+        <view class="reader-source-nav {{currentChapterIndex <= 0 ? 'is-disabled' : ''}}" bindtap="handlePrevChapter">上一章</view>
+        <text>本章 {{readingProgress}}%</text>
+        <view class="reader-source-nav {{currentChapterIndex >= totalChapters - 1 ? 'is-disabled' : ''}}" bindtap="handleNextChapter">下一章</view>
+      </view>
+    </view>
+
+    <view class="reader-chat-pane">
+      <book-chat
+        wx:if="{{readerChatReady}}"
+        class="reader-chat-component"
+        book-id="{{bookId}}"
+        book-title="{{book.title}}"
+        entry="{{readerChatEntry}}"
+        scene="{{readerChatScene}}"
+        source-chapter-id="{{allChapters[currentChapterIndex] ? allChapters[currentChapterIndex].id : ''}}"
+        source-chapter-title="{{currentChapterName}}"
+        embedded="{{true}}"
+        large-screen="{{isLandscapeReader}}"
+        bind:modechange="handleReaderChatModeChange"
+      />
+      <view wx:else class="reader-chat-loading">伴读正在准备中…</view>
+    </view>
+  </view>
+
+  <!-- 手机和 Pad 竖屏：都使用左右点击翻页。 -->
   <swiper 
+    wx:if="{{!isLandscapeReader}}"
     class="reader-swiper" 
     current="{{currentPageIndex}}"
     bindchange="onPageChange"
@@ -37,7 +112,7 @@
     duration="{{swiperDuration}}"
   >
     <swiper-item wx:for="{{chapterPages}}" wx:key="index" wx:for-index="pageIdx">
-      <view class="reader-page-content" style="padding-top: {{showControls ? navBarHeight + 66 : navBarHeight + 8}}px;">
+      <view class="reader-page-content" style="padding-top: {{navBarHeight + 8}}px;">
         <!-- 正文页渲染 -->
         <view class="reader-article {{loading ? 'loading-fade' : ''}}" wx:if="{{item.type === 'content'}}">
           
@@ -78,7 +153,7 @@
   </swiper>
 
   <!-- Reader Footer -->
-  <view class="reader-footer fade-up" wx:if="{{showFooterBar}}">
+  <view class="reader-footer fade-up" wx:if="{{showFooterBar && !isLandscapeReader}}">
     <view class="footer-actions">
       <view class="footer-btn-wrap {{currentChapterIndex <= 0 ? 'btn--disabled' : ''}}" bindtap="handlePrevChapter">
         <view class="footer-btn">
@@ -113,8 +188,8 @@
   </view>
 
   <!-- Custom TOC Bottom Sheet -->
-  <view class="toc-sheet-overlay {{showTocSheet ? 'show' : ''}}" bindtap="handleHideToc"></view>
-  <view class="toc-sheet {{showTocSheet ? 'show' : ''}}">
+  <view wx:if="{{showTocSheet}}" class="toc-sheet-overlay show" bindtap="handleHideToc"></view>
+  <view wx:if="{{showTocSheet}}" class="toc-sheet show">
     <view class="toc-header">
       <view class="toc-handle"></view>
       <view class="toc-title">目录</view>

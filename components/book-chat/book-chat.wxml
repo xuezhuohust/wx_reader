@@ -1,0 +1,547 @@
+<view wx:if="{{book}}" class="page-shell chat-page {{embedded ? 'chat-page--embedded' : ''}} {{largeScreen ? 'chat-page--large' : ''}} {{backgroundImage ? 'chat-page--has-background' : ''}}" style="{{!embedded && viewportHeight ? 'height: ' + viewportHeight + 'px;' : ''}}">
+  <!-- 背景意境图 -->
+  <view wx:if="{{backgroundImage && (!embedded || largeScreen)}}" class="chat-bg-container {{embedded ? 'chat-bg-container--embedded' : ''}}">
+    <image class="chat-bg-image" src="{{backgroundImage}}" mode="aspectFill" />
+    <view class="chat-bg-mask"></view>
+  </view>
+
+  <!-- Top App Bar -->
+  <view class="custom-nav {{embedded ? 'custom-nav--embedded' : ''}}" style="height: {{embedded ? 48 : navBarHeight}}px;">
+    <view class="nav-inner" style="top: {{embedded ? 0 : menuTop}}px; height: {{embedded ? 48 : menuHeight}}px;">
+      <view wx:if="{{!embedded}}" class="nav-back" bindtap="handleBack" style="width: {{menuHeight}}px; height: {{menuHeight}}px;">
+        <view class="back-arrow"></view>
+      </view>
+      <text class="nav-title">{{sceneTitle}}</text>
+    </view>
+  </view>
+
+  <!-- 对话切换面板 -->
+  <view wx:if="{{showConversationList && !embedded}}" class="conv-mask" bindtap="handleToggleConversationList"></view>
+  <view wx:if="{{!embedded}}" class="conv-panel {{showConversationList ? 'conv-panel--open' : ''}}" style="padding-top: {{largeScreen ? 48 : navBarHeight}}px;">
+    <view class="conv-panel-header">
+      <text class="conv-panel-title">对话列表</text>
+    </view>
+    <view class="conv-panel-actions">
+      <view class="conv-panel-new" bindtap="handleNewConversation">
+        <text class="conv-panel-new-icon">+</text>
+        <text>新建对话</text>
+      </view>
+    </view>
+    <scroll-view class="conv-panel-list" scroll-y enhanced show-scrollbar="{{false}}">
+      <view
+        wx:for="{{conversations}}"
+        wx:key="id"
+        class="conv-item {{item.id === currentConversationId ? 'conv-item--active' : ''}}"
+        data-id="{{item.id}}"
+        data-title="{{item.title}}"
+        bindtap="handleSwitchConversation"
+      >
+        <text class="conv-item-icon">💬</text>
+        <view class="conv-item-info">
+          <text class="conv-item-title">{{item.title}}</text>
+          <text class="conv-item-time">{{item.updatedAt ? item.updatedAt.slice(0, 10) : ''}}</text>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- Fixed Book Tag Bar -->
+  <view wx:if="{{!embedded}}" class="book-tag-bar {{largeScreen ? 'book-tag-bar--large' : ''}}" style="top: {{navBarHeight}}px;">
+    <view class="book-tag-left">
+      <view class="book-tag-icon"></view>
+      <text class="book-tag-text">当前伴读：《{{book.title}}》<text wx:if="{{chapterTitle}}" class="chapter-tag">{{chapterTitle}}</text></text>
+      <view wx:if="{{!largeScreen}}" class="clear-btn {{loadingReply ? 'clear-btn--disabled' : ''}}" catchtap="handleClearConversations">
+        <view class="clear-icon"></view>
+      </view>
+    </view>
+    <view wx:if="{{largeScreen}}" class="book-tag-clear-row">
+      <view class="clear-btn {{loadingReply ? 'clear-btn--disabled' : ''}}" catchtap="handleClearConversations" aria-label="清空当前对话">
+        <view class="clear-icon"></view>
+        <text>清空对话</text>
+      </view>
+    </view>
+    <!-- 2026-07-03 新增：查看背景图按钮（极简图标版） -->
+    <view wx:if="{{backgroundImage}}" class="view-bg-icon-btn" catchtap="handlePreviewBackground">
+      <view class="view-bg-icon"></view>
+    </view>
+    <view wx:if="{{chatMode === 'drama'}}" class="drama-playlist-trigger" catchtap="handleToggleDramaPlaylist" aria-label="剧创播放列表">
+      <text class="drama-playlist-icon">▶</text>
+      <text>播放列表</text>
+    </view>
+  </view>
+
+  <!-- 横屏阅读页沿用手机的“当前伴读”信息行，清空入口不放进标题栏。 -->
+  <view wx:if="{{embedded}}" class="embedded-book-tag-bar">
+    <view wx:if="{{largeScreen}}" class="embedded-clear-btn clear-btn {{loadingReply ? 'clear-btn--disabled' : ''}}" catchtap="handleClearConversations" aria-label="清空当前对话">
+      <view class="clear-icon"></view>
+    </view>
+    <view class="book-tag-left">
+      <view class="book-tag-icon"></view>
+      <text class="book-tag-text">当前伴读：《{{book.title}}》<text wx:if="{{chapterTitle}}" class="chapter-tag">{{chapterTitle}}</text></text>
+      <view wx:if="{{!largeScreen}}" class="clear-btn {{loadingReply ? 'clear-btn--disabled' : ''}}" catchtap="handleClearConversations" aria-label="清空当前对话">
+        <view class="clear-icon"></view>
+      </view>
+    </view>
+    <view wx:if="{{backgroundImage && largeScreen}}" class="embedded-view-bg-btn" catchtap="handlePreviewBackground" aria-label="查看章节背景图">
+      <view class="view-bg-icon"></view>
+    </view>
+    <view wx:if="{{chatMode === 'drama'}}" class="drama-playlist-trigger drama-playlist-trigger--embedded" catchtap="handleToggleDramaPlaylist" aria-label="剧创播放列表">
+      <text class="drama-playlist-icon">▶</text>
+      <text>播放列表</text>
+    </view>
+  </view>
+
+  <!-- Chat Canvas -->
+  <scroll-view
+    class="chat-body"
+    scroll-y
+    enhanced
+    show-scrollbar="{{false}}"
+    scroll-with-animation="{{scrollWithAnimation}}"
+    scroll-top="{{scrollTop}}"
+    enable-back-to-top
+    bindscroll="handleScroll"
+    bindtouchstart="handleChatTouchStart"
+    bindtouchend="handleChatTouchEnd"
+    bindtouchcancel="handleChatTouchEnd"
+    style="padding-top: {{embedded ? 0 : (largeScreen ? navBarHeight + 62 : navBarHeight + 36)}}px;"
+  >
+    <view class="message-list">
+      <!-- 骨架屏加载状态 -->
+      <view wx:if="{{loadingMessages}}" class="skeleton-container">
+        <view wx:for="{{[1,2,3]}}" wx:key="*this" class="skeleton-row">
+          <view class="skeleton-avatar"></view>
+          <view class="skeleton-content">
+            <view class="skeleton-line" style="width: 80%"></view>
+            <view class="skeleton-line" style="width: 60%"></view>
+          </view>
+        </view>
+      </view>
+
+      <block wx:else>
+        <!-- 伴读欢迎消息 -->
+        <view class="message-row row-ai" wx:if="{{messages.length === 0}}">
+          <view class="chat-avatar ai-avatar">
+            <image wx:if="{{agentAvatarUrl}}" class="avatar-image" src="{{agentAvatarUrl}}" mode="aspectFill" />
+            <text wx:else>助</text>
+          </view>
+          <view class="message-container">
+            <view class="message-bubble bubble-ai">
+              <text>{{emptyWelcomeText}}</text>
+            </view>
+            
+            <!-- Quick Questions (Notion Chips) -->
+            <view class="suggestion-chips">
+              <view
+                wx:for="{{quickQuestions}}"
+                wx:key="*this"
+                class="chip-item"
+                data-question="{{item}}"
+                bindtap="handleQuickQuestion"
+              >{{item}}</view>
+            </view>
+          </view>
+        </view>
+
+        <!-- Messages -->
+        <block wx:for="{{messages}}" wx:key="id">
+          <!-- 0. 模式切换分割线 (独立行渲染) -->
+          <view wx:if="{{item.type === 'mode-switch'}}" class="mode-switch-row" id="{{item.id}}">
+            <view class="mode-switch-divider">
+              <view class="divider-line"></view>
+              <view class="divider-content">
+                <view wx:if="{{item.chatMode === 'creative'}}" class="divider-icon icon-creative"></view>
+                <view wx:elif="{{item.chatMode === 'drama'}}" class="divider-icon icon-drama"></view>
+                <view wx:elif="{{item.chatMode === 'story'}}" class="divider-icon icon-story"></view>
+                <view wx:else class="divider-icon icon-chat"></view>
+                <text wx:if="{{item.chatMode === 'creative'}}">已切换至二创模式</text>
+                <text wx:elif="{{item.chatMode === 'drama'}}">已切换至剧创模式</text>
+                <text wx:elif="{{item.chatMode === 'story'}}">已切换至讲故事模式</text>
+                <text wx:else>已切换至伴读模式</text>
+              </view>
+              <view class="divider-line"></view>
+            </view>
+          </view>
+
+          <!-- 普通消息行 -->
+          <view
+            wx:else
+            id="{{item.id}}"
+            class="message-row {{item.isUser ? 'row-user' : 'row-ai'}}"
+          >
+            <view class="chat-avatar {{item.isUser ? 'user-avatar' : 'ai-avatar'}}">
+              <image wx:if="{{item.isUser && userAvatarUrl}}" class="avatar-image" src="{{userAvatarUrl}}" mode="aspectFill" />
+              <image wx:elif="{{!item.isUser && agentAvatarUrl}}" class="avatar-image" src="{{agentAvatarUrl}}" mode="aspectFill" />
+              <text wx:else>{{item.isUser ? userAvatarText : '助'}}</text>
+            </view>
+            <view class="message-container">
+              <view class="message-bubble {{item.isUser ? 'bubble-user' : 'bubble-ai'}} {{item.thinking ? 'message-bubble--thinking' : ''}}">
+              <!-- 思考中动画 -->
+              <view wx:if="{{item.isAssistant && item.thinking}}" class="thinking-container">
+                <view class="thinking-dot"></view>
+                <view class="thinking-dot"></view>
+                <view class="thinking-dot"></view>
+                <text class="thinking-text">{{thinkingText}}</text>
+              </view>
+
+              <!-- 1. 剧创位置选择与视频任务卡片 -->
+              <view wx:if="{{item.type === 'drama-question'}}" class="drama-question-card">
+                <text class="drama-card-title">{{item.selectionStage === 'scene' ? '选择生成场景' : '选择视频位置'}}</text>
+                <text class="drama-card-copy">{{item.content}}</text>
+                <view wx:if="{{item.positionOptions && item.positionOptions.length}}" class="drama-position-list">
+                  <block wx:if="{{item.selectionStage === 'scene'}}">
+                    <view
+                      wx:for="{{item.positionOptions}}"
+                      wx:key="sceneId"
+                      class="drama-position-chip"
+                      data-stage="scene"
+                      data-event-id="{{item.eventId}}"
+                      data-sub-event-id="{{item.subEventId}}"
+                      data-scene-id="{{item.sceneId}}"
+                      data-chapter-id="{{item.chapterId}}"
+                      data-title="{{item.title}}"
+                      bindtap="handleSelectDramaPosition"
+                    >
+                      <text wx:if="{{item.narrativePurpose || item.sceneThesis}}" class="drama-position-chapter">{{item.narrativePurpose || item.sceneThesis}}</text>
+                      <text class="drama-position-title">{{item.title}}</text>
+                      <text wx:if="{{item.summary}}" class="drama-position-summary">{{item.summary}}</text>
+                    </view>
+                  </block>
+                  <block wx:else>
+                    <view
+                      wx:for="{{item.positionOptions}}"
+                      wx:key="eventId"
+                      class="drama-position-chip"
+                      data-stage="event"
+                      data-event-id="{{item.eventId}}"
+                      data-chapter-id="{{item.chapterId}}"
+                      data-title="{{item.title}}"
+                      bindtap="handleSelectDramaPosition"
+                    >
+                      <text class="drama-position-chapter">{{item.chapterTitle}}</text>
+                      <text class="drama-position-title">{{item.title}}</text>
+                    </view>
+                  </block>
+                </view>
+              </view>
+
+              <view wx:elif="{{item.type === 'drama-plan'}}" class="drama-plan-card {{item.status === 'failed' ? 'drama-video-card--failed' : ''}}">
+                <view class="drama-video-card-header">
+                  <text class="drama-card-title">镜头规划</text>
+                  <text class="drama-status-tag">{{item.status === 'failed' ? '失败' : item.status === 'ready' ? '待选择' : item.status === 'submitted' ? '已提交' : '规划中'}}</text>
+                </view>
+                <text class="drama-card-copy">{{item.content}}</text>
+                <view wx:if="{{item.status === 'ready'}}" class="drama-clip-list">
+                  <block wx:for="{{item.generationClips}}" wx:key="clipId" wx:for-item="clip">
+                    <view
+                      class="drama-clip-chip {{clip.selected ? 'drama-clip-chip--selected' : ''}}"
+                      data-message-id="{{item.id}}"
+                      data-clip-id="{{clip.clipId}}"
+                      bindtap="handleToggleDramaClip"
+                    >
+                      <view class="drama-clip-check">{{clip.selected ? '✓' : ''}}</view>
+                      <view class="drama-clip-copy">
+                        <text class="drama-clip-title">{{index + 1}}. {{clip.title}}</text>
+                        <text class="drama-clip-meta">{{clip.durationSeconds}}秒 · {{clip.camera.framing}} · {{clip.camera.movement}}</text>
+                        <text class="drama-clip-intent">{{clip.visualIntent}}</text>
+                      </view>
+                    </view>
+                  </block>
+                  <button
+                    class="drama-generate-clips-button"
+                    disabled="{{dramaSubmitting || !item.selectedClipIds.length}}"
+                    data-message-id="{{item.id}}"
+                    data-plan-id="{{item.scenePlanId}}"
+                    bindtap="handleGenerateSelectedDramaClips"
+                  >生成已选 {{item.selectedClipIds.length}} 个镜头并拼接</button>
+                </view>
+              </view>
+
+              <view wx:elif="{{item.type === 'drama-video'}}" class="drama-video-card {{item.status === 'failed' ? 'drama-video-card--failed' : ''}}">
+                <view class="drama-video-card-header">
+                  <text class="drama-card-title">横屏短剧</text>
+                  <text class="drama-status-tag">{{item.status === 'completed' || item.status === 'reused' ? '已完成' : item.status === 'failed' ? '失败' : '生成中'}}</text>
+                </view>
+                <text class="drama-card-copy">{{item.content}}</text>
+                <view wx:if="{{item.videoUrl}}" class="drama-card-play" data-url="{{item.videoUrl}}" bindtap="handlePlayDramaVideo">
+                  <text class="drama-card-play-icon">▶</text>
+                  <text>全屏播放</text>
+                </view>
+              </view>
+
+              <!-- 2. 二创卡片渲染 -->
+              <view wx:elif="{{item.type === 'creative'}}" class="creative-card">
+                <view class="creative-card-header">
+                  <view class="creative-badge">{{item.creativeTypeName}}</view>
+                  <text class="creative-prompt-text">“{{item.userPrompt}}”</text>
+                </view>
+                <view class="creative-card-body">
+                  <text class="creative-content" user-select>{{item.content}}</text>
+                  <view class="typing-cursor" wx:if="{{item.status === 'generating'}}"></view>
+                </view>
+                <view wx:if="{{item.status === 'success'}}" class="creative-card-footer">
+                  <text class="creative-time">已存入作品集</text>
+                </view>
+              </view>
+
+              <!-- 3. 结构化渲染 Blocks -->
+              <block wx:elif="{{item.renderBlocks && item.renderBlocks.length > 0}}">
+                  <view wx:for="{{item.renderBlocks}}" wx:key="key" class="message-block block-{{item.type}}">
+                    <!-- 段落 -->
+                    <view wx:if="{{item.type === 'paragraph'}}" class="block-p">
+                      <text wx:for="{{item.segments}}" wx:key="key" class="{{item.strong ? 'text-strong' : ''}}">{{item.text}}</text>
+                    </view>
+                    <!-- 列表 -->
+                    <view wx:if="{{item.type === 'list'}}" class="block-list">
+                      <view wx:for="{{item.items}}" wx:key="key" class="list-item">
+                        <text class="list-order">{{item.order}}.</text>
+                        <view class="list-content">
+                          <text wx:if="{{item.title}}" class="list-title">{{item.title}}</text>
+                          <text class="list-body">{{item.body}}</text>
+                        </view>
+                      </view>
+                    </view>
+                    <!-- 引用块 (Callout) -->
+                    <view wx:if="{{item.type === 'callout'}}" class="block-callout">
+                      <view class="callout-icon">💡</view>
+                      <text class="callout-text">{{item.text}}</text>
+                    </view>
+                    <!-- 代码块 -->
+                    <view wx:if="{{item.type === 'code'}}" class="block-code">
+                      <text class="code-text">{{item.text}}</text>
+                    </view>
+                  </view>
+                  <!-- Typing Cursor for Streaming in blocks -->
+                  <view class="typing-cursor" wx:if="{{item.isAssistant && item.loading && !item.thinking}}"></view>
+              </block>
+
+              <!-- 4. 普通文本兜底 -->
+              <view wx:else class="message-text-wrapper">
+                  <text wx:if="{{item.content}}" class="message-text" user-select>{{item.content}}</text>
+                  <!-- Typing Cursor for Streaming in fallback -->
+                  <view class="typing-cursor" wx:if="{{item.isAssistant && item.loading && !item.thinking}}"></view>
+              </view>
+              </view>
+              
+              <view class="message-actions" wx:if="{{item.content && !item.loading && (item.isAssistant || item.isUser)}}">
+                <view
+                  wx:if="{{item.isAssistant}}"
+                  class="voice-control {{playingMessageId === item.id || audioLoadingMessageId === item.id ? 'is-playing' : ''}}"
+                  bindtap="handleSpeakMessage"
+                  data-id="{{item.id}}"
+                >
+                  <block wx:if="{{playingMessageId === item.id || audioLoadingMessageId === item.id}}">
+                    <view class="voice-wave">
+                      <view class="wave-bar"></view>
+                      <view class="wave-bar"></view>
+                      <view class="wave-bar"></view>
+                    </view>
+                    <text class="voice-status-text">停止</text>
+                  </block>
+                  <block wx:else>
+                    <view class="voice-icon-new"></view>
+                    <text class="voice-status-text">朗读</text>
+                  </block>
+                </view>
+                <view class="copy-control" bindtap="handleCopyMessage" data-id="{{item.id}}">
+                  <view class="copy-icon"></view>
+                  <text>复制</text>
+                </view>
+              </view>
+            </view>
+          </view>
+        </block>
+      </block>
+
+      <view class="bottom-space" style="height: {{keyboardHeight + 176}}rpx;"></view>
+    </view>
+  </scroll-view>
+
+  <!-- Scroll Down Button -->
+  <view
+    wx:if="{{showScrollDownBtn}}"
+    class="scroll-down-btn"
+    bindtap="handleScrollDownTap"
+  >
+    <view class="scroll-down-icon"></view>
+    <text class="scroll-down-text">新内容</text>
+  </view>
+
+  <!-- Chat Footer -->
+  <view class="chat-footer">
+    <!-- 二创模式功能栏 -->
+    <view wx:if="{{chatMode === 'creative'}}" class="chat-footer-tools">
+      <!-- 二创类型选择（仅二创模式显示） -->
+      <view class="creative-type-selector">
+        <view
+          wx:for="{{creativeTypes}}"
+          wx:key="id"
+          class="creative-type-chip {{creativeType === item.id ? 'creative-type-chip--active' : ''}}"
+          data-type="{{item.id}}"
+          bindtap="handleSelectCreativeType"
+        >
+          {{item.name}}
+        </view>
+      </view>
+    </view>
+
+    <view wx:if="{{chatMode === 'drama'}}" class="drama-footer-tools">
+      <text class="drama-footer-copy">横屏 16:9 · 配音与音乐自动规划</text>
+      <view class="drama-footer-playlist" bindtap="handleToggleDramaPlaylist">播放列表</view>
+    </view>
+
+    <view class="composer-wrap">
+      <view class="mode-picker">
+        <view wx:if="{{showModeMenu}}" class="mode-menu">
+          <view
+            wx:for="{{modeOptions}}"
+            wx:key="mode"
+            class="mode-menu-item {{item.active ? 'mode-menu-item--active' : ''}}"
+            data-mode="{{item.mode}}"
+            bindtap="handleSelectChatMode"
+          >
+            <view class="mode-menu-icon {{item.iconClass}}"></view>
+            <view class="mode-menu-copy">
+              <view class="mode-menu-title-line">
+                <text class="mode-menu-title">{{item.shortLabel}}</text>
+                <text wx:if="{{item.badge}}" class="mode-menu-badge">{{item.badge}}</text>
+              </view>
+              <text class="mode-menu-desc">{{item.description}}</text>
+            </view>
+            <view wx:if="{{item.active}}" class="mode-menu-check"></view>
+          </view>
+        </view>
+
+        <view class="mode-trigger {{currentModeClass}} {{showModeMenu ? 'mode-trigger--open' : ''}}" bindtap="toggleChatMode">
+          <view class="mode-trigger-icon {{currentModeIconClass}}"></view>
+          <text>{{currentModeShortLabel}}</text>
+          <view class="mode-trigger-arrow"></view>
+        </view>
+      </view>
+
+      <!-- 输入区域 -->
+      <view class="input-container {{inputMode === 'voice' ? 'voice-mode' : ''}}">
+        <!-- 模式切换按钮 -->
+        <view class="mode-toggle-btn" bindtap="handleToggleInputMode">
+          <view class="{{inputMode === 'keyboard' ? 'icon-mic' : 'icon-keyboard'}}"></view>
+        </view>
+
+        <view class="image-upload-btn {{imageUploading ? 'image-upload-btn--loading' : ''}}" bindtap="handleChooseImage">
+          <view class="icon-image-upload"></view>
+        </view>
+
+        <!-- 文本输入模式 -->
+        <textarea
+          wx:if="{{inputMode === 'keyboard'}}"
+          class="composer-input"
+          value="{{inputValue}}"
+          placeholder="{{inputPlaceholder}}"
+          placeholder-class="placeholder-text"
+          bindinput="handleInput"
+          bindfocus="handleFocus"
+          bindblur="handleBlur"
+          bindconfirm="handleSend"
+          confirm-type="send"
+          auto-height
+          adjust-position="{{true}}"
+          maxlength="1000"
+          cursor-spacing="20"
+          disable-default-padding="{{true}}"
+        />
+        
+        <!-- 语音录音模式 (类似微信) -->
+        <view
+          wx:else
+          class="voice-bar {{isRecording ? 'recording' : ''}} {{voiceCancel ? 'cancel' : ''}}"
+          bindtouchstart="handleVoiceStart"
+          bindtouchmove="handleVoiceMove"
+          bindtouchend="handleVoiceEnd"
+          bindtouchcancel="handleVoiceCancel"
+        >
+          <text>{{isRecording ? (voiceCancel ? '松开取消' : '松开发送') : '按住说话'}}</text>
+        </view>
+      </view>
+
+      <view class="send-btn {{!inputValue ? 'send-btn--disabled' : ''}}" bindtap="handleSend" wx:if="{{inputMode === 'keyboard'}}">
+        <view class="send-icon"></view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 剧创播放列表：历史视频可复用，播放时主动进入横屏全屏。 -->
+  <view wx:if="{{showDramaPlaylist}}" class="drama-playlist-mask" bindtap="handleToggleDramaPlaylist"></view>
+  <view wx:if="{{showDramaPlaylist}}" class="drama-playlist-panel">
+    <view class="drama-playlist-header">
+      <text class="drama-playlist-title">剧创播放列表</text>
+      <view class="drama-playlist-close" bindtap="handleToggleDramaPlaylist">×</view>
+    </view>
+    <scroll-view class="drama-playlist-scroll" scroll-y>
+      <view wx:if="{{!dramaVideos.length}}" class="drama-playlist-empty">本书还没有历史剧创视频</view>
+      <view wx:for="{{dramaVideos}}" wx:key="id" class="drama-playlist-item">
+        <view class="drama-playlist-item-copy">
+          <text class="drama-playlist-item-title">横屏短剧 · {{item.durationSeconds || 10}} 秒</text>
+          <text class="drama-playlist-item-status">{{item.progressMessage || item.status}}</text>
+        </view>
+        <view wx:if="{{item.videoUrl}}" class="drama-playlist-action" data-url="{{item.videoUrl}}" bindtap="handlePlayDramaVideo">播放</view>
+        <view wx:if="{{item.status === 'completed' || item.status === 'reused'}}" class="drama-playlist-action drama-playlist-reuse" data-id="{{item.id}}" bindtap="handleReuseDramaVideo">复用</view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <view wx:if="{{dramaVideoUrl}}" class="drama-video-player-shell">
+    <video
+      id="drama-video-player"
+      class="drama-video-player"
+      src="{{dramaVideoUrl}}"
+      controls
+      show-fullscreen-btn
+      enable-play-gesture
+      direction="90"
+      bindfullscreenchange="handleDramaFullscreenChange"
+    />
+  </view>
+
+  <!-- Recording Overlay -->
+  <view class="recording-overlay" wx:if="{{isRecording}}">
+    <view class="recording-card {{voiceCancel ? 'recording-card--cancel' : ''}}">
+      <block wx:if="{{!voiceCancel}}">
+        <view class="recording-wave">
+          <view class="wave-item"></view>
+          <view class="wave-item"></view>
+          <view class="wave-item"></view>
+          <view class="wave-item"></view>
+        </view>
+        <text class="recording-text">正在录音</text>
+        <text class="recording-tip">上滑取消，松开发送</text>
+      </block>
+      <block wx:else>
+        <view class="cancel-icon-wrap">
+          <view class="icon-undo-white"></view>
+        </view>
+        <text class="recording-text cancel-text">松开取消</text>
+        <text class="recording-tip">下滑回到发送</text>
+      </block>
+    </view>
+  </view>
+
+  <!-- Privacy Modal -->
+  <view wx:if="{{showPrivacyModal}}" class="profile-overlay" catchtap="handleDisagreePrivacy">
+    <view class="profile-sheet" catchtap="handleStopPropagation">
+      <view class="profile-header">
+        <text class="profile-sheet-title">{{privacyModalTitle}}</text>
+      </view>
+      <view class="permission-content">
+        <text class="permission-text">{{privacyModalText}}</text>
+      </view>
+      <view class="privacy-actions">
+        <button id="chat-privacy-disagree" class="btn-secondary privacy-btn" bindtap="handleDisagreePrivacy">拒绝</button>
+        <button
+          id="chat-privacy-agree"
+          class="btn-primary privacy-btn"
+          open-type="agreePrivacyAuthorization"
+          bindagreeprivacyauthorization="handleAgreePrivacy"
+        >同意</button>
+      </view>
+    </view>
+  </view>
+</view>

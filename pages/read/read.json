@@ -1,4 +1,7 @@
 {
   "navigationStyle": "custom",
-  "usingComponents": {}
+  "pageOrientation": "auto",
+  "usingComponents": {
+    "book-chat": "../../components/book-chat/book-chat"
+  }
 }

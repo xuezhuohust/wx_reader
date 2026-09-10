@@ -35,6 +35,8 @@ Page({
     menuTop: 0,
     menuHeight: 0,
     menuRight: 0,
+    isLargeScreen: false,
+    windowHeight: 0,
     greeting: '你好',
     weeklyStats: [
       { day: '一', height: 45, active: false },
@@ -50,7 +52,8 @@ Page({
   onLoad() {
     const app = getApp()
     const menuButtonInfo = wx.getMenuButtonBoundingClientRect()
-    const systemInfo = wx.getSystemInfoSync()
+    const layout = app.refreshLayout('my-books:onLoad')
+    const systemInfo = layout.windowInfo
     this.registerProfilePrivacyAuthorization()
     
     // 设置问候语
@@ -69,9 +72,25 @@ Page({
       menuTop: menuButtonInfo.top,
       menuHeight: menuButtonInfo.height,
       menuRight: systemInfo.windowWidth - menuButtonInfo.left + 10,
+      isLargeScreen: layout.isLandscapePad,
+      windowHeight: layout.height,
       greeting
     })
     this.refreshProfilePrivacyState()
+  },
+
+  onResize(res) {
+    const layout = getApp().refreshLayout('my-books:onResize', res && res.size)
+    if (layout.isLandscapePad !== this.data.isLargeScreen) {
+      this.setData({ isLargeScreen: layout.isLandscapePad, windowHeight: layout.height })
+    } else if (layout.height !== this.data.windowHeight) {
+      this.setData({ windowHeight: layout.height })
+    }
+    syncRoleTabBar(this, 'pages/my-books/my-books', this.data.identity)
+  },
+
+  handleAppLayoutChange(size) {
+    this.onResize({ size })
   },
 
   onShow() {

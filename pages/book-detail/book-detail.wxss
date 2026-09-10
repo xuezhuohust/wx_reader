@@ -1,7 +1,8 @@
 .detail-page {
   background-color: #faf8f5;
   color: #1b1b1b;
-  height: 100vh;
+  height: 100%;
+  min-height: 0;
   display: flex;
   flex-direction: column;
 }
@@ -406,4 +407,134 @@
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(24rpx); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+/* Pad 横屏时不让手机稿的 rpx 随窗口宽度成倍放大。 */
+.detail-page--large .scroll-area {
+  flex: 1;
+  height: 0;
+  min-height: 0;
+}
+
+.detail-page--large .nav-inner {
+  padding: 0 32px;
+}
+
+.detail-page--large .nav-back {
+  width: 40px;
+  height: 40px;
+}
+
+.detail-page--large .icon-back {
+  width: 11px;
+  height: 11px;
+  border-left-width: 2px;
+  border-bottom-width: 2px;
+  margin-left: 3px;
+}
+
+.detail-page--large .nav-title {
+  max-width: 320px;
+  font-size: 16px;
+}
+
+.detail-page--large .scroll-content {
+  padding: 0 32px 112px;
+}
+
+.detail-page--large .book-hero-new {
+  gap: 24px;
+  margin-bottom: 8px;
+}
+
+.detail-page--large .detail-cover {
+  width: 160px;
+  height: 224px;
+  border-radius: 10px;
+}
+
+.detail-page--large .detail-title {
+  font-size: 30px;
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+.detail-page--large .detail-author {
+  font-size: 16px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.detail-page--large .notion-properties {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 18px;
+  row-gap: 10px;
+}
+
+.detail-page--large .prop-item {
+  font-size: 15px;
+  min-width: 0;
+}
+
+.detail-page--large .prop-label {
+  width: 64px;
+}
+
+.detail-page--large .detail-sections {
+  gap: 24px;
+}
+
+.detail-page--large .section-title {
+  font-size: 22px;
+  margin-bottom: 14px;
+}
+
+.detail-page--large .section-content {
+  font-size: 16px;
+  line-height: 1.75;
+}
+
+.detail-page--large .section-header {
+  margin-bottom: 14px;
+}
+
+.detail-page--large .section-subtitle,
+.detail-page--large .meta-text {
+  font-size: 13px;
+}
+
+.detail-page--large .chapter-item {
+  padding: 16px 0;
+}
+
+.detail-page--large .chapter-name {
+  font-size: 16px;
+}
+
+.detail-page--large .chapter-meta {
+  gap: 6px;
+  margin-left: 16px;
+}
+
+.detail-page--large .expand-btn {
+  margin-top: 14px;
+  gap: 6px;
+  font-size: 14px;
+  padding: 10px 0;
+}
+
+.detail-page--large .detail-footer {
+  padding: 12px 32px 20px;
+}
+
+.detail-page--large .action-btn-primary,
+.detail-page--large .action-btn-secondary {
+  height: 56px;
+  border-radius: 12px;
+  font-size: 17px;
+}
+
+.detail-page--large .publisher-actions {
+  gap: 12px;
 }

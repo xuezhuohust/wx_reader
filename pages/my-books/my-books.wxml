@@ -1,10 +1,16 @@
-<view class="page-container my-books-page">
-  <!-- Header matched with Bookshelf -->
-  <view class="home-nav" style="height: {{navBarHeight}}px;">
+<view class="page-container my-books-page {{isLargeScreen ? 'my-books-page--large' : ''}}" style="{{windowHeight ? 'height: ' + windowHeight + 'px;' : ''}}">
+  <!-- 手机端保留原页头；横屏 Pad 移除左上角标题。 -->
+  <view class="home-nav" wx:if="{{!isLargeScreen}}" style="height: {{navBarHeight}}px;">
     <view class="nav-header" style="position: absolute; top: {{menuTop}}px; height: {{menuHeight}}px; left: 0; right: 0; padding-right: {{menuRight}}px;">
       <view class="nav-title">我的</view>
     </view>
   </view>
+
+  <view
+    class="large-top-safe-area"
+    wx:if="{{isLargeScreen}}"
+    style="height: {{statusBarHeight + 16}}px;"
+  ></view>
 
   <scroll-view class="scroll-area" scroll-y enable-passive>
     <view class="scroll-content">

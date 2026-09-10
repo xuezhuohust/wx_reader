@@ -1,4 +1,4 @@
-<view class="page-container home-page">
+<view class="page-container home-page {{isLargeScreen ? 'home-page--large' : ''}} {{isPadPortrait ? 'home-page--pad-portrait' : ''}}" style="{{windowHeight ? 'height: ' + windowHeight + 'px;' : ''}}">
   <scroll-view
     class="scroll-area"
     scroll-y
@@ -45,14 +45,34 @@
         </view>
       </view>
 
+      <!-- 横屏 Pad 的全宽搜索入口：手机端维持原有书库搜索体验。 -->
+      <view class="home-search-section fade-up d2" wx:if="{{isLargeScreen}}">
+        <view class="home-search-bar">
+          <view class="icon-search-small"></view>
+          <input
+            class="home-search-input"
+            placeholder="搜索书名或作者..."
+            placeholder-class="search-placeholder"
+            bindinput="handleKeywordInput"
+            value="{{searchValue}}"
+          />
+          <view
+            wx:if="{{searchValue}}"
+            class="home-search-clear"
+            bindtap="handleSearchClear"
+            aria-label="清空搜索"
+          >×</view>
+        </view>
+      </view>
+
       <view class="main-sections">
         <!-- Today's Recommendations -->
-        <view class="section-header fade-up d2" wx:if="{{recommendBooks.length > 0}}">
-          <view class="section-title">今日推荐</view>
-          <view class="section-link" bindtap="handleSeeMore">查看全部</view>
+        <view class="section-header fade-up d2" wx:if="{{recommendBooks.length > 0 && (!isLargeScreen || !searchValue || filteredBooks.length > 0)}}">
+          <view class="section-title">{{isLargeScreen && searchValue ? '搜索结果' : '今日推荐'}}</view>
+          <view class="section-link" wx:if="{{!(isLargeScreen && searchValue)}}" bindtap="handleSeeMore">查看全部</view>
         </view>
       
-      <scroll-view class="book-scroll fade-up d3" scroll-x enhanced show-scrollbar="{{false}}">
+      <scroll-view class="book-scroll fade-up d3" wx:if="{{!isLargeScreen || !searchValue || filteredBooks.length > 0}}" scroll-x enhanced show-scrollbar="{{false}}">
         <view class="book-row">
           <block wx:if="{{loading}}">
             <view wx:for="{{[1,2,3]}}" wx:key="*this" class="book-card-skeleton skeleton-pulse">
@@ -63,7 +83,7 @@
           <block wx:else>
             <view 
               class="book-card" 
-              wx:for="{{recommendBooks}}" 
+              wx:for="{{isLargeScreen && searchValue ? filteredBooks : recommendBooks}}"
               wx:key="id" 
               bindtap="handleRecommendTap"
               data-id="{{item.id}}"
@@ -78,8 +98,8 @@
                 <view class="book-card-title">{{item.title}}</view>
                 <view class="book-card-meta">
                   <text>{{item.author || '读者'}}</text>
-                  <text class="meta-dot" wx:if="{{item.category}}">·</text>
-                  <text wx:if="{{item.category}}">{{item.category}}</text>
+                  <text class="meta-dot" wx:if="{{item.category && !isLargeScreen}}">·</text>
+                  <text wx:if="{{item.category && !isLargeScreen}}">{{item.category}}</text>
                 </view>
               </view>
             </view>
@@ -88,12 +108,12 @@
       </scroll-view>
 
       <!-- For You (Masonry Style Library) -->
-      <view class="section-header fade-up d4 section-mt">
+      <view class="section-header fade-up d4 section-mt" wx:if="{{!isLargeScreen || !searchValue}}">
         <view class="section-title">为你推荐</view>
         <view class="section-link" bindtap="handleRefreshRecommend">更多</view>
       </view>
 
-      <view class="masonry-grid fade-up d5">
+      <view class="masonry-grid fade-up d5" wx:if="{{!isLargeScreen || !searchValue}}">
         <block wx:if="{{loading}}">
           <view wx:for="{{[1,2,3,4]}}" wx:key="*this" class="masonry-item-skeleton skeleton-pulse">
             <view class="skeleton-bg" style="height: {{index % 2 === 0 ? '300rpx' : '400rpx'}};"></view>
@@ -108,8 +128,8 @@
             bindtap="handleBookTap"
             data-id="{{item.id}}"
           >
-            <view class="masonry-cover" style="background: {{item.coverColor || '#f3efe8'}}; height: {{item.coverHeight}}rpx;">
-              <image wx:if="{{item.coverUrl}}" src="{{item.coverUrl}}" mode="aspectFill"></image>
+            <view class="masonry-cover" style="background: {{item.coverColor || '#f3efe8'}};">
+              <image wx:if="{{item.coverUrl}}" src="{{item.coverUrl}}" mode="aspectFit"></image>
               <view class="book-placeholder-inner-flat" wx:else>
                 <view class="placeholder-title-flat">{{item.title[0]}}</view>
               </view>
@@ -119,12 +139,16 @@
               <view class="masonry-title">{{item.title}}</view>
               <view class="masonry-meta">
                 <text>{{item.author || '读者'}}</text>
-                <text class="meta-dot">·</text>
-                <text>{{item.rating}}分</text>
+                <text class="meta-dot" wx:if="{{!isLargeScreen}}">·</text>
+                <text wx:if="{{!isLargeScreen}}">{{item.rating}}分</text>
               </view>
             </view>
           </view>
         </block>
+      </view>
+
+      <view class="home-search-empty" wx:if="{{!loading && searchValue && filteredBooks.length === 0}}">
+        未找到与“{{searchValue}}”相关的书籍
       </view>
 
       <view class="safe-area-bottom"></view>

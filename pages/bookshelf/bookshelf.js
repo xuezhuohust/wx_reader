@@ -8,6 +8,8 @@ Page({
     menuTop: 0,
     menuHeight: 0,
     menuRight: 0,
+    isLargeScreen: false,
+    windowHeight: 0,
     books: [],
     allBooks: [],
     loading: true,
@@ -28,16 +30,33 @@ Page({
   onLoad() {
     const app = getApp()
     const menuButtonInfo = wx.getMenuButtonBoundingClientRect()
-    const systemInfo = wx.getSystemInfoSync()
+    const layout = app.refreshLayout('bookshelf:onLoad')
+    const systemInfo = layout.windowInfo
     
     this.setData({
       navBarHeight: app.globalData.navBarHeight,
       statusBarHeight: app.globalData.statusBarHeight,
       menuTop: menuButtonInfo.top,
       menuHeight: menuButtonInfo.height,
-      menuRight: systemInfo.windowWidth - menuButtonInfo.left + 10
+      menuRight: systemInfo.windowWidth - menuButtonInfo.left + 10,
+      isLargeScreen: layout.isLandscapePad,
+      windowHeight: layout.height,
     })
     this.loadBookCategories()
+  },
+
+  onResize(res) {
+    const layout = getApp().refreshLayout('bookshelf:onResize', res && res.size)
+    if (layout.isLandscapePad !== this.data.isLargeScreen) {
+      this.setData({ isLargeScreen: layout.isLandscapePad, windowHeight: layout.height })
+    } else if (layout.height !== this.data.windowHeight) {
+      this.setData({ windowHeight: layout.height })
+    }
+    syncRoleTabBar(this, 'pages/bookshelf/bookshelf')
+  },
+
+  handleAppLayoutChange(size) {
+    this.onResize({ size })
   },
 
   onShow() {
