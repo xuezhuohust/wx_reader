@@ -32,8 +32,14 @@
 .tab-icon {
   width: 44rpx;
   height: 44rpx;
-  opacity: 0.4;
+  min-width: 44rpx;
+  min-height: 44rpx;
+  max-width: 44rpx;
+  max-height: 44rpx;
+  flex-shrink: 0;
+  opacity: 0.45;
   transition: all 0.2s ease;
+  object-fit: contain;
 }
 
 .tab-item--active .tab-icon {
@@ -59,8 +65,14 @@
 }
 
 .tab-shell--large .tab-icon {
-  width: 22px;
-  height: 22px;
+  width: 22px !important;
+  height: 22px !important;
+  min-width: 22px !important;
+  min-height: 22px !important;
+  max-width: 22px !important;
+  max-height: 22px !important;
+  flex-shrink: 0;
+  object-fit: contain;
 }
 
 .tab-shell--large .tab-label {

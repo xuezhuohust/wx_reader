@@ -8,7 +8,7 @@
   >
     <view class="scroll-content no-padding-top">
       <!-- Hero Header Section -->
-      <view class="home-hero-header fade-up">
+      <view class="home-hero-header fade-up" wx:if="{{!isLargeScreen}}">
         <view class="hero-academic-pattern"></view>
         <view class="hero-glass-overlay"></view>
         
@@ -65,7 +65,143 @@
         </view>
       </view>
 
-      <view class="main-sections">
+      <view class="pad-dashboard-container fade-up" wx:if="{{isLargeScreen}}">
+        <view class="pad-dashboard-canvas">
+          <view class="pad-dash-header">
+            <view class="pad-dash-title-group">
+              <view class="pad-dash-icon"></view>
+              <text class="pad-dash-title">Dashboard</text>
+            </view>
+            <view class="pad-dash-meta-badge font-mono">LitCompanion · System Active</view>
+          </view>
+
+          <view class="pad-dash-grid">
+            <!-- Left Column -->
+            <view class="pad-dash-col pad-dash-col--left">
+              <!-- F13: Now Reading Panel -->
+              <view class="pad-now-reading card-editorial" wx:if="{{recommendBooks.length > 0}}" bindtap="handleRecommendTap" data-id="{{recommendBooks[0].id}}">
+                <view class="now-reading-left">
+                  <view class="now-reading-tag font-mono">Now reading: <text class="now-reading-bold">{{recommendBooks[0].title}}</text></view>
+                </view>
+                <view class="now-reading-cover">
+                  <image wx:if="{{recommendBooks[0].coverUrl}}" src="{{recommendBooks[0].coverUrl}}" mode="aspectFill" />
+                  <view class="now-reading-placeholder font-mono" wx:else>{{recommendBooks[0].title[0]}}</view>
+                </view>
+              </view>
+
+              <!-- F14: Reading History & Extracted Scientific Concepts -->
+              <view class="pad-history-panel card-editorial">
+                <view class="panel-section-title">Reading History</view>
+                <view class="history-list">
+                  <view class="history-item" wx:for="{{(books && books.length ? books : recommendBooks).slice(0, 3)}}" wx:key="id" bindtap="handleBookTap" data-id="{{item.id}}">
+                    <view class="history-item-top">
+                      <view class="history-cover-wrap">
+                        <image wx:if="{{item.coverUrl}}" src="{{item.coverUrl}}" mode="aspectFill" />
+                        <view class="history-cover-placeholder font-mono" wx:else>{{item.title[0]}}</view>
+                      </view>
+                      <view class="history-info">
+                        <view class="history-title">{{item.title}}</view>
+                        <view class="history-meta font-mono">{{index === 0 ? "2 keywords in total" : "11 keywords in total"}}</view>
+                      </view>
+                      <view class="history-progress-pill font-mono">
+                        <text class="progress-num">{{item.progress || (index === 0 ? 50 : 9)}}%</text>
+                        <view class="progress-triangle"></view>
+                      </view>
+                    </view>
+
+                    <view class="history-concept-box" wx:if="{{index === 0}}">
+                      <view class="concept-badge-row">
+                        <view class="concept-keyword font-mono">wind</view>
+                        <text class="concept-text">wind and water can change the shape of the land.</text>
+                      </view>
+                      <view class="concept-tag font-mono">#Earth Materials and Systems</view>
+                    </view>
+                  </view>
+                </view>
+              </view>
+            </view>
+
+            <!-- Right Column -->
+            <view class="pad-dash-col pad-dash-col--right">
+              <!-- F15: Quantitative Metrics Bento -->
+              <view class="pad-metrics-grid">
+                <view class="metric-card card-editorial">
+                  <view class="metric-icon-wrap icon-book-glow"></view>
+                  <view class="metric-body">
+                    <view class="metric-label">Today read</view>
+                    <view class="metric-value font-mono">3 <text class="metric-unit">books</text></view>
+                  </view>
+                </view>
+                <view class="metric-card card-editorial">
+                  <view class="metric-icon-wrap icon-corpus-glow"></view>
+                  <view class="metric-body">
+                    <view class="metric-label">Total read</view>
+                    <view class="metric-value font-mono">7 <text class="metric-unit">books</text></view>
+                  </view>
+                </view>
+                <view class="metric-card card-editorial">
+                  <view class="metric-icon-wrap icon-hourglass-glow"></view>
+                  <view class="metric-body">
+                    <view class="metric-label">Today spent</view>
+                    <view class="metric-value font-mono">13 <text class="metric-unit">minutes</text></view>
+                  </view>
+                </view>
+                <view class="metric-card card-editorial">
+                  <view class="metric-icon-wrap icon-clock-glow"></view>
+                  <view class="metric-body">
+                    <view class="metric-label">Total spent</view>
+                    <view class="metric-value font-mono">26 <text class="metric-unit">minutes</text></view>
+                  </view>
+                </view>
+              </view>
+
+              <!-- F16: Real-world Knowledge Learning Statistics -->
+              <view class="pad-analytics-card card-editorial">
+                <view class="panel-section-title">Real-world knowledge Learning Statistics</view>
+                <view class="analytics-subtitle">Disciplines learning record</view>
+                
+                <view class="analytics-viz-row">
+                  <view class="pie-chart-mock">
+                    <view class="pie-circle-outer"></view>
+                    <view class="pie-tooltip-box font-mono">
+                      <text class="tooltip-title">Earth and Space Science</text>
+                      <text class="tooltip-val">1 (25%)</text>
+                    </view>
+                  </view>
+                  <view class="donut-legend">
+                    <view class="legend-item"><view class="legend-dot dot-slate"></view><text>Earth and Space Science</text></view>
+                    <view class="legend-item"><view class="legend-dot dot-amber"></view><text>Life Science</text></view>
+                    <view class="legend-item"><view class="legend-dot dot-blue"></view><text>Physical Science</text></view>
+                  </view>
+                </view>
+
+                <view class="sub-disciplines-box">
+                  <view class="sub-title">Most learned sub-disciplines</view>
+                  <view class="sub-bar-group">
+                    <view class="sub-bar-item">
+                      <text class="sub-label">Biological Evolution</text>
+                      <view class="sub-bar-track"><view class="sub-bar-fill bar-amber" style="width: 70%;"></view></view>
+                    </view>
+                    <view class="sub-bar-item">
+                      <text class="sub-label">Earth Systems</text>
+                      <view class="sub-bar-track"><view class="sub-bar-fill bar-green" style="width: 55%;"></view></view>
+                    </view>
+                    <view class="sub-bar-item">
+                      <text class="sub-label">Ecosystems Dynamics</text>
+                      <view class="sub-bar-track"><view class="sub-bar-fill bar-yellow" style="width: 40%;"></view></view>
+                    </view>
+                    <view class="sub-bar-item">
+                      <text class="sub-label">Energy Interactions</text>
+                      <view class="sub-bar-track"><view class="sub-bar-fill bar-cyan" style="width: 45%;"></view></view>
+                    </view>
+                  </view>
+                </view>
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+      <view class="main-sections" wx:if="{{!isLargeScreen}}">
         <!-- Today's Recommendations -->
         <view class="section-header fade-up d2" wx:if="{{recommendBooks.length > 0 && (!isLargeScreen || !searchValue || filteredBooks.length > 0)}}">
           <view class="section-title">{{isLargeScreen && searchValue ? 'Search Results' : 'Featured Corpus'}}</view>
