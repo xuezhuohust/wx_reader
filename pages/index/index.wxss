@@ -1,9 +1,9 @@
 page {
-  background-color: #faf8f5;
+  background-color: #f5f5f7;
 }
 
 .home-page {
-  background-color: #faf8f5;
+  background-color: #f5f5f7;
   color: #1b1b1b;
   height: 100%;
   min-height: 0;
@@ -27,18 +27,22 @@ page {
   width: 100%;
   min-height: 560rpx; /* 增加总高度，为底部留出更多空间 */
   overflow: hidden;
-  background-color: #faf8f5;
+  background-color: #f5f5f7;
 }
 
-.hero-bg-image {
+/* Scientific Blueprint Dot Grid & Ambient Radial Light */
+.hero-academic-pattern {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
-  height: 100%; /* 背景图铺满，配合长渐变实现渐入效果 */
+  height: 100%;
   z-index: 0;
-  transform: scale(1);
-  filter: none;
+  background-color: #f5f5f7;
+  background-image: 
+    radial-gradient(circle at 85% 15%, rgba(0, 113, 227, 0.06) 0%, rgba(245, 245, 247, 0) 65%),
+    radial-gradient(rgba(134, 134, 139, 0.22) 1.5rpx, transparent 1.5rpx);
+  background-size: 100% 100%, 26rpx 26rpx;
   opacity: 0.9;
 }
 
@@ -47,14 +51,12 @@ page {
   top: 0;
   left: 0;
   width: 100%;
-  height: 101%; /* 溢出 1% 确保完全覆盖底部接缝 */
+  height: 101%;
   background: linear-gradient(to bottom, 
-    rgba(250, 248, 245, 0.05) 0%, 
-    rgba(250, 248, 245, 0.1) 40%, 
-    rgba(250, 248, 245, 0.6) 70%, 
-    rgba(250, 248, 245, 0.95) 90%,
-    #faf8f5 98%, /* 在到达底部前提前变为纯色 */
-    #faf8f5 100%
+    rgba(248, 250, 252, 0) 0%, 
+    rgba(248, 250, 252, 0.2) 50%, 
+    rgba(248, 250, 252, 0.85) 85%, 
+    #f5f5f7 100%
   );
   z-index: 1;
 }
@@ -98,8 +100,8 @@ page {
 .shelf-pill {
   font-size: 24rpx;
   font-weight: 700;
-  color: #3c692b;
-  background-color: rgba(60, 105, 43, 0.08);
+  color: #0071e3;
+  background-color: rgba(30, 64, 175, 0.08);
   padding: 10rpx 24rpx;
   border-radius: 99rpx;
   transition: all 0.2s;
@@ -107,7 +109,7 @@ page {
 
 .shelf-pill:active {
   transform: scale(0.95);
-  background-color: rgba(60, 105, 43, 0.15);
+  background-color: rgba(30, 64, 175, 0.15);
 }
 
 /* Stripped-out Reading Entry */
@@ -163,7 +165,7 @@ page {
 .entry-tag {
   font-size: 18rpx;
   font-weight: 800;
-  color: #3c692b;
+  color: #0071e3;
   letter-spacing: 2rpx;
   opacity: 0.8;
 }
@@ -171,7 +173,7 @@ page {
 .entry-pct {
   font-size: 22rpx;
   font-weight: 900;
-  color: #3c692b;
+  color: #0071e3;
   font-family: 'DIN Alternate', sans-serif;
   opacity: 0.9;
 }
@@ -198,8 +200,8 @@ page {
 .entry-arrow-icon {
   width: 10rpx;
   height: 10rpx;
-  border-top: 3rpx solid #3c692b;
-  border-right: 3rpx solid #3c692b;
+  border-top: 3rpx solid #0071e3;
+  border-right: 3rpx solid #0071e3;
   transform: rotate(45deg);
   opacity: 0.4;
   margin-left: 12rpx;
@@ -207,7 +209,7 @@ page {
 
 .entry-progress-bar {
   height: 8rpx; /* 增加厚度，从 4rpx 增加到 8rpx */
-  background-color: rgba(60, 105, 43, 0.08);
+  background-color: rgba(30, 64, 175, 0.08);
   border-radius: 99rpx;
   overflow: hidden;
   width: 100%;
@@ -216,7 +218,7 @@ page {
 
 .entry-progress-fill {
   height: 100%;
-  background-color: #3c692b;
+  background-color: #0071e3;
   border-radius: 99rpx;
 }
 
@@ -226,7 +228,7 @@ page {
   position: relative;
   z-index: 3;
   margin-top: -2rpx; /* 向上拉 1px，物理遮盖可能的亚像素接缝 */
-  background-color: #faf8f5; /* 确保背景色纯净 */
+  background-color: #f5f5f7; /* 确保背景色纯净 */
 }
 
 .no-padding-top {
@@ -289,7 +291,7 @@ page {
 .section-link {
   font-size: 26rpx;
   font-weight: 700;
-  color: #3c692b;
+  color: #0071e3;
 }
 
 /* Book Scroll */
@@ -322,7 +324,7 @@ page {
   align-items: center;
   justify-content: center;
   position: relative;
-  border-radius: 16rpx;
+  border-radius: 16rpx; border: 0.5px solid rgba(0, 0, 0, 0.08); box-shadow: 0 4rpx 14rpx rgba(0, 0, 0, 0.04);
   overflow: hidden;
   box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
   border: 1rpx solid rgba(0, 0, 0, 0.04);
@@ -443,7 +445,7 @@ page {
   width: 100%;
   display: inline-block;
   background-color: #fff;
-  border-radius: 24rpx;
+  border-radius: 20rpx; border: 0.5px solid rgba(0, 0, 0, 0.08); box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.04);
   overflow: hidden;
   box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.05);
 }
@@ -511,7 +513,7 @@ page {
   letter-spacing: 2rpx;
   padding: 6rpx 16rpx;
   border-radius: 99rpx;
-  background-color: #3c692b;
+  background-color: #0071e3;
   color: #fff;
 }
 
@@ -592,7 +594,7 @@ page {
 .icon-book-small {
   width: 24rpx;
   height: 32rpx;
-  border: 3rpx solid #3c692b;
+  border: 3rpx solid #0071e3;
   border-radius: 4rpx;
 }
 
@@ -600,8 +602,8 @@ page {
   content: '';
   width: 14rpx;
   height: 14rpx;
-  border-top: 4rpx solid #3c692b;
-  border-right: 4rpx solid #3c692b;
+  border-top: 4rpx solid #0071e3;
+  border-right: 4rpx solid #0071e3;
   position: absolute;
   top: -7rpx;
   right: 0;

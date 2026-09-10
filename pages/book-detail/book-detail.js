@@ -9,7 +9,7 @@ Page({
     scrolled: false,
     scene: 'user',
     isPublisherScene: false,
-    pageTitle: '书本详情',
+    pageTitle: "Manuscript Details",
     chaptersExpanded: false,
     visibleChapters: [],
     chapterCount: 0,
@@ -17,8 +17,8 @@ Page({
     loading: true,
     hasProgress: false,
     displayCopyright: '',
-    displayWordCount: '暂无',
-    displayRating: '暂无',
+    displayWordCount: "N/A",
+    displayRating: "N/A",
     isLargeScreen: false,
     windowHeight: 0,
   },
@@ -39,7 +39,7 @@ Page({
       return
     }
     const isPublisherScene = scene === 'publisher'
-    const pageTitle = '书本详情'
+    const pageTitle = "Manuscript Details"
     
     const app = getApp()
     const layout = app.refreshLayout('book-detail:onLoad')
@@ -178,32 +178,32 @@ Page({
 
   formatWordCount(value) {
     if (value === null || value === undefined || value === '') {
-      return '暂无'
+      return "N/A"
     }
 
     const count = Number(value)
     if (Number.isFinite(count) && count >= 0) {
       if (count >= 10000) {
         const formatted = (count / 10000).toFixed(count % 10000 === 0 ? 0 : 1)
-        return `${formatted} 万字`
+        return `${formatted}0k words`
       }
-      return `${Math.round(count)} 字`
+      return `${Math.round(count)} words`
     }
 
-    return String(value).trim() || '暂无'
+    return String(value).trim() || "N/A"
   },
 
   formatRating(value) {
     if (value === null || value === undefined || value === '') {
-      return '暂无'
+      return "N/A"
     }
 
     const rating = Number(value)
     if (Number.isFinite(rating)) {
-      return `${rating.toFixed(Number.isInteger(rating) ? 0 : 1)} 分`
+      return `${rating.toFixed(Number.isInteger(rating) ? 0 : 1)} pts`
     }
 
-    return String(value).trim() || '暂无'
+    return String(value).trim() || "N/A"
   },
 
   getVisibleChapters(chapters, expanded) {
@@ -242,7 +242,7 @@ Page({
       .then(() => {
         wx.hideLoading()
         wx.showToast({
-          title: '解锁成功',
+          title: "Unlocked",
           icon: 'success'
         })
         this.loadBook()
@@ -262,7 +262,7 @@ Page({
 
     if (!book.purchased) {
       wx.showToast({
-        title: '请先购买后再阅读',
+        title: "Please unlock to read",
         icon: 'none',
       })
       return
@@ -291,7 +291,7 @@ Page({
             .then(() => {
               wx.hideLoading()
               wx.showToast({
-                title: '删除成功',
+                title: "Deleted",
                 icon: 'success',
               })
               setTimeout(() => {
@@ -325,7 +325,7 @@ Page({
       .then(() => {
         wx.hideLoading()
         wx.showToast({
-          title: '购买成功',
+          title: "Added to Library",
           icon: 'success',
         })
         this.loadBook()
@@ -346,7 +346,7 @@ Page({
     }
     if (!book.purchased) {
       wx.showToast({
-        title: '请先购买后再对话',
+        title: "Please unlock to start QA",
         icon: 'none',
       })
       return
@@ -397,7 +397,7 @@ Page({
 
     if (!book.purchased) {
       wx.showToast({
-        title: '请先购买后再阅读',
+        title: "Please unlock to read",
         icon: 'none',
       })
       return
@@ -429,7 +429,7 @@ Page({
 
     if (book.buildStatus !== 'done') {
       wx.showToast({
-        title: '请先完成建库',
+        title: "Indexing required",
         icon: 'none',
       })
       return
@@ -439,7 +439,7 @@ Page({
     api.updateBookOnlineStatus(book.id, nextStatus)
       .then(() => {
         wx.showToast({
-          title: nextStatus === 'online' ? '已上架' : '已下架',
+          title: nextStatus === "online" ? "Published" : "Unpublished",
           icon: 'success',
         })
         this.loadBook()

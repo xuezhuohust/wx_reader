@@ -2,7 +2,7 @@
   <!-- 手机端保留原页头；横屏 Pad 交由状态栏安全留白承接内容。 -->
   <view class="home-nav" wx:if="{{!isLargeScreen}}" style="height: {{navBarHeight}}px; background-color: #faf8f5;">
     <view class="nav-header" style="position: absolute; top: {{menuTop}}px; height: {{menuHeight}}px; left: 0; right: 0; padding-right: {{menuRight}}px;">
-      <view class="nav-title">书库</view>
+      <view class="nav-title">Corpus Library</view>
       <view class="nav-actions">
       </view>
     </view>
@@ -28,7 +28,7 @@
         <view class="icon-search-small"></view>
         <input
           class="search-input"
-          placeholder="搜索书名或作者..."
+          placeholder="Filter corpus by title or author..."
           placeholder-class="search-placeholder"
           bindinput="handleSearchInput"
           value="{{searchValue}}"
@@ -78,19 +78,19 @@
             <view class="book-placeholder-inner-flat" wx:else>
               <view class="placeholder-title-flat">{{item.title[0]}}</view>
             </view>
-            <view class="book-grid-badge" wx:if="{{item.isAIReady}}">AI-Ready</view>
+            <view class="book-grid-badge font-mono" wx:if="{{item.isAIReady}}">AI-Ready</view>
           </view>
           
           <view class="book-grid-info">
             <view class="book-grid-title">{{item.title}}</view>
-            <view class="book-grid-author">{{item.author || '未知作者'}}</view>
+            <view class="book-grid-author">{{item.author || 'Unknown Scholar'}}</view>
             <view class="book-grid-meta">
               <view class="meta-item">
                 <text class="meta-star">★</text>
                 <text>{{item.rating || '4.5'}}</text>
               </view>
               <view class="meta-dot">·</view>
-              <view class="meta-readers">{{item.readersCount || '1.2k'}} 在读</view>
+              <view class="meta-readers font-mono">{{item.readersCount || '1.2k'}} readers</view>
             </view>
           </view>
         </view>
@@ -110,9 +110,9 @@
         <view class="empty-icon-wrap">
           <view class="icon-book-empty"></view>
         </view>
-        <view class="empty-title">未找到相关书籍</view>
-        <view class="empty-desc">尝试换个搜索词或分类看看</view>
-        <view class="btn-primary" bindtap="handleResetFilters">重置筛选</view>
+        <view class="empty-title">No Manuscripts Found</view>
+        <view class="empty-desc">Try adjusting search filters or query keywords</view>
+        <view class="btn-primary" bindtap="handleResetFilters">Reset Filters</view>
       </view>
 
       <view class="safe-area-bottom"></view>

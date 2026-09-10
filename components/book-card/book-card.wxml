@@ -21,15 +21,15 @@
 
       <view wx:if="{{mode === 'owned'}}" class="owned-meta">
         <text class="meta-item">{{readTimeText}}</text>
-        <text class="meta-item">对话 {{book.chatCount || 0}}</text>
+        <text class="meta-item">QA {{book.chatCount || 0}}</text>
       </view>
     </view>
 
     <view class="book-footer">
       <view class="price-section" wx:if="{{mode === 'market'}}">
-        <text class="price-label">价格</text>
+        <text class="price-label">Price</text>
         <text class="price-value" wx:if="{{!book.purchased}}">{{priceText}}</text>
-        <text class="status-owned" wx:else>已拥有</text>
+        <text class="status-owned" wx:else>In Library</text>
       </view>
       
       <view class="action-trigger" bindtap="handleTap">

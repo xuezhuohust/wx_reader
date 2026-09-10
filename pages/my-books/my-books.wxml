@@ -2,7 +2,7 @@
   <!-- 手机端保留原页头；横屏 Pad 移除左上角标题。 -->
   <view class="home-nav" wx:if="{{!isLargeScreen}}" style="height: {{navBarHeight}}px;">
     <view class="nav-header" style="position: absolute; top: {{menuTop}}px; height: {{menuHeight}}px; left: 0; right: 0; padding-right: {{menuRight}}px;">
-      <view class="nav-title">我的</view>
+      <view class="nav-title">Research Profile</view>
     </view>
   </view>
 
@@ -19,10 +19,10 @@
           <image class="profile-avatar" src="{{identity.avatarUrl || 'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0'}}" mode="aspectFill"></image>
         </view>
         <view class="profile-info">
-          <view class="user-name">{{identity.displayName || '微信用户'}}</view>
+          <view class="user-name">{{identity.displayName || 'Research Fellow'}}</view>
           <view class="profile-meta-row">
-            <view class="user-tag">{{currentRole === 'publisher' ? '内容创作者' : '深度阅读者'}}</view>
-            <text class="join-date">2024 年加入</text>
+            <view class="user-tag">{{currentRole === 'publisher' ? 'Corpus Creator' : 'Principal Researcher'}}</view>
+            <text class="join-date">Joined 2024</text>
           </view>
         </view>
         <view class="icon-arrow-right-faint"></view>
@@ -33,22 +33,22 @@
       <view class="reading-stats fade-up d2">
         <view class="reading-stat">
           <view class="reading-stat-value">216h</view>
-          <view class="reading-stat-label">累计阅读</view>
+          <view class="reading-stat-label">Total Research Hours</view>
         </view>
         <view class="reading-stat">
           <view class="reading-stat-value">23</view>
-          <view class="reading-stat-label">已读书籍</view>
+          <view class="reading-stat-label">Indexed Texts</view>
         </view>
         <view class="reading-stat">
           <view class="reading-stat-value">156</view>
-          <view class="reading-stat-label">我的笔记</view>
+          <view class="reading-stat-label">Annotations</view>
         </view>
       </view>
 
       <!-- Weekly Chart -->
       <view class="weekly-chart fade-up d4">
         <view class="chart-header">
-          <view class="chart-title">本周阅读时长</view>
+          <view class="chart-title">Weekly Corpus Ingestion</view>
           <view class="chart-summary">12.5h</view>
         </view>
         <view class="chart-bars">
@@ -68,8 +68,8 @@
             <view class="icon-menu-notes"></view>
           </view>
           <view class="menu-item-text">
-            <view class="menu-item-title">我的笔记</view>
-            <view class="menu-item-sub">156 条 · 6 本书</view>
+            <view class="menu-item-title">Research Annotations</view>
+            <view class="menu-item-sub">156 entries · 6 documents</view>
           </view>
           <view class="icon-arrow-right-small"></view>
         </view>
@@ -79,8 +79,8 @@
             <view class="icon-menu-fav"></view>
           </view>
           <view class="menu-item-text">
-            <view class="menu-item-title">我的收藏</view>
-            <view class="menu-item-sub">12 本书 · 3 篇笔记</view>
+            <view class="menu-item-title">Bookmarked Citations</view>
+            <view class="menu-item-sub">12 texts · 3 notes</view>
           </view>
           <view class="icon-arrow-right-small"></view>
         </view>
@@ -90,8 +90,8 @@
             <view class="icon-menu-history"></view>
           </view>
           <view class="menu-item-text">
-            <view class="menu-item-title">阅读历史</view>
-            <view class="menu-item-sub">最近 7 天阅读记录</view>
+            <view class="menu-item-title">Session History</view>
+            <view class="menu-item-sub">Last 7 days reading logs</view>
           </view>
           <view class="icon-arrow-right-small"></view>
         </view>
@@ -101,8 +101,8 @@
             <view class="icon-menu-settings"></view>
           </view>
           <view class="menu-item-text">
-            <view class="menu-item-title">智能设置</view>
-            <view class="menu-item-sub">AI 伴读偏好设置</view>
+            <view class="menu-item-title">AI Preferences</view>
+            <view class="menu-item-sub">Model & prompt tuning</view>
           </view>
           <view class="icon-arrow-right-small"></view>
         </view>
@@ -112,7 +112,7 @@
             <view class="icon-menu-logout"></view>
           </view>
           <view class="menu-item-text">
-            <view class="menu-item-title logout-text">退出登录</view>
+            <view class="menu-item-title logout-text">Sign Out</view>
           </view>
         </view>
       </view>
@@ -126,7 +126,7 @@
   <view wx:if="{{showProfileModal}}" class="profile-overlay" bindtap="handleCloseProfile">
     <view class="profile-sheet" catchtap="handleStopPropagation">
       <view class="sheet-bar"></view>
-      <view class="sheet-title">完善个人资料</view>
+      <view class="sheet-title">Researcher Profile</view>
       <view wx:if="{{!profilePrivacyAgreed}}" class="profile-privacy-box">
         <view class="profile-privacy-title">设置头像前需要隐私授权</view>
         <view class="profile-privacy-text">
@@ -147,22 +147,22 @@
           <image wx:if="{{identity && identity.avatarUrl}}" src="{{identity.avatarUrl}}" mode="aspectFill" />
           <view class="uploader-placeholder" wx:else>+</view>
         </view>
-        <view class="uploader-hint">{{avatarUploading ? '头像上传中...' : '点击更换头像'}}</view>
+        <view class="uploader-hint">{{avatarUploading ? 'Uploading...' : 'Change avatar'}}</view>
       </button>
       <view class="input-group">
-        <view class="input-label">昵称</view>
+        <view class="input-label">Display Name</view>
         <input
           class="input-field"
           type="text"
           value="{{nicknameDraft}}"
-          placeholder="请输入您的昵称"
+          placeholder="Enter display name"
           placeholder-class="search-placeholder"
           bindinput="handleNicknameDraftInput"
           bindblur="handleNicknameDraftInput"
           maxlength="20"
         />
       </view>
-      <view class="btn-primary" bindtap="handleProfileSubmit">保存设置</view>
+      <view class="btn-primary" bindtap="handleProfileSubmit">Save</view>
     </view>
   </view>
 </view>

@@ -2,7 +2,7 @@
   "navigationStyle": "custom",
   "pageOrientation": "auto",
   "disableScroll": true,
-  "navigationBarTitleText": "书本详情",
+  "navigationBarTitleText": "Manuscript Details",
   "usingComponents": {
     "status-tag": "/components/status-tag/status-tag"
   }

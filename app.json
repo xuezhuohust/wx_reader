@@ -16,10 +16,10 @@
   ],
   "window": {
     "navigationStyle": "custom",
-    "navigationBarBackgroundColor": "#faf8f5",
-    "navigationBarTitleText": "AI 伴读",
+    "navigationBarBackgroundColor": "#f5f5f7",
+    "navigationBarTitleText": "AI Academic Reader",
     "navigationBarTextStyle": "black",
-    "backgroundColor": "#faf8f5",
+    "backgroundColor": "#f5f5f7",
     "backgroundTextStyle": "light",
     "pageOrientation": "auto"
   },
@@ -36,38 +36,38 @@
   "lazyCodeLoading": "requiredComponents",
   "tabBar": {
     "custom": true,
-    "color": "#9a9e95",
-    "selectedColor": "#3c692b",
-    "backgroundColor": "#faf8f5",
+    "color": "#86868b",
+    "selectedColor": "#0071e3",
+    "backgroundColor": "#ffffff",
     "borderStyle": "white",
     "list": [
       {
         "pagePath": "pages/bookshelf/bookshelf",
-        "text": "书库",
+        "text": "Library",
         "iconPath": "app-assets/tab-default.png",
         "selectedIconPath": "app-assets/tab-active.png"
       },
       {
         "pagePath": "pages/index/index",
-        "text": "首页",
+        "text": "Dashboard",
         "iconPath": "app-assets/tab-default.png",
         "selectedIconPath": "app-assets/tab-active.png"
       },
       {
         "pagePath": "pages/my-books/my-books",
-        "text": "我的",
+        "text": "Profile",
         "iconPath": "app-assets/tab-default.png",
         "selectedIconPath": "app-assets/tab-active.png"
       },
       {
         "pagePath": "pages/publisher/books",
-        "text": "管理",
+        "text": "Corpus",
         "iconPath": "app-assets/tab-default.png",
         "selectedIconPath": "app-assets/tab-active.png"
       },
       {
         "pagePath": "pages/publisher/index",
-        "text": "仪表盘",
+        "text": "Analytics",
         "iconPath": "app-assets/tab-default.png",
         "selectedIconPath": "app-assets/tab-active.png"
       }

@@ -2,7 +2,7 @@
   <!-- Custom Navigation Bar -->
   <view class="custom-nav" style="height: {{navBarHeight}}px;">
     <view class="nav-inner" style="top: {{menuTop}}px; height: {{menuHeight}}px;">
-      <text class="nav-title">业务管理中心</text>
+      <text class="nav-title">Corpus Operations</text>
     </view>
   </view>
 
@@ -12,8 +12,8 @@
         <view class="intro-badge">
           <text>OPERATIONS</text>
         </view>
-        <text class="header-title">图书资产概览</text>
-        <text class="header-desc">处理书籍录入、AI 建库及发布状态</text>
+        <text class="header-title">Corpus Asset Overview</text>
+        <text class="header-desc">Manage ingestion, vector indexing, and publication</text>
       </view>
     </view>
 
@@ -23,18 +23,18 @@
       <view class="ops-icon-box tint-sky">
         <view class="icon-svg icon-upload-blue"></view>
       </view>
-      <text class="ops-label">上传书籍</text>
+      <text class="ops-label">Ingest Document</text>
     </view>
     <view class="ops-item card-base" bindtap="handleGoBuild">
       <view class="ops-icon-box tint-lavender">
         <view class="icon-svg icon-build-purple"></view>
       </view>
-      <text class="ops-label">建库任务</text>
+      <text class="ops-label">Index Queue</text>
     </view>
   </view>
 
   <view class="section-title-row">
-    <text class="section-title">书目清单</text> 
+    <text class="section-title">Corpus Inventory</text> 
     <text class="count-badge">{{filteredBooks.length}}</text>
   </view>
 
@@ -43,7 +43,7 @@
       <view class="icon-svg icon-search-gray"></view>
       <input
         class="search-input"
-        placeholder="搜索书名、作者、分类"
+        placeholder="Search title, author, field..."
         placeholder-style="color:var(--stone);"
         value="{{searchValue}}"
         bindinput="handleSearchInput"
@@ -74,7 +74,7 @@
           <view class="tag-row">
             <view class="mini-tag tag-peach" wx:if="{{item.category}}">{{item.category}}</view>
             <view class="mini-tag {{item.buildStatus === 'completed' ? 'tag-mint' : 'tag-gray'}}">
-              {{item.buildStatus === 'completed' ? '已建库' : '待处理'}}
+              {{item.buildStatus === 'completed' ? 'Indexed' : 'Pending'}}
             </view>
           </view>
         </view>
@@ -90,14 +90,14 @@
             class="btn-action btn-outline-default"
             catchtap="handleEditBook"
             data-id="{{item.id}}"
-          >编辑</button>
+          >Edit</button>
           <button
             class="btn-action {{item.onlineStatus === 'online' ? 'btn-outline-danger' : 'btn-outline-primary'}}"
             catchtap="handleToggleStatus"
             data-id="{{item.id}}"
             data-status="{{item.onlineStatus}}"
           >
-            {{item.onlineStatus === 'online' ? '下架' : '上架'}}
+            {{item.onlineStatus === 'online' ? 'Draft' : 'Publish'}}
           </button>
         </view>
       </view>
@@ -106,8 +106,8 @@
 
     <empty-state
       wx:else
-      title="暂时没有书目"
-      description="上传一本书后，这里会显示你的出版社书单"
+      title="No Corpus Ingested"
+      description="Ingest a manuscript to start tracking knowledge pipeline."
     />
   </scroll-view>
 </view>

@@ -6,7 +6,7 @@
     catchtap="handleStartAI"
   >
     <view class="icon-ai-sparkle reader-ai-fab-icon"></view>
-    <text>AI 伴读</text>
+    <text>AI QA</text>
   </view>
 
   <!-- Custom Navigation Bar -->
@@ -17,7 +17,7 @@
       </view>
       <view class="nav-center" style="position: absolute; left: 50%; transform: translateX(-50%); width: 40%; height: 100%;">
         <view class="reader-chapter-title {{currentChapterName.length > 10 ? 'should-marquee' : ''}}">
-          <text>{{currentChapterName || '正在加载...'}}</text>
+          <text>{{currentChapterName || 'Loading...'}}</text>
           <text wx:if="{{currentChapterName.length > 10}}" class="marquee-copy">{{currentChapterName}}</text>
         </view>
       </view>
@@ -32,11 +32,11 @@
           <view class="icon-back"></view>
         </view>
         <view class="reader-pane-heading">
-          <text class="reader-pane-title">{{currentChapterName || '正在加载...'}}</text>
+          <text class="reader-pane-title">{{currentChapterName || 'Loading...'}}</text>
         </view>
       </view>
 
-      <view wx:if="{{loading}}" class="reader-source-loading">正在加载原文…</view>
+      <view wx:if="{{loading}}" class="reader-source-loading">Loading manuscript...</view>
       <swiper
         wx:else
         class="reader-source-swiper"
@@ -58,7 +58,7 @@
                 data-text="{{paraObj.text}}"
               >{{paraObj.text}}</view>
               <view class="chapter-end-hint" wx:if="{{item.showChapterEnd}}">
-                <text>— 本章完 —</text>
+                <text>— End of Section —</text>
               </view>
             </view>
             <view class="reader-bridge-page" wx:else>
@@ -78,9 +78,9 @@
       </swiper>
 
       <view class="reader-source-footer">
-        <view class="reader-source-nav {{currentChapterIndex <= 0 ? 'is-disabled' : ''}}" bindtap="handlePrevChapter">上一章</view>
-        <text>本章 {{readingProgress}}%</text>
-        <view class="reader-source-nav {{currentChapterIndex >= totalChapters - 1 ? 'is-disabled' : ''}}" bindtap="handleNextChapter">下一章</view>
+        <view class="reader-source-nav {{currentChapterIndex <= 0 ? 'is-disabled' : ''}}" bindtap="handlePrevChapter">Prev</view>
+        <text>Section {{readingProgress}}%</text>
+        <view class="reader-source-nav {{currentChapterIndex >= totalChapters - 1 ? 'is-disabled' : ''}}" bindtap="handleNextChapter">Next</view>
       </view>
     </view>
 
@@ -98,7 +98,7 @@
         large-screen="{{isLandscapeReader}}"
         bind:modechange="handleReaderChatModeChange"
       />
-      <view wx:else class="reader-chat-loading">伴读正在准备中…</view>
+      <view wx:else class="reader-chat-loading">Assistant initializing...</view>
     </view>
   </view>
 
@@ -159,7 +159,7 @@
         <view class="footer-btn">
           <view class="icon-chapter-prev"></view>
         </view>
-        <text class="btn-label">上一章</text>
+        <text class="btn-label">Previous</text>
       </view>
       
       <view class="footer-nav-center" bindtap="handleShowToc">
@@ -171,15 +171,15 @@
             </view>
           </view>
           <view class="nav-progress-meta">
-            <text class="progress-pct">本章 {{readingProgress}}%</text>
+            <text class="progress-pct">Section {{readingProgress}}%</text>
             <text class="progress-sep">·</text>
-            <text class="progress-chapter">第 {{currentChapterIndex + 1}} / {{totalChapters}} 章</text>
+            <text class="progress-chapter">Chapter {{currentChapterIndex + 1}} of {{totalChapters}}</text>
           </view>
         </view>
       </view>
 
       <view class="footer-btn-wrap {{currentChapterIndex >= totalChapters - 1 ? 'btn--disabled' : ''}}" bindtap="handleNextChapter">
-        <text class="btn-label">下一章</text>
+        <text class="btn-label">Next</text>
         <view class="footer-btn">
           <view class="icon-chapter-next"></view>
         </view>
@@ -192,8 +192,8 @@
   <view wx:if="{{showTocSheet}}" class="toc-sheet show">
     <view class="toc-header">
       <view class="toc-handle"></view>
-      <view class="toc-title">目录</view>
-      <view class="toc-subtitle">共 {{totalChapters}} 章节</view>
+      <view class="toc-title">Contents</view>
+      <view class="toc-subtitle">Total {{totalChapters}} Chapters</view>
     </view>
     <scroll-view class="toc-list" scroll-y scroll-into-view="chapter-{{currentChapterIndex}}">
       <view 
@@ -216,19 +216,19 @@
     <view class="selection-menu" catchtap="nop">
       <view class="menu-item" bindtap="handleMenuAI">
         <view class="menu-icon icon-ai-sparkle-white"></view>
-        <text>AI 解析</text>
+        <text>Explain</text>
       </view>
       <view class="menu-item" bindtap="handleMenuCopy">
         <view class="menu-icon icon-copy"></view>
-        <text>复制</text>
+        <text>Copy</text>
       </view>
       <view class="menu-item" bindtap="handleMenuHighlight">
         <view class="menu-icon icon-highlight"></view>
-        <text>划线</text>
+        <text>Highlight</text>
       </view>
       <view class="menu-item" bindtap="handleMenuShare">
         <view class="menu-icon icon-share"></view>
-        <text>分享</text>
+        <text>Share</text>
       </view>
     </view>
   </view>

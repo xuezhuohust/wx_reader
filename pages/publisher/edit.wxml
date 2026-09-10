@@ -4,7 +4,7 @@
       <view class="nav-left" bindtap="handleBack">
         <view class="chevron-left-black"></view>
       </view>
-      <text class="nav-title">编辑书籍</text>
+      <text class="nav-title">Edit Manuscript</text>
     </view>
   </view>
 
@@ -12,22 +12,22 @@
   <view class="upload-form">
     <view class="form-group card-base">
       <view class="form-item">
-        <text class="form-label">书籍名称</text>
-        <input class="form-input" value="{{form.title}}" data-field="title" bindinput="handleInput" placeholder="请输入书名" />
+        <text class="form-label">Manuscript Title</text>
+        <input class="form-input" value="{{form.title}}" data-field="title" bindinput="handleInput" placeholder="Enter title" />
       </view>
       <view class="form-item">
-        <text class="form-label">作者/编著者</text>
-        <input class="form-input" value="{{form.author}}" data-field="author" bindinput="handleInput" placeholder="请输入作者" />
+        <text class="form-label">Author(s)</text>
+        <input class="form-input" value="{{form.author}}" data-field="author" bindinput="handleInput" placeholder="Enter author(s)" />
       </view>
       <view class="form-item">
-        <text class="form-label">出版单位</text>
-        <input class="form-input" value="{{form.publisher}}" data-field="publisher" bindinput="handleInput" placeholder="请输入出版社" />
+        <text class="form-label">Institution / Publisher</text>
+        <input class="form-input" value="{{form.publisher}}" data-field="publisher" bindinput="handleInput" placeholder="Enter publisher" />
       </view>
       <view class="form-item">
-        <text class="form-label">内容分类</text>
+        <text class="form-label">Research Field</text>
         <picker class="form-picker" range="{{categories}}" value="{{categoryIndex}}" bindchange="handleCategoryChange">
           <view class="picker-inner">
-            <text class="picker-value">{{form.category || '请选择分类'}}</text>
+            <text class="picker-value">{{form.category || 'Select field'}}</text>
             <view class="chevron-down-mini"></view>
           </view>
         </picker>
@@ -36,16 +36,16 @@
 
     <view class="form-group card-base">
       <view class="form-item">
-        <text class="form-label">内容简介</text>
-        <textarea class="form-textarea" value="{{form.description}}" data-field="description" bindinput="handleInput" placeholder="请输入书籍核心内容简介" />
+        <text class="form-label">Abstract</text>
+        <textarea class="form-textarea" value="{{form.description}}" data-field="description" bindinput="handleInput" placeholder="Enter abstract" />
       </view>
       <view class="form-item">
-        <text class="form-label">定价 (元)</text>
+        <text class="form-label">Access Fee / Price ($)</text>
         <input class="form-input" value="{{form.price}}" data-field="price" bindinput="handleInput" placeholder="0.00" type="digit" />
       </view>
       <view class="form-item no-border">
-        <text class="form-label">版权及权利声明</text>
-        <textarea class="form-textarea" value="{{form.copyright}}" data-field="copyright" bindinput="handleInput" placeholder="请输入版权归属及授权说明" />
+        <text class="form-label">License & Rights</text>
+        <textarea class="form-textarea" value="{{form.copyright}}" data-field="copyright" bindinput="handleInput" placeholder="Specify license or DOI" />
       </view>
     </view>
 
@@ -53,8 +53,8 @@
       <block wx:if="{{coverPath || form.cover_url}}">
         <image class="cover-preview" src="{{coverPath || form.cover_url}}" mode="aspectFill" />
         <view class="upload-info">
-          <text class="upload-title">点击更换封面</text>
-          <text class="upload-hint">支持 jpg / png / webp</text>
+          <text class="upload-title">Change Cover</text>
+          <text class="upload-hint">Formats: JPG, PNG, WebP</text>
         </view>
       </block>
       <block wx:else>
@@ -62,14 +62,14 @@
           <view class="icon-svg icon-upload-cloud"></view>
         </view>
         <view class="upload-info">
-          <text class="upload-title">点击上传封面图片</text>
-          <text class="upload-hint">支持 jpg / png / webp，≤5MB</text>
+          <text class="upload-title">Upload Cover</text>
+          <text class="upload-hint">Formats: JPG, PNG, WebP, ≤5MB</text>
         </view>
       </block>
     </view>
 
     <view class="submit-section">
-      <button class="btn-submit" bindtap="handleSubmit">保存修改</button>
+      <button class="btn-submit" bindtap="handleSubmit">Save Changes</button>
     </view>
   </view>
   </scroll-view>

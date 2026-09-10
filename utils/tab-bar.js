@@ -17,19 +17,19 @@ const ICONS = {
 const READER_TAB_ITEMS = [
   {
     pagePath: 'pages/bookshelf/bookshelf',
-    text: '书库',
+    text: 'Library',
     iconPath: ICONS.bookshelf,
     selectedIconPath: ICONS.bookshelf,
   },
   {
     pagePath: 'pages/index/index',
-    text: '首页',
+    text: 'Dashboard',
     iconPath: ICONS.home,
     selectedIconPath: ICONS.home,
   },
   {
     pagePath: 'pages/my-books/my-books',
-    text: '我的',
+    text: 'Profile',
     iconPath: ICONS.user,
     selectedIconPath: ICONS.user,
   },
@@ -39,19 +39,19 @@ const READER_TAB_ITEMS = [
 const PUBLISHER_TAB_ITEMS = [
   {
     pagePath: 'pages/publisher/books',
-    text: '管理',
+    text: 'Corpus',
     iconPath: ICONS.management,
     selectedIconPath: ICONS.management,
   },
   {
     pagePath: 'pages/publisher/index',
-    text: '仪表盘',
+    text: 'Analytics',
     iconPath: ICONS.dashboard,
     selectedIconPath: ICONS.dashboard,
   },
   {
     pagePath: 'pages/my-books/my-books',
-    text: '我的',
+    text: 'Profile',
     iconPath: ICONS.user,
     selectedIconPath: ICONS.user,
   },

@@ -19,12 +19,11 @@ Page({
     publisher: null,
     publisherStats: {},
     currentRole: "reader",
-    currentRoleLabel: "读者",
+    currentRoleLabel: "Researcher",
     showPermissionModal: false,
     showPrivacyModal: false,
-    privacyModalTitle: "隐私授权说明",
-    privacyModalText:
-      "为提供完整伴读体验，小程序需要在您主动使用相关功能时调用录音、剪贴板、文件选择与图片选择能力，用于语音提问、复制消息、上传书籍和设置封面。请先阅读并同意隐私授权。",
+    privacyModalTitle: "Privacy & Authorization",
+    privacyModalText: "To facilitate full interactive academic reading, the system requests audio recording, clipboard, and document permissions when you initiate queries or upload research corpus. Please confirm to proceed.",
     navBarHeight: getApp().globalData.navBarHeight,
     statusBarHeight: getApp().globalData.statusBarHeight,
     menuRight: getApp().globalData.menuRight,
@@ -147,13 +146,11 @@ Page({
 
   updateTimeGreeting() {
     const hour = new Date().getHours();
-    let greeting = "你好";
-    if (hour < 6) greeting = "凌晨";
-    else if (hour < 9) greeting = "早晨";
-    else if (hour < 12) greeting = "上午";
-    else if (hour < 14) greeting = "中午";
-    else if (hour < 18) greeting = "下午";
-    else greeting = "晚上";
+    let greeting = "Hello";
+    if (hour < 6) greeting = "Early Dawn";
+    else if (hour < 12) greeting = "Good Morning";
+    else if (hour < 18) greeting = "Good Afternoon";
+    else greeting = "Good Evening";
     this.setData({ timeGreeting: greeting });
   },
 

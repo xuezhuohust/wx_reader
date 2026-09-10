@@ -11,29 +11,29 @@
     <view class="hero-band-dark">
       <view class="hero-content">
         <view class="hero-title-wrap">
-          <text class="hero-title">{{publisher.name || '运营数据概览'}}</text>
+          <text class="hero-title">{{publisher.name || 'Analytics & Metrics'}}</text>
         </view>
-        <text class="hero-desc">实时掌控书籍资产动态，深度洞察读者交互趋势。</text>
+        <text class="hero-desc">Real-time surveillance of corpus ingestion and interactive telemetry.</text>
       </view>
 
       <!-- Floating Metrics: Positioned on the edge -->
       <view class="floating-metrics">
         <view class="metric-item">
-          <text class="m-label">管理规模</text>
+          <text class="m-label">Corpus Volume</text>
           <view class="m-value-row">
             <text class="m-value">{{stats.totalBooks || 0}}</text>
-            <text class="m-unit">册</text>
+            <text class="m-unit">docs</text>
           </view>
-          <text class="m-sub">已上架 {{stats.totalBooks || 0}}</text>
+          <text class="m-sub">Published {{stats.totalBooks || 0}}</text>
         </view>
         <view class="m-divider"></view>
         <view class="metric-item">
-          <text class="m-label">AI 对话量</text>
+          <text class="m-label">QA Queries</text>
           <view class="m-value-row">
             <text class="m-value">{{stats.totalChatCount || 0}}</text>
-            <text class="m-unit">次</text>
+            <text class="m-unit">reqs</text>
           </view>
-          <text class="m-sub">活跃度 100%</text>
+          <text class="m-sub">Activity 100%</text>
         </view>
       </view>
     </view>
@@ -45,13 +45,13 @@
     <view class="chart-section card-base">
       <view class="chart-header">
         <view class="chart-title-wrap">
-          <text class="chart-title">读者互动趋势</text>
-          <text class="chart-subtitle">最近 7 天对话统计</text>
+          <text class="chart-title">Interaction Telemetry</text>
+          <text class="chart-subtitle">7-day QA query volume</text>
         </view>
         <view class="chart-legend">
           <view class="legend-item">
             <view class="legend-dot bg-publisher"></view>
-            <text>对话次数</text>
+            <text>Queries</text>
           </view>
         </view>
       </view>
@@ -70,18 +70,18 @@
     <!-- Status Visualization -->
     <view class="viz-section card-base tint-gray">
       <view class="viz-header">
-        <text class="viz-title">资产构建进度</text>
+        <text class="viz-title">Indexing Pipeline Status</text>
       </view>
       <view class="viz-content">
         <view class="viz-row">
-          <text class="viz-label">已建库书籍</text>
+          <text class="viz-label">Indexed Documents</text>
           <view class="viz-bar-wrap">
             <view class="viz-bar-fill bg-publisher" style="width: {{stats.totalBooks ? (stats.builtCount/stats.totalBooks*100) : 0}}%"></view>
           </view>
           <text class="viz-value">{{stats.builtCount || 0}}</text>
         </view>
         <view class="viz-row">
-          <text class="viz-label">待解析任务</text>
+          <text class="viz-label">Queued Tasks</text>
           <view class="viz-bar-wrap">
             <view class="viz-bar-fill chart-3" style="width: {{stats.totalBooks ? (stats.pendingCount/stats.totalBooks*100) : 0}}%"></view>
           </view>
@@ -93,7 +93,7 @@
     <!-- Quick Actions (Designed as the user requested) -->
     <view class="quick-actions">
       <view class="section-header">
-        <text class="section-title">功能入口</text>
+        <text class="section-title">Operations</text>
       </view>
       <view class="actions-grid">
         <view wx:for="{{entries}}" wx:key="title" class="action-card card-base {{item.tintClass}}" bindtap="handleEntryTap" data-path="{{item.path}}" data-type="{{item.type}}">
@@ -112,12 +112,12 @@
     <!-- Operational Activity (Simplified for Dashboard) -->
     <view class="activity-section">
       <view class="section-header">
-        <text class="section-title">管理中心</text>
+        <text class="section-title">Corpus Workspace</text>
       </view>
       <view class="activity-card card-base" bindtap="handleGoBooks">
         <view class="activity-info">
-          <text class="activity-t">书目全量清单</text>
-          <text class="activity-d">管理书籍上下架与 AI 处理状态</text>
+          <text class="activity-t">Inventory Roster</text>
+          <text class="activity-d">Manage document status & vector indices</text>
         </view>
         <view class="chevron-right-mini"></view>
       </view>
@@ -126,7 +126,7 @@
     <!-- Switch Back Button (Moved to Bottom of Dashboard) -->
     <view class="switch-back-section">
       <button class="btn-switch-back" bindtap="handleSwitchToReader">
-        退出管理模式
+        Exit Management Mode
       </button>
     </view>
     </view>

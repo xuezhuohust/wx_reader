@@ -13,36 +13,36 @@ page {
   min-height: 100%;
   overflow-x: hidden;
   /* Primary - Sage Green */
-  --primary: #3c692b;
-  --primary-pressed: #255015;
-  --primary-container: #7fb069;
+  --primary: #1e40af; /* Academic Navy Blue */
+  --primary-pressed: #1e3a8a;
+  --primary-container: #2563eb;
   --on-primary: #ffffff;
-  --on-primary-container: #174207;
+  --on-primary-container: #eff6ff;
 
   /* Surface & Backgrounds */
-  --bg-canvas: #faf8f5;
-  --bg-surface: #f3efe8;
-  --bg-surface-soft: #f8f6f2;
+  --bg-canvas: #f8fafc;
+  --bg-surface: #f1f5f9;
+  --bg-surface-soft: #f8fafc;
   --surface-container-low: #f3f4f5;
   --surface-container: #edeeef;
   --surface-container-high: #e7e8e9;
   --surface-lowest: #ffffff;
 
   /* Ink & Text */
-  --ink: #191c1d;
-  --charcoal: #191c1d;
-  --on-surface-variant: #42493d;
-  --slate: #42493d;
-  --steel: #72796c;
-  --stone: #9a9e95;
-  --muted: #c2c9ba;
+  --ink: #0f172a;
+  --charcoal: #0f172a;
+  --on-surface-variant: #334155;
+  --slate: #475569;
+  --steel: #64748b;
+  --stone: #94a3b8;
+  --muted: #cbd5e1;
 
   /* Borders */
-  --outline: #72796c;
-  --outline-variant: #c2c9ba;
-  --hairline: #e1e3e4;
-  --hairline-soft: #edeeef;
-  --hairline-strong: #c2c9ba;
+  --outline: #94a3b8;
+  --outline-variant: #e2e8f0;
+  --hairline: #e2e8f0;
+  --hairline-soft: #f1f5f9;
+  --hairline-strong: #cbd5e1;
 
   /* Semantic */
   --semantic-success: #3c692b;
@@ -72,8 +72,8 @@ page {
   --radius-xs: 4rpx;
   --radius-sm: 8rpx;
   --radius-md: 12rpx;
-  --radius-lg: 16rpx;
-  --radius-xl: 24rpx;
+  --radius-lg: 10rpx;
+  --radius-xl: 12rpx;
   --radius-full: 9999rpx;
 
   background: var(--bg-canvas);
@@ -176,3 +176,101 @@ view, text, button, input, textarea, picker, scroll-view {
 
 .skeleton-pulse { animation: skeletonPulse 1.5s ease-in-out infinite; }
 .skeleton-bg { background: var(--hairline-soft); border-radius: var(--radius-sm); }
+
+/* Academic Scientific UI Extensions */
+.font-mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+}
+.academic-badge {
+  display: inline-flex;
+  align-items: center;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 20rpx;
+  font-weight: 600;
+  padding: 4rpx 12rpx;
+  border-radius: 4rpx;
+  letter-spacing: 0.5rpx;
+  border: 1rpx solid transparent;
+}
+.academic-badge--primary {
+  background: #eff6ff;
+  color: #1e40af;
+  border-color: #bfdbfe;
+}
+.academic-badge--neutral {
+  background: #f1f5f9;
+  color: #475569;
+  border-color: #e2e8f0;
+}
+.academic-badge--success {
+  background: #f0fdf4;
+  color: #15803d;
+  border-color: #bbf7d0;
+}
+
+/* Apple Human Interface Guidelines (HIG) System Variables & Materials */
+:root, page {
+  /* Apple System Colors */
+  --apple-blue: #0071e3;
+  --apple-blue-pressed: #0077ed;
+  --apple-bg: #f5f5f7; /* iOS / macOS system grouped background */
+  --apple-surface: #ffffff;
+  --apple-label: #1d1d1f;
+  --apple-secondary-label: #86868b;
+  --apple-tertiary-label: #6e6e73;
+  --apple-separator: rgba(0, 0, 0, 0.08);
+
+  /* Override primary tokens with Apple HIG Blue & Clean Light Palette */
+  --primary: #0071e3;
+  --primary-pressed: #0077ed;
+  --primary-container: #0071e3;
+  --on-primary: #ffffff;
+  --on-primary-container: #f0f7ff;
+
+  --bg-canvas: #f5f5f7;
+  --bg-surface: #ffffff;
+  --bg-surface-soft: #fbfbfd;
+  --surface-lowest: #ffffff;
+
+  --ink: #1d1d1f;
+  --charcoal: #1d1d1f;
+  --on-surface-variant: #515154;
+  --slate: #6e6e73;
+  --steel: #86868b;
+  --stone: #a1a1a6;
+  --hairline: rgba(0, 0, 0, 0.08);
+
+  /* Apple squircle radius standards */
+  --radius-xs: 6rpx;
+  --radius-sm: 10rpx;
+  --radius-md: 16rpx;
+  --radius-lg: 20rpx;
+  --radius-xl: 28rpx;
+
+  /* Apple System Typography */
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  letter-spacing: -0.2rpx;
+}
+
+/* Apple HIG Translucent Navigation & Vibrancy Materials */
+.apple-glass {
+  background: rgba(255, 255, 255, 0.82) !important;
+  backdrop-filter: saturate(180%) blur(20px) !important;
+  -webkit-backdrop-filter: saturate(180%) blur(20px) !important;
+  border-bottom: 0.5px solid rgba(0, 0, 0, 0.12) !important;
+}
+
+/* Apple HIG Card Elevation */
+.card-apple {
+  background: #ffffff;
+  border-radius: 20rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04), 0 1rpx 2rpx rgba(0, 0, 0, 0.02);
+  border: 0.5px solid rgba(0, 0, 0, 0.06);
+}
+
+.apple-pill-btn {
+  border-radius: 999rpx;
+  font-weight: 500;
+  background: #0071e3;
+  color: #ffffff;
+}

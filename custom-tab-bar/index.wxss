@@ -3,10 +3,10 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.88);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border-top: 1rpx solid rgba(0, 0, 0, 0.05);
+  border-top: 0.5px solid rgba(0, 0, 0, 0.12); backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px); box-shadow: 0 -2rpx 10rpx rgba(15, 23, 42, 0.03);
   /* 高于 enhanced scroll-view 的合成层，旋转重排后仍保持在最前。 */
   z-index: 2147483647;
   transform: translateZ(0);
@@ -38,7 +38,7 @@
 
 .tab-item--active .tab-icon {
   opacity: 1;
-  filter: brightness(0) saturate(100%) invert(35%) sepia(20%) saturate(1200%) hue-rotate(70deg) brightness(90%) contrast(90%);
+  filter: brightness(0) saturate(100%) invert(32%) sepia(98%) saturate(2250%) hue-rotate(200deg) brightness(98%) contrast(102%);
 }
 
 .tab-label {

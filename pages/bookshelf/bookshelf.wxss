@@ -1,9 +1,9 @@
 page {
-  background-color: #faf8f5;
+  background-color: #f8fafc;
 }
 
 .bookshelf-page {
-  background-color: #faf8f5;
+  background-color: #f8fafc;
   color: #1b1b1b;
   height: 100%;
   min-height: 0;
@@ -14,7 +14,7 @@ page {
 
 /* Header */
 .home-nav {
-  background-color: #faf8f5;
+  background-color: #f8fafc;
   position: sticky;
   top: 0;
   z-index: 100;
@@ -72,7 +72,7 @@ page {
   display: flex;
   align-items: center;
   background-color: #fff;
-  border-radius: 24rpx;
+  border-radius: 10rpx; border: 1rpx solid #e2e8f0;
   padding: 20rpx 28rpx;
   margin-bottom: 32rpx;
   border: 1rpx solid rgba(0, 0, 0, 0.06);
@@ -115,8 +115,8 @@ page {
 /* Shelf Tabs */
 .shelf-tabs {
   display: flex;
-  background-color: #f3efe8;
-  padding: 6rpx;
+  background: rgba(118, 118, 128, 0.12);
+  padding: 4rpx;
   border-radius: 18rpx;
   margin-bottom: 32rpx;
 }
@@ -133,9 +133,10 @@ page {
 }
 
 .shelf-tab.active {
-  background-color: #fff;
-  color: #1b1b1b;
-  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+  background: #ffffff;
+  color: #1d1d1f;
+  font-weight: 600;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.12);
 }
 
 /* Filter Chips */
@@ -222,7 +223,7 @@ page {
   right: 16rpx;
   font-size: 18rpx;
   font-weight: 700;
-  background-color: #3c692b;
+  background-color: #0071e3;
   color: #fff;
   padding: 6rpx 16rpx;
   border-radius: 99rpx;
@@ -292,7 +293,7 @@ page {
 .empty-icon-wrap {
   width: 120rpx;
   height: 120rpx;
-  background-color: rgba(60, 105, 43, 0.05);
+  background-color: rgba(0, 113, 227, 0.05);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -303,7 +304,7 @@ page {
 .icon-book-empty {
   width: 48rpx;
   height: 60rpx;
-  border: 4rpx solid #3c692b;
+  border: 4rpx solid #0071e3;
   border-radius: 6rpx;
   opacity: 0.3;
 }

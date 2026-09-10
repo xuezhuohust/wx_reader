@@ -18,13 +18,13 @@ Page({
     // Filters
     activeStatus: 'all',
     statusTabs: [
-      { label: '全部', value: 'all' },
-      { label: '在读', value: 'reading' },
-      { label: '想读', value: 'wishlist' },
-      { label: '已读', value: 'finished' }
+      { label: "All", value: "all" },
+      { label: "In Progress", value: "reading" },
+      { label: "Wishlist", value: "wishlist" },
+      { label: "Completed", value: "finished" }
     ],
-    activeCategory: '全部',
-    categories: ['全部'],
+    activeCategory: "All",
+    categories: ["All"],
   },
 
   onLoad() {
@@ -81,7 +81,7 @@ Page({
       .then((categories) => {
         const activeCategory = categories.indexOf(this.data.activeCategory) >= 0
           ? this.data.activeCategory
-          : '全部'
+          : "All"
         this.setData({ categories, activeCategory }, () => {
           this.applyFilters()
         })
@@ -93,7 +93,7 @@ Page({
 
   loadBookshelf(done) {
     this.setData({ loading: true })
-    const availableCategories = this.data.categories.filter((category) => category !== '全部')
+    const availableCategories = this.data.categories.filter((category) => category !== "All")
     const allProgress = wx.getStorageSync('reading_progress') || {}
 
     api.getPurchasedBooks()
@@ -169,7 +169,7 @@ Page({
     this.setData({
       searchValue: '',
       activeStatus: 'all',
-      activeCategory: '全部'
+      activeCategory: "All"
     }, () => {
       this.applyFilters()
     })
@@ -188,7 +188,7 @@ Page({
       const matchesStatus = activeStatus === 'all' || book.status === activeStatus
       
       // Category match
-      const matchesCategory = activeCategory === '全部' || book.category === activeCategory
+      const matchesCategory = activeCategory === "All" || book.category === activeCategory
       
       return matchesSearch && matchesStatus && matchesCategory
     })

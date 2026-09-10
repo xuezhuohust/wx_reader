@@ -4,7 +4,7 @@
       <view class="nav-back" bindtap="handleBack" style="width: {{menuHeight}}px; height: {{menuHeight}}px;">
         <view class="back-arrow"></view>
       </view>
-      <view class="nav-title" wx:if="{{scrolled}}">账号设置</view>
+      <view class="nav-title" wx:if="{{scrolled}}">Account Settings</view>
     </view>
   </view>
 
@@ -18,12 +18,12 @@
   >
     <view class="settings-content">
       <view class="page-header">
-        <text class="page-heading">账号设置</text>
-        <text class="page-subtitle">管理你的头像、昵称与账号安全</text>
+        <text class="page-heading">Account Settings</text>
+        <text class="page-subtitle">Manage researcher profile & session</text>
       </view>
 
       <view class="section">
-        <view class="section-label">个人资料</view>
+        <view class="section-label">Researcher Profile</view>
         <view class="card-base">
         <view wx:if="{{!profilePrivacyAgreed}}" class="avatar-row avatar-row--privacy">
           <view class="avatar-preview">
@@ -33,7 +33,7 @@
             </view>
           </view>
           <view class="avatar-meta">
-            <text class="avatar-label">修改头像</text>
+            <text class="avatar-label">Avatar</text>
             <text class="avatar-hint">同意{{privacyContractName}}后可选择微信头像</text>
           </view>
           <button class="privacy-inline-btn" open-type="agreePrivacyAuthorization" bindagreeprivacyauthorization="handleAgreeProfilePrivacy">同意</button>
@@ -47,7 +47,7 @@
             </view>
           </view>
           <view class="avatar-meta">
-            <text class="avatar-label">修改头像</text>
+            <text class="avatar-label">Avatar</text>
             <text class="avatar-hint">{{avatarUploading ? '头像上传中...' : '支持 JPG、PNG、WebP 格式'}}</text>
           </view>
           <view class="chevron-right"></view>
@@ -57,13 +57,13 @@
         <view class="row-separator"></view>
 
         <view class="nickname-row">
-          <text class="nickname-label">昵称</text>
+          <text class="nickname-label">Display Name</text>
           <view class="nickname-input-wrap">
             <input
               class="nickname-input"
               type="text"
               value="{{nicknameDraft}}"
-              placeholder="输入昵称"
+              placeholder="Enter your name"
               placeholder-style="color:var(--muted);"
               bindinput="handleNicknameDraftInput"
               maxlength="20"
@@ -75,12 +75,12 @@
 
       <view class="save-area">
         <button class="btn-save" bindtap="handleSave" disabled="{{saving}}">
-          {{saving ? '保存中...' : '保存更改'}}
+          {{saving ? 'Saving...' : 'Save Changes'}}
         </button>
       </view>
 
       <view class="logout-area">
-        <button class="btn-logout" bindtap="handleLogout">退出登录</button>
+        <button class="btn-logout" bindtap="handleLogout">Sign Out</button>
       </view>
 
       <view class="bottom-safe"></view>

@@ -21,21 +21,21 @@ function formatDate(dateText) {
 /** 格式化相对阅读时间（今天/昨天/具体日期） */
 function formatRelativeReadTime(dateText) {
   if (!dateText) {
-    return '尚未开始阅读'
+    return "Not started";
   }
 
-  const now = new Date()
-  const target = new Date(dateText.replace(/-/g, '/'))
-  const diff = now.getTime() - target.getTime()
-  const day = 24 * 60 * 60 * 1000
+  const now = new Date();
+  const target = new Date(dateText.replace(/-/g, "/"));
+  const diff = now.getTime() - target.getTime();
+  const day = 24 * 60 * 60 * 1000;
 
   if (diff < day) {
-    return '今天阅读'
+    return "Read today";
   }
   if (diff < day * 2) {
-    return '昨天阅读'
+    return "Read yesterday";
   }
-  return `最近阅读 ${formatDate(dateText)}`
+  return `Read on ${formatDate(dateText)}`;
 }
 
 /** 获取当前时间的格式化字符串 yyyy-MM-dd HH:mm */
@@ -47,10 +47,10 @@ function formatNow() {
 /** 获取建库状态的显示文本和主题色 */
 function getBuildStatusMeta(status) {
   const map = {
-    none: { text: '未建库', theme: 'neutral' },
-    building: { text: '建库中', theme: 'warning' },
-    done: { text: '已完成', theme: 'success' },
-    failed: { text: '失败', theme: 'danger' },
+    none: { text: "Unindexed", theme: "neutral" },
+    building: { text: "Indexing", theme: "warning" },
+    done: { text: "Indexed", theme: "success" },
+    failed: { text: "Failed", theme: "danger" },
   }
   return map[status] || map.none
 }
@@ -58,8 +58,8 @@ function getBuildStatusMeta(status) {
 /** 获取上下架状态的显示文本和主题色 */
 function getOnlineStatusMeta(status) {
   const map = {
-    online: { text: '已上架', theme: 'success' },
-    offline: { text: '已下架', theme: 'neutral' },
+    online: { text: "Published", theme: "success" },
+    offline: { text: "Draft", theme: "neutral" },
   }
   return map[status] || map.offline
 }
@@ -74,8 +74,8 @@ function getPurchaseStatusMeta(purchased) {
     || purchased === 'purchased'
 
   return purchasedFlag
-    ? { text: '已购买', theme: 'primary' }
-    : { text: '未购买', theme: 'neutral' }
+    ? { text: "In Library", theme: "primary" }
+    : { text: "Available", theme: "neutral" }
 }
 
 module.exports = {

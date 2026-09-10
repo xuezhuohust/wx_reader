@@ -19,12 +19,12 @@
   <view wx:if="{{showConversationList && !embedded}}" class="conv-mask" bindtap="handleToggleConversationList"></view>
   <view wx:if="{{!embedded}}" class="conv-panel {{showConversationList ? 'conv-panel--open' : ''}}" style="padding-top: {{largeScreen ? 48 : navBarHeight}}px;">
     <view class="conv-panel-header">
-      <text class="conv-panel-title">对话列表</text>
+      <text class="conv-panel-title">Conversations</text>
     </view>
     <view class="conv-panel-actions">
       <view class="conv-panel-new" bindtap="handleNewConversation">
         <text class="conv-panel-new-icon">+</text>
-        <text>新建对话</text>
+        <text>New Session</text>
       </view>
     </view>
     <scroll-view class="conv-panel-list" scroll-y enhanced show-scrollbar="{{false}}">
@@ -49,15 +49,15 @@
   <view wx:if="{{!embedded}}" class="book-tag-bar {{largeScreen ? 'book-tag-bar--large' : ''}}" style="top: {{navBarHeight}}px;">
     <view class="book-tag-left">
       <view class="book-tag-icon"></view>
-      <text class="book-tag-text">当前伴读：《{{book.title}}》<text wx:if="{{chapterTitle}}" class="chapter-tag">{{chapterTitle}}</text></text>
+      <text class="book-tag-text">Target Corpus: {{book.title}}<text wx:if="{{chapterTitle}}" class="chapter-tag">{{chapterTitle}}</text></text>
       <view wx:if="{{!largeScreen}}" class="clear-btn {{loadingReply ? 'clear-btn--disabled' : ''}}" catchtap="handleClearConversations">
         <view class="clear-icon"></view>
       </view>
     </view>
     <view wx:if="{{largeScreen}}" class="book-tag-clear-row">
-      <view class="clear-btn {{loadingReply ? 'clear-btn--disabled' : ''}}" catchtap="handleClearConversations" aria-label="清空当前对话">
+      <view class="clear-btn {{loadingReply ? 'clear-btn--disabled' : ''}}" catchtap="handleClearConversations" aria-label="Clear Session">
         <view class="clear-icon"></view>
-        <text>清空对话</text>
+        <text>Clear Session</text>
       </view>
     </view>
     <!-- 2026-07-03 新增：查看背景图按钮（极简图标版） -->
@@ -66,19 +66,19 @@
     </view>
     <view wx:if="{{chatMode === 'drama'}}" class="drama-playlist-trigger" catchtap="handleToggleDramaPlaylist" aria-label="剧创播放列表">
       <text class="drama-playlist-icon">▶</text>
-      <text>播放列表</text>
+      <text>Playlist</text>
     </view>
   </view>
 
   <!-- 横屏阅读页沿用手机的“当前伴读”信息行，清空入口不放进标题栏。 -->
   <view wx:if="{{embedded}}" class="embedded-book-tag-bar">
-    <view wx:if="{{largeScreen}}" class="embedded-clear-btn clear-btn {{loadingReply ? 'clear-btn--disabled' : ''}}" catchtap="handleClearConversations" aria-label="清空当前对话">
+    <view wx:if="{{largeScreen}}" class="embedded-clear-btn clear-btn {{loadingReply ? 'clear-btn--disabled' : ''}}" catchtap="handleClearConversations" aria-label="Clear Session">
       <view class="clear-icon"></view>
     </view>
     <view class="book-tag-left">
       <view class="book-tag-icon"></view>
-      <text class="book-tag-text">当前伴读：《{{book.title}}》<text wx:if="{{chapterTitle}}" class="chapter-tag">{{chapterTitle}}</text></text>
-      <view wx:if="{{!largeScreen}}" class="clear-btn {{loadingReply ? 'clear-btn--disabled' : ''}}" catchtap="handleClearConversations" aria-label="清空当前对话">
+      <text class="book-tag-text">Target Corpus: {{book.title}}<text wx:if="{{chapterTitle}}" class="chapter-tag">{{chapterTitle}}</text></text>
+      <view wx:if="{{!largeScreen}}" class="clear-btn {{loadingReply ? 'clear-btn--disabled' : ''}}" catchtap="handleClearConversations" aria-label="Clear Session">
         <view class="clear-icon"></view>
       </view>
     </view>
@@ -87,7 +87,7 @@
     </view>
     <view wx:if="{{chatMode === 'drama'}}" class="drama-playlist-trigger drama-playlist-trigger--embedded" catchtap="handleToggleDramaPlaylist" aria-label="剧创播放列表">
       <text class="drama-playlist-icon">▶</text>
-      <text>播放列表</text>
+      <text>Playlist</text>
     </view>
   </view>
 
@@ -123,7 +123,7 @@
         <view class="message-row row-ai" wx:if="{{messages.length === 0}}">
           <view class="chat-avatar ai-avatar">
             <image wx:if="{{agentAvatarUrl}}" class="avatar-image" src="{{agentAvatarUrl}}" mode="aspectFill" />
-            <text wx:else>助</text>
+            <text wx:else>AI</text>
           </view>
           <view class="message-container">
             <view class="message-bubble bubble-ai">
@@ -154,10 +154,10 @@
                 <view wx:elif="{{item.chatMode === 'drama'}}" class="divider-icon icon-drama"></view>
                 <view wx:elif="{{item.chatMode === 'story'}}" class="divider-icon icon-story"></view>
                 <view wx:else class="divider-icon icon-chat"></view>
-                <text wx:if="{{item.chatMode === 'creative'}}">已切换至二创模式</text>
-                <text wx:elif="{{item.chatMode === 'drama'}}">已切换至剧创模式</text>
-                <text wx:elif="{{item.chatMode === 'story'}}">已切换至讲故事模式</text>
-                <text wx:else>已切换至伴读模式</text>
+                <text wx:if="{{item.chatMode === 'creative'}}">Switched to Creative Synthesis</text>
+                <text wx:elif="{{item.chatMode === 'drama'}}">Switched to Drama Mode</text>
+                <text wx:elif="{{item.chatMode === 'story'}}">Switched to Narrative Mode</text>
+                <text wx:else>Switched to Academic QA</text>
               </view>
               <view class="divider-line"></view>
             </view>
@@ -172,7 +172,7 @@
             <view class="chat-avatar {{item.isUser ? 'user-avatar' : 'ai-avatar'}}">
               <image wx:if="{{item.isUser && userAvatarUrl}}" class="avatar-image" src="{{userAvatarUrl}}" mode="aspectFill" />
               <image wx:elif="{{!item.isUser && agentAvatarUrl}}" class="avatar-image" src="{{agentAvatarUrl}}" mode="aspectFill" />
-              <text wx:else>{{item.isUser ? userAvatarText : '助'}}</text>
+              <text wx:else>{{item.isUser ? userAvatarText : 'AI'}}</text>
             </view>
             <view class="message-container">
               <view class="message-bubble {{item.isUser ? 'bubble-user' : 'bubble-ai'}} {{item.thinking ? 'message-bubble--thinking' : ''}}">
@@ -280,7 +280,7 @@
                   <view class="typing-cursor" wx:if="{{item.status === 'generating'}}"></view>
                 </view>
                 <view wx:if="{{item.status === 'success'}}" class="creative-card-footer">
-                  <text class="creative-time">已存入作品集</text>
+                  <text class="creative-time">Saved to Workspace</text>
                 </view>
               </view>
 
@@ -336,16 +336,16 @@
                       <view class="wave-bar"></view>
                       <view class="wave-bar"></view>
                     </view>
-                    <text class="voice-status-text">停止</text>
+                    <text class="voice-status-text">Stop</text>
                   </block>
                   <block wx:else>
                     <view class="voice-icon-new"></view>
-                    <text class="voice-status-text">朗读</text>
+                    <text class="voice-status-text">Listen</text>
                   </block>
                 </view>
                 <view class="copy-control" bindtap="handleCopyMessage" data-id="{{item.id}}">
                   <view class="copy-icon"></view>
-                  <text>复制</text>
+                  <text>Copy</text>
                 </view>
               </view>
             </view>
@@ -364,7 +364,7 @@
     bindtap="handleScrollDownTap"
   >
     <view class="scroll-down-icon"></view>
-    <text class="scroll-down-text">新内容</text>
+    <text class="scroll-down-text">Latest</text>
   </view>
 
   <!-- Chat Footer -->
@@ -458,7 +458,7 @@
           bindtouchend="handleVoiceEnd"
           bindtouchcancel="handleVoiceCancel"
         >
-          <text>{{isRecording ? (voiceCancel ? '松开取消' : '松开发送') : '按住说话'}}</text>
+          <text>{{isRecording ? (voiceCancel ? 'Release to cancel' : 'Release to send') : 'Hold to speak'}}</text>
         </view>
       </view>
 
@@ -511,15 +511,15 @@
           <view class="wave-item"></view>
           <view class="wave-item"></view>
         </view>
-        <text class="recording-text">正在录音</text>
-        <text class="recording-tip">上滑取消，松开发送</text>
+        <text class="recording-text">Recording Voice</text>
+        <text class="recording-tip">Slide up to cancel, release to send</text>
       </block>
       <block wx:else>
         <view class="cancel-icon-wrap">
           <view class="icon-undo-white"></view>
         </view>
-        <text class="recording-text cancel-text">松开取消</text>
-        <text class="recording-tip">下滑回到发送</text>
+        <text class="recording-text cancel-text">Release to cancel</text>
+        <text class="recording-tip">Slide down to send</text>
       </block>
     </view>
   </view>

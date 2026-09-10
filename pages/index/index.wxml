@@ -9,15 +9,15 @@
     <view class="scroll-content no-padding-top">
       <!-- Hero Header Section -->
       <view class="home-hero-header fade-up">
-        <image class="hero-bg-image" src="https://img1.baidu.com/it/u=2426475971,3278061385&fm=253&fmt=auto&app=138&f=JPEG?w=625&h=500" mode="aspectFill"></image>
+        <view class="hero-academic-pattern"></view>
         <view class="hero-glass-overlay"></view>
         
         <view class="hero-body" style="padding-top: {{menuTop}}px;">
           <view class="hero-top-nav">
             <view class="greeting-group">
-              <text class="greeting-time">{{timeGreeting}}好</text>
+              <text class="greeting-time">{{timeGreeting}} · Academic Research</text>
               <view class="greeting-main">
-                <text class="app-title">AI伴读助手</text>
+                <text class="app-title">LitCompanion AI</text>
               </view>
             </view>
           </view>
@@ -30,7 +30,7 @@
             </view>
             <view class="entry-main-info">
               <view class="entry-meta">
-                <text class="entry-tag">继续阅读</text>
+                <text class="entry-tag">RESUME SESSION</text>
                 <text class="entry-pct">{{recommendBooks[0].progress || '0'}}%</text>
               </view>
               <view class="entry-title-row">
@@ -51,7 +51,7 @@
           <view class="icon-search-small"></view>
           <input
             class="home-search-input"
-            placeholder="搜索书名或作者..."
+            placeholder="Search corpus by title, author or keyword..."
             placeholder-class="search-placeholder"
             bindinput="handleKeywordInput"
             value="{{searchValue}}"
@@ -68,8 +68,8 @@
       <view class="main-sections">
         <!-- Today's Recommendations -->
         <view class="section-header fade-up d2" wx:if="{{recommendBooks.length > 0 && (!isLargeScreen || !searchValue || filteredBooks.length > 0)}}">
-          <view class="section-title">{{isLargeScreen && searchValue ? '搜索结果' : '今日推荐'}}</view>
-          <view class="section-link" wx:if="{{!(isLargeScreen && searchValue)}}" bindtap="handleSeeMore">查看全部</view>
+          <view class="section-title">{{isLargeScreen && searchValue ? 'Search Results' : 'Featured Corpus'}}</view>
+          <view class="section-link" wx:if="{{!(isLargeScreen && searchValue)}}" bindtap="handleSeeMore">Browse All</view>
         </view>
       
       <scroll-view class="book-scroll fade-up d3" wx:if="{{!isLargeScreen || !searchValue || filteredBooks.length > 0}}" scroll-x enhanced show-scrollbar="{{false}}">
@@ -97,7 +97,7 @@
               <view class="book-card-info">
                 <view class="book-card-title">{{item.title}}</view>
                 <view class="book-card-meta">
-                  <text>{{item.author || '读者'}}</text>
+                  <text>{{item.author || 'Scholar'}}</text>
                   <text class="meta-dot" wx:if="{{item.category && !isLargeScreen}}">·</text>
                   <text wx:if="{{item.category && !isLargeScreen}}">{{item.category}}</text>
                 </view>
@@ -109,8 +109,8 @@
 
       <!-- For You (Masonry Style Library) -->
       <view class="section-header fade-up d4 section-mt" wx:if="{{!isLargeScreen || !searchValue}}">
-        <view class="section-title">为你推荐</view>
-        <view class="section-link" bindtap="handleRefreshRecommend">更多</view>
+        <view class="section-title">Curated Works</view>
+        <view class="section-link" bindtap="handleRefreshRecommend">Refresh</view>
       </view>
 
       <view class="masonry-grid fade-up d5" wx:if="{{!isLargeScreen || !searchValue}}">
@@ -133,14 +133,14 @@
               <view class="book-placeholder-inner-flat" wx:else>
                 <view class="placeholder-title-flat">{{item.title[0]}}</view>
               </view>
-              <view class="masonry-badge" wx:if="{{item.isAIReady}}">AI讲解</view>
+              <view class="masonry-badge" wx:if="{{item.isAIReady}}">AI Annotated</view>
             </view>
             <view class="masonry-info">
               <view class="masonry-title">{{item.title}}</view>
               <view class="masonry-meta">
-                <text>{{item.author || '读者'}}</text>
+                <text>{{item.author || 'Scholar'}}</text>
                 <text class="meta-dot" wx:if="{{!isLargeScreen}}">·</text>
-                <text wx:if="{{!isLargeScreen}}">{{item.rating}}分</text>
+                <text wx:if="{{!isLargeScreen}}">{{item.rating}} pts</text>
               </view>
             </view>
           </view>
@@ -148,7 +148,7 @@
       </view>
 
       <view class="home-search-empty" wx:if="{{!loading && searchValue && filteredBooks.length === 0}}">
-        未找到与“{{searchValue}}”相关的书籍
+        No documents found matching "{{searchValue}}"
       </view>
 
       <view class="safe-area-bottom"></view>
@@ -166,13 +166,13 @@
         <text class="privacy-text">{{privacyModalText}}</text>
       </view>
       <view class="privacy-actions">
-        <button class="btn-secondary" bindtap="handleDisagreePrivacy">暂不同意</button>
+        <button class="btn-secondary" bindtap="handleDisagreePrivacy">Decline</button>
         <button
           id="home-privacy-agree"
           class="btn-primary"
           open-type="agreePrivacyAuthorization"
           bindagreeprivacyauthorization="handleAgreePrivacy"
-        >同意并继续</button>
+        >Agree & Continue</button>
       </view>
     </view>
   </view>

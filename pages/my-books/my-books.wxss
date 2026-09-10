@@ -1,9 +1,9 @@
 page {
-  background-color: #faf8f5;
+  background-color: #f8fafc;
 }
 
 .my-books-page {
-  background-color: #faf8f5;
+  background-color: #f8fafc;
   color: #1b1b1b;
   height: 100%;
   min-height: 0;
@@ -18,7 +18,7 @@ page {
 
 /* Header matched with Bookshelf */
 .home-nav {
-  background-color: #faf8f5;
+  background-color: #f8fafc;
   position: sticky;
   top: 0;
   z-index: 100;
@@ -146,8 +146,8 @@ page {
 }
 
 .user-tag {
-  background: rgba(60, 105, 43, 0.06);
-  color: #3c692b;
+  background: rgba(0, 113, 227, 0.06);
+  color: #0071e3;
   padding: 4rpx 14rpx;
   border-radius: 99rpx;
   font-size: 18rpx;
@@ -229,7 +229,7 @@ page {
 .chart-summary {
   font-size: 44rpx;
   font-weight: 900;
-  color: #3c692b;
+  color: #0071e3;
   letter-spacing: -1rpx;
 }
 
@@ -267,7 +267,7 @@ page {
 }
 
 .chart-bar.active {
-  background: #3c692b;
+  background: #0071e3;
 }
 
 .chart-bar-label {
@@ -303,13 +303,13 @@ page {
   align-items: center;
   justify-content: center;
   margin-right: 0;
-  background: rgba(60, 105, 43, 0.04);
-  color: #3c692b;
+  background: rgba(0, 113, 227, 0.04);
+  color: #0071e3;
 }
 
 /* 移除特定的颜色变体，统一使用学术绿体系 */
-.menu-item-icon.green { color: #3c692b; background: rgba(60, 105, 43, 0.04); }
-.menu-item-icon.warm { color: #3c692b; background: rgba(60, 105, 43, 0.04); }
+.menu-item-icon.green { color: #0071e3; background: rgba(0, 113, 227, 0.04); }
+.menu-item-icon.warm { color: #0071e3; background: rgba(0, 113, 227, 0.04); }
 .menu-item-icon.red { color: #ba1a1a; background: rgba(186, 26, 26, 0.04); } /* 退出登录保留警告色 */
 
 .menu-item-text {
@@ -350,7 +350,7 @@ page {
 
 .icon-morning { width: 32rpx; height: 32rpx; border: 4rpx solid #f59e0b; border-radius: 50%; position: relative; }
 .icon-morning::after { content: ''; position: absolute; top: 10rpx; left: 10rpx; width: 12rpx; height: 12rpx; background: #f59e0b; border-radius: 50%; }
-.icon-marathon { width: 32rpx; height: 40rpx; border: 4rpx solid #3c692b; border-radius: 6rpx; }
+.icon-marathon { width: 32rpx; height: 40rpx; border: 4rpx solid #0071e3; border-radius: 6rpx; }
 .icon-pen { width: 32rpx; height: 32rpx; border-bottom: 4rpx solid #8c8c8c; transform: rotate(-45deg); }
 
 .icon-menu-notes { width: 28rpx; height: 36rpx; border: 3.5rpx solid currentColor; border-radius: 4rpx; }
@@ -424,7 +424,7 @@ page {
 .profile-privacy-box {
   margin-bottom: 40rpx;
   padding: 28rpx;
-  border-radius: 24rpx;
+  border-radius: 12rpx; border: 1rpx solid #e2e8f0;
   background: #f8f5ef;
   border: 1rpx solid rgba(27, 27, 27, 0.06);
 }

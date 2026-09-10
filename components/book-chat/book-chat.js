@@ -113,8 +113,8 @@ Component({
     storyProgress: null,
     // 2026-07-03 新增：二创模式支持
     chatMode: "chat", // 'chat', 'story', 'creative' or 'drama'
-    currentModeLabel: "伴读对话模式",
-    currentModeShortLabel: "伴读",
+    currentModeLabel: "Academic QA",
+    currentModeShortLabel: "QA",
     currentModeClass: "",
     currentModeIconClass: "icon-chat",
     modeOptions: [],
@@ -122,18 +122,18 @@ Component({
     creativeTypes: [
       {
         id: "story_continue",
-        name: "剧情续写",
-        prompt: "请根据当前章节进度，续写一段剧情。",
+        name: "Continuation",
+        prompt: "Synthesize the subsequent progression based on the current chapter context.",
       },
       {
         id: "parallel_world",
-        name: "平行时空",
-        prompt: "如果在这个时刻发生了不一样的转折，会怎样？",
+        name: "Alternative Scenario",
+        prompt: "What if a critical counterfactual condition occurred at this stage?",
       },
       {
         id: "character_extension",
-        name: "角色补完",
-        prompt: "深入描写此时角色的内心世界或隐藏细节。",
+        name: "Deep Analysis",
+        prompt: "Elaborate deeply on the underlying psychological traits and implicit motives.",
       },
     ],
     creativeGenerating: false,
@@ -397,18 +397,14 @@ Component({
     getModeMeta(mode) {
       if (mode === "story") {
         return {
-          label: "讲故事模式",
-          shortLabel: "讲故事",
-          description: "情节讲述和进度回顾",
+          label: "Narrative Mode", shortLabel: "Story", description: "Storyline synthesis & timeline review",
           triggerClass: "mode-trigger--story",
           iconClass: "icon-story",
         };
       }
       if (mode === "creative") {
         return {
-          label: "AI 二创模式",
-          shortLabel: "二创",
-          description: "续写、改写和角色对话",
+          label: "Creative Synthesis", shortLabel: "Synthesis", description: "Continuation, rewriting & dialogue synthesis",
           badge: "新",
           triggerClass: "mode-trigger--creative",
           iconClass: "icon-creative",
@@ -416,21 +412,13 @@ Component({
       }
       if (mode === "drama") {
         return {
-          label: "剧创模式",
-          shortLabel: "剧创",
-          description: "生成带配乐的横屏短剧视频",
+          label: "Drama Generation", shortLabel: "Drama", description: "Multimodal video generation & scene rendering",
           badge: "视频",
           triggerClass: "mode-trigger--drama",
           iconClass: "icon-drama",
         };
       }
-      return {
-        label: "伴读对话模式",
-        shortLabel: "伴读",
-        description: "总结、解释和深度问答",
-        triggerClass: "",
-        iconClass: "icon-chat",
-      };
+      return { label: "Academic QA", shortLabel: "QA", description: "Corpus analysis & interactive QA", triggerClass: "", iconClass: "icon-chat" };
     },
 
     buildModeState(mode) {
@@ -474,51 +462,21 @@ Component({
       const mode = entry === "creative" ? "creative" : scene;
       if (mode === "story") {
         return {
-          title: "讲故事模式",
-          placeholder: "想听哪一段故事？",
-          emptyWelcome:
-            "你好！我可以按情节脉络给你讲故事，也可以重讲、跳转或回顾进度。",
-          thinkingText: "故事助手正在组织情节",
-          quickQuestions: ["继续讲", "重讲这一段", "我讲到哪了", "跳到下一章"],
+          title: "Narrative Mode", placeholder: "Inquire about specific plots or timeline...", emptyWelcome: "Hello! I can narrate storylines, reconstruct narratives, and recap reading progression.", thinkingText: "Synthesizing narrative trajectory...", quickQuestions: ["Continue storyline", "Recap this section", "Where did we leave off?", "Advance to next chapter"],
         };
       }
       if (mode === "creative") {
         return {
-          title: "二次创作",
-          placeholder: "说说想怎么二创...",
-          emptyWelcome:
-            "你好！我会参考原著和当前章节，帮你续写、改写、写番外或补一段人物对话。",
-          thinkingText: "创作助手正在构思",
-          quickQuestions: [
-            "续写这一章",
-            "改成角色对话",
-            "写一个番外",
-            "换个视角重写",
-          ],
+          title: "Creative Synthesis", placeholder: "Specify synthesis requirements...", emptyWelcome: "Hello! I can extrapolate chapters, simulate dialogues, and synthesize perspectives based on the corpus.", thinkingText: "Synthesizing creative variations...", quickQuestions: ["Extrapolate chapter", "Convert to dialogue", "Generate side-story", "Rewrite from alternative POV"],
         };
       }
       if (mode === "drama") {
         return {
-          title: "剧创模式",
-          placeholder: "描述想生成的情节位置...",
-          emptyWelcome:
-            "你好！我会先确认要生成的原文位置，再生成带配乐的横屏短剧视频。",
-          thinkingText: "剧创助手正在准备视频",
-          quickQuestions: ["生成当前章节", "选择一个情节", "查看播放列表"],
+          title: "Drama Generation", placeholder: "Describe scene anchor for video generation...", emptyWelcome: "Hello! I can identify relevant scenes and generate multimodal video scripts and dramatizations.", thinkingText: "Rendering drama composition...", quickQuestions: ["Synthesize current chapter", "Select a scene", "View playlist"],
         };
       }
       return {
-        title: "智能伴读",
-        placeholder: "问问伴读助手...",
-        emptyWelcome:
-          "你好！我是你的学术伴读助手。我已经为您研读了这本书。您可以就其核心论点、逻辑推演或特定概念提出问题。",
-        thinkingText: "伴读助手正在思考",
-        quickQuestions: [
-          "总结这本书",
-          "这本书适合谁读",
-          "提炼三个核心观点",
-          "帮我解释第一章",
-        ],
+        title: "Academic QA", placeholder: "Ask questions about this corpus...", emptyWelcome: "Hello! I am your Academic Reading Assistant. I have indexed this text. Ask any questions about arguments, methodology, citations, or logical derivations.", thinkingText: "Synthesizing response from corpus...", quickQuestions: ["Summarize main arguments", "Explain core methodology", "Extract 3 key findings", "Elaborate on Chapter 1"],
       };
     },
 
@@ -900,12 +858,12 @@ Component({
         type: "creative", // 标记为二创类型
         status: "generating",
         creativeType: this.data.creativeType,
-        creativeTypeName: creativeTypeObj ? creativeTypeObj.name : "AI 二创",
+        creativeTypeName: creativeTypeObj ? creativeTypeObj.name : "Synthesis",
         userPrompt: prompt,
-        content: "正在为你构思二创内容...",
+        content: "Synthesizing creative extrapolation...",
       });
 
-      const userMsgContent = `[AI 二创 - ${creativeTypeObj ? creativeTypeObj.name : ""}] ${prompt}`;
+      const userMsgContent = `[Synthesis - ${creativeTypeObj ? creativeTypeObj.name : ""}] ${prompt}`;
       const userMessage = this.createMessage("user", userMsgContent);
       const nextMessages = [
         ...this.data.messages,
@@ -2087,7 +2045,7 @@ Component({
         const typeObj = this.data.creativeTypes.find(
           (t) => t.id === decorated.creativeType,
         );
-        decorated.creativeTypeName = typeObj ? typeObj.name : "AI 二创";
+        decorated.creativeTypeName = typeObj ? typeObj.name : "Synthesis";
       }
 
       return decorated;

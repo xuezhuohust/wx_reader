@@ -404,11 +404,11 @@ Page({
       if (typeof chapter === 'string') {
         return {
           id: `ch-${String(index + 1).padStart(3, '0')}`,
-          title: chapter || `第 ${index + 1} 章`,
+          title: chapter || `Chapter ${index + 1}`,
         }
       }
 
-      const title = String((chapter && (chapter.title || chapter.name)) || `第 ${index + 1} 章`)
+      const title = String((chapter && (chapter.title || chapter.name)) || `Chapter ${index + 1}`)
       const id = String(
         (chapter && (chapter.id || chapter.nodeId || chapter.node_id || chapter.chapterId || chapter.chapter_id))
         || `ch-${String(index + 1).padStart(3, '0')}`
@@ -428,7 +428,7 @@ Page({
   loadChapterWindow(offset = 0, fromDirection = 'next-window') {
     const { currentChapterIndex, allChapterNames, allChapters } = this.data
     const chapter = allChapters[currentChapterIndex] || {}
-    const chapterName = chapter.title || allChapterNames[currentChapterIndex] || `第 ${currentChapterIndex + 1} 章`
+    const chapterName = chapter.title || allChapterNames[currentChapterIndex] || `Chapter ${currentChapterIndex + 1}`
     const requestSeq = (this.chapterWindowRequestSeq || 0) + 1
     const appendWindow = fromDirection === 'append-window'
     this.chapterWindowRequestSeq = requestSeq
@@ -864,11 +864,11 @@ Page({
 
   getMockText(index) {
     const texts = [
-      `第一章：初识 AI 伴读\n\n这是一个风和日丽的下午，我坐在窗前，打开了这款 AI 伴读助手。在这个数字阅读的时代，我们拥有的不仅是文字，更是一个懂你的灵魂伴侣。\n\nAI 伴读助手不仅能为你提供海量的书籍资源，还能根据你的阅读习惯，为你推荐最适合的内容。无论是深奥的哲学著作，还是轻松的言情小说，它都能游刃有余地为你解读。\n\n它的核心逻辑在于“理解”。它不仅仅是识别文字，更是通过深度学习，捕捉每一个章节的情绪起伏，每一个人物的命运脉络。当你读到动情处，它会为你点亮一盏温暖的灯；当你困惑时，它会为你拨开迷雾。\n\n这就是 AI 伴读的魅力。它让阅读不再是一个人的孤岛，而是一场跨越时空的对话。在这个快节奏的社会里，让我们静下心来，与 AI 一起，重新发现文字的力量。\n\n这就是我们的第一章，关于开始，关于希望，也关于科技与人文的完美融合。`,
-      `第二章：深度阅读的艺术\n\n什么是深度阅读？在碎片化信息充斥的今天，专注力成为了最稀缺的资源。深度阅读不仅是获取信息，更是一场思维的马拉松。\n\n当你沉浸在一段文字中，你的大脑会构建出一个完整的世界。这个世界里有声音、有气味、有光影。AI 伴读助手在这里扮演的是“领航员”的角色。它不会干扰你的思考，但在你需要的时候，它会提供必要的背景资料，帮助你理解作者的深层意图。\n\n研究表明，每天坚持 30 分钟的深度阅读，可以显著提升一个人的共情能力和逻辑思维。通过 AI 的辅助，我们可以更高效地进入“心流”状态。这种状态下，时间仿佛静止，你与作者的灵魂在纸页间共舞。\n\n在这个章节中，我们将探讨如何利用 AI 提升阅读质量。从划线笔记到思维导图，从语音交互到情绪分析，AI 正在重塑我们的阅读方式。\n\n让我们继续前行，探索阅读的无限可能。`,
-      `第三章：钢铁是怎样炼成的\n\n人最宝贵的是生命。生命属于人只有一次。人的一生应当这样度过：当他回首往事的时候，不会因为虚度年华而悔恨，也不会因为碌碌无为而羞愧；在临死的时候，他能够说：“我的整个生命和全部精力，都已经献给了世界上最壮丽的事业——为人类的解放而斗争。”\n\n保尔·柯察金的形象已经成为了整整一代人的精神图腾。在极其艰苦的环境下，他依然保持着对理想的执着追求。这种精神，无论在哪个时代，都具有震撼人心的力量。\n\n在这一章中，我们将通过 AI 的视角，重新解读这部经典名著。看看在现代科技的背景下，我们如何理解英雄主义，如何面对生活中的挫折与磨难。\n\n阅读经典，是为了汲取力量。而 AI，则是那把帮我们开启力量之门的钥匙。`,
-    ]
-    return texts[index % texts.length]
+      "Chapter 1: Foundations of Interactive Corpus Intelligence\n\nIn this section, we formulate the baseline theoretical framework for intelligent corpus reading systems. Modern computational reading extends far beyond passive optical character recognition, transitioning into dynamic knowledge synthesis and interactive semantic parsing.\n\nBy mapping high-dimensional vector embeddings of sequential documents, the system establishes a dense semantic topological graph. When researchers investigate dense manuscripts, the reading assistant operates as an epistemological copilot—indexing citations, identifying conceptual anomalies, and constructing verifiable inference trajectories in real time.\n\nThis foundational paradigm bridges human perceptual comprehension with scalable neural retrieval, laying the methodological groundwork for the subsequent analytical evaluations.",
+      "Chapter 2: Structural Analysis & Discourse Representation\n\nWhat defines rigorous close reading in an era of information abundance? Focus and structured analytical comprehension represent the critical bottleneck in contemporary scholarship. Deep reading is not merely sequential token consumption; it is an iterative marathon of conceptual synthesis.\n\nWhen scholars immerse themselves in complex texts, the cognitive architecture constructs an internal model of relational concepts. Within this environment, the assistant acts as a non-intrusive navigator. Rather than preempting critical scrutiny, it retrieves auxiliary grounding context, clarifying implicit hypotheses and methodological constraints.\n\nEmpirical studies demonstrate that active interactive dialogue significantly augments synthesis accuracy and hypothesis formulation. Through contextual anchoring, reading transforms from isolated inspection into an active, collaborative research exploration.",
+      "Chapter 3: Empirical Validation & Computational Synthesis\n\nEvaluating reading assistance systems requires multi-faceted empirical benchmarking across contextual fidelity, query response latency, and grounding correctness. Systematic analysis demonstrates that grounding responses strictly on indexed corpus spans minimizes hallucinations while preserving dialectical depth.\n\nThrough structured citation extraction and localized chunk references, researchers can immediately trace every interpretive claim back to its originating paragraph. This creates a transparent chain of evidence essential for scientific inquiry.\n\nIn conclusion, integrating conversational neural interfaces directly into the document viewing canvas establishes a unified research environment, seamlessly linking source evidence, analytical reflection, and knowledge dissemination."
+    ];
+    return texts[index % texts.length];
   },
 
   mockChapterContent(fromDirection = 'next') {

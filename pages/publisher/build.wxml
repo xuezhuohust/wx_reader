@@ -5,7 +5,7 @@
       <view class="nav-left" bindtap="handleBack">
         <view class="chevron-left-black"></view>
       </view>
-      <text class="nav-title">建库进度</text>
+      <text class="nav-title">Indexing Pipeline</text>
     </view>
   </view>
 
@@ -15,8 +15,8 @@
         <view class="intro-badge">
           <text>TASK TRACKING</text>
         </view>
-        <text class="header-title">AI 建库队列</text>
-        <text class="header-desc">追踪书籍资产的 AI 训练与知识库构建进度</text>
+        <text class="header-title">Vector Index Pipeline</text>
+        <text class="header-desc">Track manuscript parsing, embedding, and vector index builds</text>
       </view>
     </view>
 
@@ -28,14 +28,14 @@
           <text class="book-author">{{item.author}}</text>
         </view>
         <view class="status-badge {{item.buildStatus === 'building' ? 'badge-processing' : (item.buildStatus === 'completed' ? 'badge-done' : 'badge-pending')}}">
-          {{item.buildStatus === 'building' ? '解析中' : (item.buildStatus === 'completed' ? '已就绪' : '待启动')}}
+          {{item.buildStatus === 'building' ? 'Parsing' : (item.buildStatus === 'completed' ? 'Indexed' : 'Queued')}}
         </view>
       </view>
 
       <view class="build-content">
         <view class="progress-section">
           <view class="progress-header">
-            <text class="progress-label">{{item.buildStage || '准备就绪'}}</text>
+            <text class="progress-label">{{item.buildStage || 'Ready'}}</text>
             <text class="progress-value">{{item.buildProgress || 0}}%</text>
           </view>
           <view class="progress-bar-bg">
@@ -61,15 +61,15 @@
           data-id="{{item.id}}"
           bindtap="handleStartBuild"
         >
-          {{item.buildStatus === 'failed' ? '重试任务' : '启动解析'}}
+          {{item.buildStatus === 'failed' ? 'Retry' : 'Start Pipeline'}}
         </button>
         <view wx:elif="{{item.buildStatus === 'building'}}" class="running-indicator">
           <view class="dot-loading"></view>
-          <text>AI 正在理解内容...</text>
+          <text>Constructing semantic vector embeddings...</text>
         </view>
         <view wx:else class="success-indicator">
           <view class="icon-svg icon-check-green"></view>
-          <text>知识库构建完成</text>
+          <text>Knowledge index completed</text>
         </view>
       </view>
     </view>
@@ -77,8 +77,8 @@
 
   <empty-state
     wx:if="{{!books.length}}"
-    title="暂无建库任务"
-    description="上传书籍后，任务将在此处显示"
+    title="Pipeline Queue Empty"
+    description="Tasks will appear here once manuscripts are ingested."
   />
   </scroll-view>
 </view>
