@@ -160,3 +160,34 @@ test('temporary polling failures retry, while removed tasks stop polling', async
   assert.equal(reader.data.backgroundImage, '/old.png')
   assert.equal(reader.data.messages.at(-1).status, 'failed')
 })
+
+test('explicit regeneration submits the displayed job ID and replaces the old background only on success', async () => {
+  let request
+  const { reader, storage } = setup({
+    generateDramaSceneImage: async (planId, options) => {
+      request = { planId, options }
+      return { sceneImage: { id: 'new-job', status: 'completed', image: { imageUrl: '/new-style.png' } } }
+    },
+  })
+  reader.data.backgroundSource = 'scene'
+  reader.handleRetryDramaSceneImage({ currentTarget: { dataset: { planId: 'plan', jobId: 'old-job', regenerate: true } } })
+  await flush()
+  assert.equal(request.planId, 'plan')
+  assert.equal(request.options.regenerate, true)
+  assert.equal(request.options.previousJobId, 'old-job')
+  assert.equal(reader.data.backgroundImage, 'https://example.com/new-style.png')
+  assert.equal(storage.get(reader.dramaSceneBackgroundKey('conversation')).imageJobId, 'new-job')
+  assert.equal(reader.data.messages.at(-1).imageJobId, 'new-job')
+})
+
+test('saved backgrounds restore the original plan and job for later regeneration', () => {
+  const { reader, storage } = setup()
+  storage.set(reader.dramaSceneBackgroundKey('conversation'), {
+    imageUrl: '/saved.png', scenePlanId: 'saved-plan', imageJobId: 'saved-job',
+  })
+  reader.restoreDramaSceneBackground()
+  assert.equal(reader.data.backgroundImage, '/saved.png')
+  assert.equal(reader.data.messages.at(-1).scenePlanId, 'saved-plan')
+  assert.equal(reader.data.messages.at(-1).imageJobId, 'saved-job')
+  assert.equal(reader.data.dramaImageGenerating, false)
+})

@@ -1322,10 +1322,14 @@ function generateDramaScenePlan(planId, options) {
 }
 
 /** Use the complete stored storyboard to generate one conversation background. */
-function generateDramaSceneImage(planId) {
+function generateDramaSceneImage(planId, options) {
   return request({
     url: `/api/drama/scene-plans/${encodeURIComponent(planId)}/generate-image`,
     method: "POST",
+    data: {
+      regenerate: Boolean(options && options.regenerate),
+      previousJobId: options && options.previousJobId || "",
+    },
     timeout: 30000,
   });
 }

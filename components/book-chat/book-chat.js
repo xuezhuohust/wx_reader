@@ -1436,6 +1436,12 @@ Component({
       if (saved && saved.pendingPlanId) {
         const run = this.beginDramaSceneImageRun(saved.pendingPlanId);
         this.pollDramaSceneImage(run);
+      } else if (saved && saved.scenePlanId && saved.imageUrl) {
+        this.setData({ messages: [...this.data.messages, this.decorateMessage({
+          id: `drama_image_${Date.now()}`, role: "assistant", type: "drama-image", status: "completed",
+          scenePlanId: saved.scenePlanId, imageJobId: saved.imageJobId || "", imageUrl: saved.imageUrl,
+          content: "已恢复当前对话的场景图背景。",
+        })] });
       }
     },
 
@@ -1464,10 +1470,10 @@ Component({
         && this.bookId === run.bookId && this.data.currentConversationId === run.conversationId;
     },
 
-    startDramaSceneImageGeneration(planId) {
+    startDramaSceneImageGeneration(planId, options) {
       if (!planId || !this.data.currentConversationId || this.data.dramaSubmitting || this.data.dramaImageGenerating) return;
       const run = this.beginDramaSceneImageRun(planId);
-      return api.generateDramaSceneImage(planId)
+      return api.generateDramaSceneImage(planId, options)
         .then((result) => {
           const job = result && result.sceneImage;
           if (!job || !job.status) throw new Error("场景图任务创建失败");
@@ -1528,12 +1534,13 @@ Component({
         dramaImageGenerating: !terminal,
         ...(completed ? { backgroundImage: imageUrl, backgroundSource: "scene" } : {}),
         messages: this.data.messages.map((item) => item.id === run.messageId
-          ? this.decorateMessage({ ...item, status: job.status, content, imageUrl }) : item),
+          ? this.decorateMessage({ ...item, status: job.status, content, imageUrl, imageJobId: job.id || item.imageJobId || "" }) : item),
       }, () => this.scrollToBottom());
       if (terminal) {
         clearTimeout(this._dramaImagePollTimer);
         this.saveDramaSceneBackground(run.conversationId, {
           imageUrl: completed ? imageUrl : this.data.backgroundSource === "scene" ? this.data.backgroundImage : "",
+          ...(completed ? { scenePlanId: run.planId, imageJobId: job.id || "" } : {}),
         });
         this._dramaImageRun = null;
       }
@@ -1541,7 +1548,11 @@ Component({
     },
 
     handleRetryDramaSceneImage(event) {
-      this.startDramaSceneImageGeneration(String(event.currentTarget.dataset.planId || ""));
+      const data = event.currentTarget.dataset;
+      this.startDramaSceneImageGeneration(String(data.planId || ""), {
+        regenerate: data.regenerate === true || data.regenerate === "true",
+        previousJobId: String(data.jobId || ""),
+      });
     },
 
     startDramaSceneGeneration(planId, planMessageId, generationClipIds) {

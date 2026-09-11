@@ -263,7 +263,7 @@
                   <text class="drama-status-tag">{{item.status === 'completed' ? '已完成' : item.status === 'failed' ? '失败' : '生成中'}}</text>
                 </view>
                 <text class="drama-card-copy">{{item.content}}</text>
-                <button wx:if="{{item.status === 'failed'}}" class="drama-generate-clips-button" disabled="{{dramaSubmitting || dramaImageGenerating}}" data-plan-id="{{item.scenePlanId}}" bindtap="handleRetryDramaSceneImage">重试生成场景图</button>
+                <button wx:if="{{item.status === 'failed' || item.status === 'completed'}}" class="drama-generate-clips-button" disabled="{{dramaSubmitting || dramaImageGenerating}}" data-plan-id="{{item.scenePlanId}}" data-job-id="{{item.imageJobId}}" data-regenerate="{{item.status === 'completed'}}" bindtap="handleRetryDramaSceneImage">{{item.status === 'completed' ? '重新生成场景图' : '重试生成场景图'}}</button>
               </view>
 
               <view wx:elif="{{item.type === 'drama-video'}}" class="drama-video-card {{item.status === 'failed' ? 'drama-video-card--failed' : ''}}">
