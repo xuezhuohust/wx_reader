@@ -21,6 +21,36 @@ function isValidDisplayName(displayName) {
 
 Page({
   data: {
+    statsBento: {
+      todayPapers: 3,
+      totalPapers: 18,
+      todayMinutes: 45,
+      totalHours: 216,
+      conceptsAcquired: 74,
+      annotationsCount: 156
+    },
+    acquiredConcepts: [
+      {
+        id: "c1",
+        keyword: "Attention Routing",
+        category: "AI & Architectures",
+        fact: "Sparse mixture of experts routes distinct tokens dynamically across feed-forward experts without parameter explosion.",
+        sourceBook: "Deep Foundations of LLMs"
+      },
+      {
+        id: "c2",
+        keyword: "Latent Diffusion",
+        category: "Multimodal Systems",
+        fact: "Perceptual compression separates high-frequency perceptual details from generative semantic synthesis.",
+        sourceBook: "Generative Visual Dynamics"
+      }
+    ],
+    domainExpertise: [
+      { name: "Machine Learning", percent: 85, count: 12 },
+      { name: "Human-AI Interaction", percent: 68, count: 8 },
+      { name: "Cognitive Computing", percent: 42, count: 5 }
+    ],
+
     books: [],
     identity: null,
     showProfileModal: false,

@@ -49,9 +49,13 @@ function getLayoutProfile(inputWindowInfo, inputOrientation, options) {
   const screenWidth = Number(windowInfo.screenWidth || systemInfo.screenWidth || width || 0)
   const screenHeight = Number(windowInfo.screenHeight || systemInfo.screenHeight || height || 0)
   const isConfiguredPad = PAD_MODEL_PATTERNS.some((pattern) => pattern.test(model))
-  const isPad = deviceType === 'pad'
+  const minDimension = Math.min(width, height);
+  const maxDimension = Math.max(width, height);
+  const isLargeScreenByBounds = minDimension >= 540 || maxDimension >= 960;
+  const isPad = deviceType === "pad"
     || /ipad|tablet|\bpad\b/i.test(model)
     || isConfiguredPad
+    || isLargeScreenByBounds
   // 页面实际应采用当前小程序窗口的比例。Android Pad 的系统信息在旋转
   // 首帧可能仍保留旧方向，因此真机旋转事件的 value 需要优先参与判断。
   const hasWindowBounds = width > 0 && height > 0

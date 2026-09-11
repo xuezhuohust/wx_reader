@@ -26,12 +26,6 @@
   "resizable": true,
   "style": "v2",
   "__usePrivacyCheck__": true,
-  "permission": {
-    "scope.writeClipboard": true,
-    "scope.record": {
-      "desc": "我们需要您的麦克风权限，以便为您提供语音交互、语音提问等伴读功能。"
-    }
-  },
   "sitemapLocation": "sitemap.json",
   "lazyCodeLoading": "requiredComponents",
   "tabBar": {

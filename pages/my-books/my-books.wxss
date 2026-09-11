@@ -1,294 +1,533 @@
+
+/* Pad 横屏专属顶部栏 (1068x712 适配) */
+.pad-profile-header {
+  background-color: #fbf9f5;
+  border-bottom: 1px solid #e7e5e4;
+  padding: 12px 32px 14px;
+  flex-shrink: 0;
+  z-index: 100;
+}
+
+.pad-header-inner {
+  max-width: 1068px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.pad-brand-group {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.pad-brand-logo {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: #2563eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+  flex-shrink: 0;
+}
+
+.pad-brand-book-icon {
+  width: 18px;
+  height: 14px;
+  border: 2px solid #ffffff;
+  border-radius: 2px 4px 4px 2px;
+  position: relative;
+}
+
+.pad-brand-book-icon::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 1.5px;
+  background: #ffffff;
+}
+
+.pad-header-titles {
+  display: flex;
+  flex-direction: column;
+}
+
+.pad-main-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: #1c1917;
+  letter-spacing: -0.5px;
+  line-height: 1.2;
+}
+
+.pad-sub-title {
+  font-size: 11px;
+  color: #78716c;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  margin-top: 2px;
+}
+
+.pad-user-quick {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #ffffff;
+  padding: 5px 14px 5px 6px;
+  border-radius: 999px;
+  border: 1px solid #e7e5e4;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+  cursor: pointer;
+}
+
+.user-avatar-wrap {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 1.5px solid #2563eb;
+  flex-shrink: 0;
+}
+
+.pad-quick-avatar {
+  width: 100%;
+  height: 100%;
+}
+
+.user-info-meta {
+  display: flex;
+  flex-direction: column;
+}
+
+.pad-user-quick .user-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1c1917;
+  line-height: 1.15;
+}
+
+.pad-user-quick .user-role-badge {
+  font-size: 10px;
+  color: #2563eb;
+  font-weight: 600;
+}
+
+/* ==========================================================================
+   Editorial Academic Theme: Scholar Profile Page
+   Warm editorial canvas (#fbf9f5), double-bordered containers, Bento metrics
+   ========================================================================== */
+
 page {
-  background-color: #f8fafc;
+  background-color: #fbf9f5;
+}
+
+.font-mono {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, monospace;
 }
 
 .my-books-page {
-  background-color: #f8fafc;
-  color: #1b1b1b;
+  background-color: #fbf9f5;
+  color: #1c1917;
   height: 100%;
   min-height: 0;
   display: flex;
   flex-direction: column;
-  overflow: visible;
 }
 
 .large-top-safe-area {
   flex-shrink: 0;
 }
 
-/* Header matched with Bookshelf */
+/* 顶部轻量导航 */
 .home-nav {
-  background-color: #f8fafc;
+  background-color: #fbf9f5;
   position: sticky;
   top: 0;
   z-index: 100;
   flex-shrink: 0;
+  border-bottom: 1rpx solid rgba(0, 0, 0, 0.05);
 }
 
 .nav-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 0 40rpx;
+  padding: 0 36rpx;
+}
+
+.nav-title-group {
+  display: flex;
+  flex-direction: column;
 }
 
 .nav-title {
-  font-size: 56rpx;
-  font-weight: 900;
-  letter-spacing: -1.5rpx;
-  color: #1b1b1b;
-  line-height: 1.2;
+  font-size: 40rpx;
+  font-weight: 800;
+  letter-spacing: -1rpx;
+  color: #1c1917;
+  line-height: 1.15;
 }
 
-.nav-actions {
-  display: flex;
+.nav-subtitle {
+  font-size: 20rpx;
+  color: #78716c;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1rpx;
+  margin-top: 4rpx;
 }
 
-.nav-btn {
-  width: 72rpx;
-  height: 72rpx;
-  border-radius: 50%;
-  background-color: #fff;
-  border: 1rpx solid rgba(0, 0, 0, 0.06);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.nav-btn:active {
-  background-color: #f3efe8;
-  transform: scale(0.94);
-}
-
-.icon-settings {
-  width: 32rpx;
-  height: 32rpx;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: 10rpx;
-}
-
-.icon-settings::before, .icon-settings::after {
-  content: '';
-  width: 30rpx;
-  height: 4rpx;
-  background-color: #1b1b1b;
-  border-radius: 4rpx;
-  position: relative;
-}
-
-/* 模拟书库筛选图标：带圆点的横线 */
-.icon-settings::before {
-  box-shadow: -8rpx 0 0 -1rpx #1b1b1b inset; /* 这里的逻辑有点复杂，直接用简单的横线模拟 */
-  background: linear-gradient(to right, #1b1b1b 0%, #1b1b1b 25%, transparent 25%, transparent 40%, #1b1b1b 40%, #1b1b1b 100%);
-}
-
-.icon-settings::after {
-  background: linear-gradient(to right, #1b1b1b 0%, #1b1b1b 60%, transparent 60%, transparent 75%, #1b1b1b 75%, #1b1b1b 100%);
-}
-
-/* Scroll Area */
+/* 滚动区 */
 .scroll-area {
   flex: 1;
-  height: 0; /* 关键：强制 flex 子项高度受限，从而触发 scroll-view 内部滚动 */
+  height: 0;
 }
 
 .scroll-content {
-  padding: 0 64rpx 64rpx;
+  padding: 24rpx 28rpx 40rpx;
 }
 
-/* Profile Hero - Artifact Inspired & Decardified */
-.profile-card-hero {
+/* 主实体画板与卡片基底 (Card-Editorial) */
+.editorial-profile-canvas {
+  display: flex;
+  flex-direction: column;
+  gap: 24rpx;
+}
+
+.card-editorial {
+  background: #ffffff;
+  border-radius: 20rpx;
+  border: 1.5rpx solid rgba(28, 25, 23, 0.08);
+  box-shadow: 0 2rpx 10rpx rgba(28, 25, 23, 0.03);
+  position: relative;
+  box-sizing: border-box;
+}
+
+/* 1. 学者身份卡片 */
+.profile-hero-card {
+  padding: 30rpx;
   display: flex;
   align-items: center;
-  padding: 56rpx 0;
-  background: transparent;
+  justify-content: space-between;
 }
 
-.avatar-wrap {
-  width: 120rpx;
-  height: 120rpx;
+.profile-hero-left {
+  display: flex;
+  align-items: center;
+  gap: 24rpx;
+  flex: 1;
+}
+
+.avatar-halo-wrap {
+  width: 110rpx;
+  height: 110rpx;
   border-radius: 50%;
-  overflow: hidden;
-  margin-right: 32rpx;
-  background: #fff;
-  border: 1rpx solid rgba(0, 0, 0, 0.04);
-  position: relative;
-  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.03);
+  border: 3rpx solid #e7e5e4;
+  padding: 4rpx;
+  background: #fbf9f5;
+  box-sizing: border-box;
+  flex-shrink: 0;
 }
 
 .profile-avatar {
   width: 100%;
   height: 100%;
+  border-radius: 50%;
 }
 
-.profile-info {
-  flex: 1;
+.profile-meta-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.user-name-row {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
 }
 
 .user-name {
-  font-size: 44rpx;
-  font-weight: 900;
-  color: #1b1b1b;
-  letter-spacing: -1.2rpx;
-  margin-bottom: 6rpx;
-  line-height: 1.1;
+  font-size: 36rpx;
+  font-weight: 800;
+  color: #1c1917;
+  letter-spacing: -0.5rpx;
 }
 
-.profile-meta-row {
+.user-verified-badge {
+  font-size: 18rpx;
+  font-weight: 700;
+  background: #ecfdf5;
+  color: #059669;
+  border: 1rpx solid #a7f3d0;
+  padding: 2rpx 10rpx;
+  border-radius: 8rpx;
+  text-transform: uppercase;
+  letter-spacing: 0.5rpx;
+}
+
+.profile-tag-row {
   display: flex;
   align-items: center;
   gap: 12rpx;
 }
 
 .user-tag {
-  background: rgba(0, 113, 227, 0.06);
-  color: #0071e3;
-  padding: 4rpx 14rpx;
-  border-radius: 99rpx;
-  font-size: 18rpx;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5rpx;
-}
-
-.join-date {
+  background: #eff6ff;
+  color: #2563eb;
+  padding: 4rpx 12rpx;
+  border-radius: 8rpx;
   font-size: 20rpx;
-  color: #8c8c8c;
-  font-weight: 500;
+  font-weight: 700;
+  border: 1rpx solid #bfdbfe;
 }
 
-/* Reading Stats - Pure Decardified */
-.reading-stats {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 64rpx;
-  padding: 0;
+.user-id {
+  font-size: 20rpx;
+  color: #a8a29e;
+  font-weight: 600;
 }
 
-.reading-stat {
-  flex: 1;
-  background: transparent;
-  padding: 0;
+.profile-edit-btn {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  text-align: center;
-  border: none;
-  box-shadow: none;
+  gap: 8rpx;
+  background: #f5f5f4;
+  padding: 10rpx 18rpx;
+  border-radius: 12rpx;
+  border: 1rpx solid #e7e5e4;
+  flex-shrink: 0;
 }
 
-.reading-stat-value {
-  font-size: 42rpx;
-  font-weight: 900;
-  color: #1b1b1b;
-  letter-spacing: -1rpx;
-  font-family: 'Satoshi', 'DIN Alternate', sans-serif;
-  line-height: 1.2;
-}
-
-.reading-stat-label {
-  font-size: 18rpx;
+.edit-btn-text {
+  font-size: 22rpx;
   font-weight: 700;
-  color: #8c8c8c;
-  text-transform: uppercase;
-  letter-spacing: 1.5rpx;
-  margin-top: 8rpx;
-  opacity: 0.6;
+  color: #44403c;
 }
 
-/* Weekly Chart - Pure Decardified */
-.weekly-chart {
-  margin-bottom: 64rpx;
-  padding: 0;
-  background: transparent;
-  border: none;
-  box-shadow: none;
-}
-
-.chart-header {
-  margin-bottom: 40rpx;
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-}
-
-.chart-title {
-  font-size: 20rpx;
-  font-weight: 900;
-  color: #1b1b1b;
-  opacity: 0.3;
-  text-transform: uppercase;
-  letter-spacing: 2rpx;
-}
-
-.chart-summary {
-  font-size: 44rpx;
-  font-weight: 900;
-  color: #0071e3;
-  letter-spacing: -1rpx;
-}
-
-.chart-bars {
-  height: 240rpx;
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
+/* 2. 学术量化 Bento 矩阵 */
+.academic-bento-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 16rpx;
 }
 
-.chart-bar-wrap {
-  flex: 1;
+.bento-card {
+  padding: 24rpx 20rpx;
+  display: flex;
+  align-items: center;
+  gap: 18rpx;
+}
+
+.bento-icon-box {
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 16rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.bento-icon--amber { background: #fffbeb; color: #d97706; border: 1.5rpx solid #fde68a; }
+.bento-icon--blue  { background: #eff6ff; color: #2563eb; border: 1.5rpx solid #bfdbfe; }
+.bento-icon--teal  { background: #f0fdfa; color: #0d9488; border: 1.5rpx solid #99f6e4; }
+.bento-icon--orange { background: #fff7ed; color: #ea580c; border: 1.5rpx solid #fed7aa; }
+
+.bento-data {
   display: flex;
   flex-direction: column;
+  min-width: 0;
+}
+
+.bento-label {
+  font-size: 20rpx;
+  color: #78716c;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.bento-num-wrap {
+  display: flex;
+  align-items: baseline;
+  gap: 6rpx;
+  margin-top: 4rpx;
+}
+
+.bento-val {
+  font-size: 34rpx;
+  font-weight: 800;
+  color: #1c1917;
+  line-height: 1.1;
+}
+
+.bento-sub {
+  font-size: 18rpx;
+  color: #a8a29e;
+  font-weight: 500;
+}
+
+/* 3. 知识萃取流卡片 */
+.concepts-section {
+  padding: 28rpx;
+}
+
+.section-title-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20rpx;
+}
+
+.title-with-pill {
+  display: flex;
   align-items: center;
   gap: 12rpx;
-  height: 100%;
 }
 
-.chart-bar-container {
-  flex: 1;
-  width: 100%;
-  display: flex;
-  align-items: flex-end;
-  position: relative;
-}
-
-.chart-bar {
-  width: 100%;
-  background: #e2e2e2;
-  border-radius: 6rpx;
-  transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-  min-height: 8rpx;
-}
-
-.chart-bar.active {
-  background: #0071e3;
-}
-
-.chart-bar-label {
-  font-size: 18rpx;
+.section-title {
+  font-size: 28rpx;
   font-weight: 800;
-  color: #b2b2b2;
-  margin-top: 12rpx;
+  color: #1c1917;
+  letter-spacing: -0.5rpx;
 }
 
-/* Menu List - Pure Decardified */
-.menu-list {
-  background: transparent;
-  margin-top: 16rpx;
+.badge-pill {
+  font-size: 18rpx;
+  background: #f5f5f4;
+  color: #78716c;
+  padding: 2rpx 10rpx;
+  border-radius: 6rpx;
+  font-weight: 700;
+}
+
+.sub-counter {
+  font-size: 20rpx;
+  color: #a8a29e;
+  font-weight: 600;
+}
+
+.concept-cards-flow {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.concept-item {
+  background: #fafaf9;
+  border: 1rpx solid #e7e5e4;
+  border-radius: 14rpx;
+  padding: 20rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 10rpx;
+}
+
+.concept-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.concept-keyword {
+  font-size: 22rpx;
+  font-weight: 800;
+  color: #2563eb;
+  background: #eff6ff;
+  padding: 2rpx 12rpx;
+  border-radius: 6rpx;
+  border: 1rpx solid #dbeafe;
+}
+
+.concept-category {
+  font-size: 20rpx;
+  color: #78716c;
+  font-weight: 600;
+}
+
+.concept-fact {
+  font-size: 24rpx;
+  line-height: 1.5;
+  color: #292524;
+  font-style: italic;
+}
+
+.concept-footer {
+  display: flex;
+  align-items: center;
+}
+
+.concept-source {
+  font-size: 19rpx;
+  color: #a8a29e;
+}
+
+/* 4. 领域精力分布 */
+.discipline-section {
+  padding: 28rpx;
+}
+
+.domain-bars-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.domain-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.domain-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.domain-name {
+  font-size: 24rpx;
+  font-weight: 700;
+  color: #292524;
+}
+
+.domain-stats {
+  font-size: 20rpx;
+  color: #78716c;
+  font-weight: 600;
+}
+
+.domain-progress-track {
+  width: 100%;
+  height: 14rpx;
+  background: #f5f5f4;
+  border-radius: 99rpx;
+  overflow: hidden;
+  border: 1rpx solid #e7e5e4;
+}
+
+.domain-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #3b82f6, #0d9488);
+  border-radius: 99rpx;
+  transition: width 0.6s ease;
+}
+
+/* 5. 菜单列表 */
+.menu-section {
+  padding: 8rpx 28rpx;
 }
 
 .menu-item {
   display: flex;
   align-items: center;
-  padding: 32rpx 0;
-  border-bottom: 1rpx solid rgba(0, 0, 0, 0.03);
-  gap: 24rpx;
+  padding: 26rpx 0;
+  border-bottom: 1rpx solid rgba(0, 0, 0, 0.04);
+  gap: 20rpx;
 }
 
 .menu-item:last-child {
@@ -296,92 +535,120 @@ page {
 }
 
 .menu-item-icon {
-  width: 72rpx;
-  height: 72rpx;
-  border-radius: 20rpx;
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 16rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: 0;
-  background: rgba(0, 113, 227, 0.04);
-  color: #0071e3;
+  flex-shrink: 0;
 }
 
-/* 移除特定的颜色变体，统一使用学术绿体系 */
-.menu-item-icon.green { color: #0071e3; background: rgba(0, 113, 227, 0.04); }
-.menu-item-icon.warm { color: #0071e3; background: rgba(0, 113, 227, 0.04); }
-.menu-item-icon.red { color: #ba1a1a; background: rgba(186, 26, 26, 0.04); } /* 退出登录保留警告色 */
+.icon-bg-blue { background: #eff6ff; color: #2563eb; }
+.icon-bg-amber { background: #fffbeb; color: #d97706; }
+.icon-bg-teal { background: #f0fdfa; color: #0d9488; }
+.icon-bg-red { background: #fef2f2; color: #dc2626; }
 
 .menu-item-text {
   flex: 1;
 }
 
 .menu-item-title {
-  font-size: 28rpx;
+  font-size: 26rpx;
   font-weight: 700;
-  color: #1b1b1b;
-  letter-spacing: -0.2rpx;
+  color: #1c1917;
 }
 
 .menu-item-sub {
   font-size: 20rpx;
-  color: #8c8c8c;
+  color: #78716c;
   margin-top: 4rpx;
   font-weight: 500;
 }
 
 .logout-text {
-  color: #ba1a1a;
+  color: #dc2626;
 }
 
-/* Icons (SVG mapping) */
-.icon-settings { width: 32rpx; height: 32rpx; border: 4rpx solid #1b1b1b; border-radius: 8rpx; }
-.icon-user-white { width: 48rpx; height: 48rpx; border: 4rpx solid #fff; border-radius: 50%; opacity: 0.8; }
-.icon-arrow-right-faint {
-  width: 14rpx;
-  height: 14rpx;
-  border-top: 3.5rpx solid #ccc;
-  border-right: 3.5rpx solid #ccc;
-  transform: rotate(45deg);
-  opacity: 0.6;
-  margin-left: 20rpx;
+/* 图标基础样式 */
+.icon-svg-book {
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid currentColor;
+  border-radius: 3px;
+  position: relative;
 }
-.icon-arrow-right-small { width: 10rpx; height: 10rpx; border-top: 3.5rpx solid #8c8c8c; border-right: 3.5rpx solid #8c8c8c; transform: rotate(45deg); opacity: 0.4; }
-
-.icon-morning { width: 32rpx; height: 32rpx; border: 4rpx solid #f59e0b; border-radius: 50%; position: relative; }
-.icon-morning::after { content: ''; position: absolute; top: 10rpx; left: 10rpx; width: 12rpx; height: 12rpx; background: #f59e0b; border-radius: 50%; }
-.icon-marathon { width: 32rpx; height: 40rpx; border: 4rpx solid #0071e3; border-radius: 6rpx; }
-.icon-pen { width: 32rpx; height: 32rpx; border-bottom: 4rpx solid #8c8c8c; transform: rotate(-45deg); }
-
-.icon-menu-notes { width: 28rpx; height: 36rpx; border: 3.5rpx solid currentColor; border-radius: 4rpx; }
-.icon-menu-fav { width: 32rpx; height: 32rpx; background-color: currentColor; clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%); }
-.icon-menu-history { width: 32rpx; height: 32rpx; border: 3.5rpx solid currentColor; border-radius: 50%; position: relative; }
-.icon-menu-history::after { content: ''; position: absolute; top: 14rpx; left: 14rpx; width: 10rpx; height: 3.5rpx; background: currentColor; transform: rotate(-45deg); }
-.icon-menu-settings { width: 32rpx; height: 32rpx; border: 3.5rpx solid currentColor; border-radius: 6rpx; }
-.icon-menu-logout { width: 32rpx; height: 32rpx; border-left: 3.5rpx solid currentColor; border-top: 3.5rpx solid currentColor; border-bottom: 3.5rpx solid currentColor; position: relative; }
-.icon-menu-logout::after { content: '→'; position: absolute; right: -10rpx; top: -10rpx; color: currentColor; font-size: 24rpx; }
-
-/* Animations */
-.fade-up {
-  animation: fadeUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-.d1 { animation-delay: 0ms; }
-.d2 { animation-delay: 80ms; }
-.d3 { animation-delay: 160ms; }
-.d4 { animation-delay: 240ms; }
-.d5 { animation-delay: 320ms; }
-
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(24rpx); }
-  to { opacity: 1; transform: translateY(0); }
+.icon-svg-book::before {
+  content: "";
+  position: absolute;
+  top: 3px; left: 2px; right: 2px;
+  height: 1.5px;
+  background: currentColor;
 }
 
-/* Privacy/Profile Sheet */
+.icon-svg-clock {
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid currentColor;
+  border-radius: 50%;
+  position: relative;
+}
+.icon-svg-clock::after {
+  content: "";
+  position: absolute;
+  top: 3px; left: 7px;
+  width: 1.5px; height: 5px;
+  background: currentColor;
+  box-shadow: 2px 3px 0 0 currentColor;
+}
+
+.icon-svg-triple {
+  width: 16px;
+  height: 16px;
+  position: relative;
+}
+.icon-svg-triple::before {
+  content: "";
+  position: absolute;
+  top: 1px; left: 6px;
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.icon-svg-triple::after {
+  content: "";
+  position: absolute;
+  bottom: 1px; left: 1px;
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 10px 0 0 0 currentColor;
+}
+
+.icon-svg-notes {
+  width: 14px;
+  height: 18px;
+  border: 1.5px solid currentColor;
+  border-radius: 3px;
+}
+
+.icon-menu-notes { width: 14px; height: 18px; border: 2px solid currentColor; border-radius: 3px; box-sizing: border-box; }
+.icon-menu-fav { width: 16px; height: 16px; background-color: currentColor; clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%); }
+.icon-menu-settings { width: 16px; height: 16px; border: 2px solid currentColor; border-radius: 4px; box-sizing: border-box; }
+.icon-menu-logout { width: 16px; height: 16px; border-left: 2px solid currentColor; border-top: 2px solid currentColor; border-bottom: 2px solid currentColor; position: relative; box-sizing: border-box; }
+.icon-menu-logout::after { content: "→"; position: absolute; right: -5px; top: -5px; color: currentColor; font-size: 12px; }
+.icon-arrow-right-small { width: 6px; height: 6px; border-top: 1.5px solid #a8a29e; border-right: 1.5px solid #a8a29e; transform: rotate(45deg); }
+
+.safe-area-bottom {
+  height: calc(140rpx + env(safe-area-inset-bottom));
+}
+
+/* 个人资料弹窗 */
 .profile-overlay {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
   z-index: 3000;
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(0, 0, 0, 0.4);
   display: flex;
   align-items: flex-end;
 }
@@ -389,263 +656,316 @@ page {
 .profile-sheet {
   width: 100%;
   background: #fff;
-  border-radius: 48rpx 48rpx 0 0;
-  padding: 40rpx 40rpx calc(48rpx + env(safe-area-inset-bottom));
+  border-radius: 36rpx 36rpx 0 0;
+  padding: 36rpx 36rpx calc(48rpx + env(safe-area-inset-bottom));
 }
 
 .sheet-bar {
   width: 80rpx;
   height: 8rpx;
-  background-color: #f3efe8;
+  background-color: #e7e5e4;
   border-radius: 99rpx;
-  margin: 0 auto 32rpx;
+  margin: 0 auto 28rpx;
 }
 
 .sheet-title {
-  font-size: 34rpx;
-  font-weight: 900;
-  color: #1b1b1b;
+  font-size: 32rpx;
+  font-weight: 800;
+  color: #1c1917;
   text-align: center;
-  margin-bottom: 48rpx;
+  margin-bottom: 36rpx;
 }
 
 .avatar-uploader {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 48rpx;
+  margin-bottom: 36rpx;
   background: none;
   line-height: normal;
   padding: 0;
 }
-
 .avatar-uploader::after { border: none; }
 
-.profile-privacy-box {
-  margin-bottom: 40rpx;
-  padding: 28rpx;
-  border-radius: 12rpx; border: 1rpx solid #e2e8f0;
-  background: #f8f5ef;
-  border: 1rpx solid rgba(27, 27, 27, 0.06);
-}
-
-.profile-privacy-title {
-  font-size: 28rpx;
-  font-weight: 900;
-  color: #1b1b1b;
-  margin-bottom: 12rpx;
-}
-
-.profile-privacy-text {
-  font-size: 24rpx;
-  line-height: 1.65;
-  color: #6f6a62;
-}
-
-.profile-privacy-actions {
-  display: flex;
-  gap: 16rpx;
-  margin-top: 24rpx;
-}
-
-.profile-privacy-link,
-.profile-privacy-agree {
-  flex: 1;
-  height: 76rpx;
-  border-radius: 18rpx;
-  font-size: 26rpx;
-  font-weight: 800;
-  line-height: 76rpx;
-  padding: 0;
-}
-
-.profile-privacy-link {
-  background: #ffffff;
-  color: #5f645c;
-}
-
-.profile-privacy-agree {
-  background: #2f6b3f;
-  color: #ffffff;
-}
-
-.profile-privacy-link::after,
-.profile-privacy-agree::after {
-  border: none;
-}
-
 .uploader-inner {
-  width: 160rpx;
-  height: 160rpx;
+  width: 140rpx;
+  height: 140rpx;
   border-radius: 50%;
-  background-color: #f3efe8;
+  background-color: #f5f5f4;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  border: 1rpx solid rgba(0, 0, 0, 0.06);
+  border: 2rpx solid #e7e5e4;
 }
-
 .uploader-inner image { width: 100%; height: 100%; }
 
 .uploader-placeholder {
-  font-size: 64rpx;
-  color: #8c8c8c;
-  font-weight: 300;
+  font-size: 56rpx;
+  color: #a8a29e;
 }
 
 .uploader-hint {
-  font-size: 24rpx;
-  color: #8c8c8c;
-  margin-top: 16rpx;
-  font-weight: 700;
+  font-size: 22rpx;
+  color: #78716c;
+  margin-top: 12rpx;
+  font-weight: 600;
 }
 
 .input-group {
-  margin-bottom: 48rpx;
+  margin-bottom: 36rpx;
 }
 
 .input-label {
-  font-size: 24rpx;
-  font-weight: 900;
-  color: #1b1b1b;
+  font-size: 22rpx;
+  font-weight: 800;
+  color: #78716c;
   text-transform: uppercase;
-  letter-spacing: 2rpx;
-  margin-bottom: 16rpx;
-  opacity: 0.6;
+  letter-spacing: 1rpx;
+  margin-bottom: 12rpx;
 }
 
 .input-field {
   width: 100%;
-  height: 100rpx;
-  background-color: #f3efe8;
-  border-radius: 24rpx;
-  padding: 0 32rpx;
-  font-size: 30rpx;
-  font-weight: 700;
-  color: #1b1b1b;
+  height: 88rpx;
+  background-color: #f5f5f4;
+  border-radius: 16rpx;
+  padding: 0 28rpx;
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #1c1917;
+  border: 1.5rpx solid #e7e5e4;
+  box-sizing: border-box;
 }
 
 .btn-primary {
-  background-color: #1b1b1b;
+  background-color: #1c1917;
   color: #fff;
-  height: 100rpx;
+  height: 88rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 24rpx;
-  font-size: 30rpx;
+  border-radius: 16rpx;
+  font-size: 28rpx;
   font-weight: 700;
 }
 
-.btn-primary:active {
-  transform: scale(0.96);
+
+/* ==========================================================================
+   Pad 专门适配: 针对宽屏/Pad (如 1068x712, dpr 3 等高分大屏)
+   1. 锁定像素级比例，防止 rpx 在 1068px 宽度下被放大近 3 倍导致页面巨大失真
+   2. 规范最大内容阅读宽度与两列卡片自适应
+   ========================================================================== */
+
+/* 移动端默认单列流 */
+.profile-body-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 24rpx;
 }
 
-.search-placeholder {
-  color: #8c8c8c;
-  font-weight: 500;
+.profile-column {
+  display: flex;
+  flex-direction: column;
+  gap: 24rpx;
 }
 
-.safe-area-bottom {
-  height: calc(140rpx + env(safe-area-inset-bottom));
-}
-
-/* 横屏 Pad：沿用手机内容与交互，仅收紧 rpx 放大造成的首屏占用。 */
-.my-books-page--large .nav-header {
-  padding: 0 32px;
-}
-
-.my-books-page--large .nav-title {
-  font-size: 26px;
-  letter-spacing: -0.8px;
-}
-
+/* ==========================================================================
+   Pad 横屏 1068x712 专属优化
+   ========================================================================== */
 .my-books-page--large .scroll-content {
-  padding: 0 32px 28px;
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 16px 24px 40px;
+  box-sizing: border-box;
 }
 
-.my-books-page--large .profile-card-hero {
-  padding: 20px 0;
+.my-books-page--large .editorial-profile-canvas {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
-.my-books-page--large .avatar-wrap {
-  width: 64px;
-  height: 64px;
-  margin-right: 16px;
+.my-books-page--large .profile-body-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+.my-books-page--large .profile-column {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Pad 模式下个人 Hero 卡片 */
+.my-books-page--large .profile-hero-card {
+  padding: 14px 20px;
+  border-radius: 12px;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.my-books-page--large .profile-hero-left {
+  gap: 16px;
+}
+
+.my-books-page--large .profile-avatar {
+  width: 48px;
+  height: 48px;
+}
+
+.my-books-page--large .avatar-halo-wrap {
+  width: 56px;
+  height: 56px;
+  border-width: 2px;
+  padding: 2px;
 }
 
 .my-books-page--large .user-name {
-  font-size: 25px;
-  letter-spacing: -0.6px;
-  margin-bottom: 4px;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.my-books-page--large .user-verified-badge {
+  font-size: 11px;
+  padding: 2px 6px;
 }
 
 .my-books-page--large .user-tag {
-  padding: 3px 8px;
   font-size: 11px;
-  letter-spacing: 0.4px;
+  padding: 2px 8px;
 }
 
-.my-books-page--large .join-date {
+.my-books-page--large .user-id {
+  font-size: 11px;
+}
+
+.my-books-page--large .profile-edit-btn {
+  padding: 6px 14px;
+  border-radius: 8px;
+  background: #f5f5f4;
+}
+
+.my-books-page--large .edit-btn-text {
   font-size: 12px;
 }
 
-.my-books-page--large .reading-stats {
-  margin-bottom: 28px;
+/* 左列 Bento 矩阵 */
+.my-books-page--large .academic-bento-grid {
+  gap: 12px;
 }
 
-.my-books-page--large .reading-stat-value {
-  font-size: 28px;
+.my-books-page--large .bento-card {
+  padding: 14px 16px;
+  gap: 14px;
+  border-radius: 12px;
 }
 
-.my-books-page--large .reading-stat-label {
-  font-size: 11px;
-  letter-spacing: 0.8px;
-  margin-top: 4px;
+.my-books-page--large .bento-icon-box {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
 }
 
-.my-books-page--large .weekly-chart {
-  margin-bottom: 28px;
-}
-
-.my-books-page--large .chart-header {
-  margin-bottom: 16px;
-}
-
-.my-books-page--large .chart-title {
+.my-books-page--large .bento-label {
   font-size: 12px;
-  letter-spacing: 1px;
+  color: #78716c;
 }
 
-.my-books-page--large .chart-summary {
-  font-size: 26px;
+.my-books-page--large .bento-val {
+  font-size: 22px;
+  font-weight: 800;
 }
 
-.my-books-page--large .chart-bars {
-  height: 120px;
-  gap: 8px;
-}
-
-.my-books-page--large .chart-bar {
-  border-radius: 3px;
-  min-height: 4px;
-}
-
-.my-books-page--large .chart-bar-wrap,
-.my-books-page--large .chart-bar-label {
-  gap: 5px;
+.my-books-page--large .bento-sub {
   font-size: 11px;
-  margin-top: 5px;
+  color: #a8a29e;
 }
 
-.my-books-page--large .menu-list {
-  margin-top: 0;
+/* 右列 知识沉淀流 */
+.my-books-page--large .concepts-section {
+  padding: 18px 20px;
+  border-radius: 12px;
+}
+
+.my-books-page--large .section-title {
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.my-books-page--large .badge-pill {
+  font-size: 11px;
+}
+
+.my-books-page--large .sub-counter {
+  font-size: 12px;
+}
+
+.my-books-page--large .concept-cards-flow {
+  gap: 12px;
+}
+
+.my-books-page--large .concept-item {
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: #fafaf9;
+}
+
+.my-books-page--large .concept-keyword {
+  font-size: 12px;
+  padding: 2px 8px;
+}
+
+.my-books-page--large .concept-category {
+  font-size: 11px;
+}
+
+.my-books-page--large .concept-fact {
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.my-books-page--large .concept-source {
+  font-size: 11px;
+}
+
+/* 左列下半部分 领域专长 */
+.my-books-page--large .discipline-section {
+  padding: 18px 20px;
+  border-radius: 12px;
+}
+
+.my-books-page--large .domain-bars-wrap {
+  gap: 14px;
+}
+
+.my-books-page--large .domain-name {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.my-books-page--large .domain-stats {
+  font-size: 12px;
+}
+
+.my-books-page--large .domain-progress-track {
+  height: 8px;
+  border-radius: 999px;
+}
+
+/* 右列下半部分 操作菜单 */
+.my-books-page--large .menu-section {
+  padding: 8px 20px;
+  border-radius: 12px;
 }
 
 .my-books-page--large .menu-item {
   padding: 14px 0;
-  gap: 12px;
+  gap: 14px;
 }
 
 .my-books-page--large .menu-item-icon {
@@ -655,110 +975,15 @@ page {
 }
 
 .my-books-page--large .menu-item-title {
-  font-size: 15px;
+  font-size: 13px;
+  font-weight: 700;
 }
 
 .my-books-page--large .menu-item-sub {
+  font-size: 11px;
   margin-top: 2px;
-  font-size: 12px;
 }
 
 .my-books-page--large .safe-area-bottom {
-  height: calc(88px + env(safe-area-inset-bottom));
-}
-
-/* 横屏 Pad 的昵称弹窗使用居中的紧凑对话框，避免 rpx 放大后内容超出屏幕。 */
-.my-books-page--large .profile-overlay {
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-}
-
-.my-books-page--large .profile-sheet {
-  width: 100%;
-  max-width: 480px;
-  max-height: calc(100vh - 40px);
-  overflow-y: auto;
-  padding: 20px 24px;
-  border-radius: 16px;
-}
-
-.my-books-page--large .sheet-bar {
-  width: 40px;
-  height: 4px;
-  margin-bottom: 14px;
-}
-
-.my-books-page--large .sheet-title {
-  margin-bottom: 18px;
-  font-size: 20px;
-}
-
-.my-books-page--large .profile-privacy-box {
-  margin-bottom: 18px;
-  padding: 14px;
-  border-radius: 10px;
-}
-
-.my-books-page--large .profile-privacy-title {
-  margin-bottom: 6px;
-  font-size: 15px;
-}
-
-.my-books-page--large .profile-privacy-text {
-  font-size: 13px;
-}
-
-.my-books-page--large .profile-privacy-actions {
-  gap: 8px;
-  margin-top: 12px;
-}
-
-.my-books-page--large .profile-privacy-link,
-.my-books-page--large .profile-privacy-agree {
-  height: 38px;
-  border-radius: 9px;
-  font-size: 14px;
-  line-height: 38px;
-}
-
-.my-books-page--large .avatar-uploader {
-  margin-bottom: 18px;
-}
-
-.my-books-page--large .uploader-inner {
-  width: 80px;
-  height: 80px;
-}
-
-.my-books-page--large .uploader-placeholder {
-  font-size: 32px;
-}
-
-.my-books-page--large .uploader-hint {
-  margin-top: 8px;
-  font-size: 13px;
-}
-
-.my-books-page--large .input-group {
-  margin-bottom: 20px;
-}
-
-.my-books-page--large .input-label {
-  margin-bottom: 8px;
-  font-size: 12px;
-  letter-spacing: 1px;
-}
-
-.my-books-page--large .input-field {
-  height: 46px;
-  padding: 0 14px;
-  border-radius: 10px;
-  font-size: 16px;
-}
-
-.my-books-page--large .profile-sheet .btn-primary {
-  height: 46px;
-  border-radius: 10px;
-  font-size: 16px;
+  height: calc(80px + env(safe-area-inset-bottom));
 }

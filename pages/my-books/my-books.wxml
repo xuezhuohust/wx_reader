@@ -1,126 +1,227 @@
 <view class="page-container my-books-page {{isLargeScreen ? 'my-books-page--large' : ''}}" style="{{windowHeight ? 'height: ' + windowHeight + 'px;' : ''}}">
-  <!-- 手机端保留原页头；横屏 Pad 移除左上角标题。 -->
+  <!-- 1. 移动端普通顶部导航 -->
   <view class="home-nav" wx:if="{{!isLargeScreen}}" style="height: {{navBarHeight}}px;">
     <view class="nav-header" style="position: absolute; top: {{menuTop}}px; height: {{menuHeight}}px; left: 0; right: 0; padding-right: {{menuRight}}px;">
-      <view class="nav-title">Research Profile</view>
+      <view class="nav-title-group">
+        <text class="nav-title">Scholar Profile</text>
+        <text class="nav-subtitle font-mono">LitCompanion · Research Metrics</text>
+      </view>
     </view>
   </view>
 
-  <view
-    class="large-top-safe-area"
-    wx:if="{{isLargeScreen}}"
-    style="height: {{statusBarHeight + 16}}px;"
-  ></view>
+  <!-- 2. Pad 横屏专属顶级学术工作台顶部栏 (1068x712 适配) -->
+  <view class="pad-profile-header" wx:if="{{isLargeScreen}}" style="padding-top: {{statusBarHeight}}px;">
+    <view class="pad-header-inner">
+      <view class="pad-brand-group">
+        <view class="pad-brand-logo">
+          <view class="pad-brand-book-icon"></view>
+        </view>
+        <view class="pad-header-titles">
+          <text class="pad-main-title">Scholar Research Portfolio</text>
+          <text class="pad-sub-title font-mono">LitCompanion AI · Academic Analytics &amp; Knowledge Triples</text>
+        </view>
+      </view>
+
+      <view class="pad-user-quick" bindtap="handleOpenProfile">
+        <view class="user-avatar-wrap">
+          <image class="pad-quick-avatar" src="{{identity.avatarUrl || 'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0'}}" mode="aspectFill"></image>
+        </view>
+        <view class="user-info-meta">
+          <text class="user-name">{{identity.displayName || 'Research Fellow'}}</text>
+          <text class="user-role-badge font-mono">{{currentRole === 'publisher' ? 'Corpus Curator' : 'Principal Scholar'}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
 
   <scroll-view class="scroll-area" scroll-y enable-passive>
     <view class="scroll-content">
-      <view class="profile-card-hero" bindtap="handleOpenProfile">
-        <view class="avatar-wrap">
-          <image class="profile-avatar" src="{{identity.avatarUrl || 'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0'}}" mode="aspectFill"></image>
-        </view>
-        <view class="profile-info">
-          <view class="user-name">{{identity.displayName || 'Research Fellow'}}</view>
-          <view class="profile-meta-row">
-            <view class="user-tag">{{currentRole === 'publisher' ? 'Corpus Creator' : 'Principal Researcher'}}</view>
-            <text class="join-date">Joined 2024</text>
-          </view>
-        </view>
-        <view class="icon-arrow-right-faint"></view>
-      </view>
-
-      <view class="main-sections">
-        <!-- Reading Stats Bento -->
-      <view class="reading-stats fade-up d2">
-        <view class="reading-stat">
-          <view class="reading-stat-value">216h</view>
-          <view class="reading-stat-label">Total Research Hours</view>
-        </view>
-        <view class="reading-stat">
-          <view class="reading-stat-value">23</view>
-          <view class="reading-stat-label">Indexed Texts</view>
-        </view>
-        <view class="reading-stat">
-          <view class="reading-stat-value">156</view>
-          <view class="reading-stat-label">Annotations</view>
-        </view>
-      </view>
-
-      <!-- Weekly Chart -->
-      <view class="weekly-chart fade-up d4">
-        <view class="chart-header">
-          <view class="chart-title">Weekly Corpus Ingestion</view>
-          <view class="chart-summary">12.5h</view>
-        </view>
-        <view class="chart-bars">
-          <view class="chart-bar-wrap" wx:for="{{weeklyStats}}" wx:key="day">
-            <view class="chart-bar-container">
-              <view class="chart-bar {{item.active ? 'active' : ''}}" style="height: {{item.height}}%;"></view>
+            <!-- 实体工作台/手账质感主画板 -->
+      <view class="editorial-profile-canvas">
+        
+        <!-- 1. 顶部学者档案卡片 (跨满通栏) -->
+        <view class="profile-hero-card card-editorial" bindtap="handleOpenProfile">
+          <view class="profile-hero-left">
+            <view class="avatar-halo-wrap">
+              <image class="profile-avatar" src="{{identity.avatarUrl || 'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0'}}" mode="aspectFill"></image>
             </view>
-            <text class="chart-bar-label">{{item.day}}</text>
+            <view class="profile-meta-info">
+              <view class="user-name-row">
+                <text class="user-name">{{identity.displayName || 'Research Fellow'}}</text>
+                <view class="user-verified-badge font-mono">Active</view>
+              </view>
+              <view class="profile-tag-row">
+                <text class="user-tag font-mono">{{currentRole === 'publisher' ? 'Corpus Curator' : 'Principal Scholar'}}</text>
+                <text class="user-id font-mono">#ID-2024 · Lab Fellow</text>
+              </view>
+            </view>
+          </view>
+
+          <view class="profile-edit-btn">
+            <text class="edit-btn-text font-mono">Edit</text>
+            <view class="icon-arrow-right-small"></view>
           </view>
         </view>
-      </view>
 
-      <!-- Menu List -->
-      <view class="menu-list fade-up d5">
-        <view class="menu-item" bindtap="handleDeveloping">
-          <view class="menu-item-icon green">
-            <view class="icon-menu-notes"></view>
+        <!-- 2. 下方两列主体内容网格 -->
+        <view class="profile-body-grid">
+          
+          <!-- 左列: 量化 Bento + 领域精力分布 -->
+          <view class="profile-column profile-column--left">
+            <!-- 量化科研指标 Bento (F15 风格温润微拟物双栏矩阵) -->
+            <view class="academic-bento-grid">
+              <view class="bento-card card-editorial">
+                <view class="bento-icon-box bento-icon--amber">
+                  <view class="icon-svg-book"></view>
+                </view>
+                <view class="bento-data">
+                  <text class="bento-label">Papers Ingested</text>
+                  <view class="bento-num-wrap font-mono">
+                    <text class="bento-val">{{statsBento.todayPapers}}</text>
+                    <text class="bento-sub">/ {{statsBento.totalPapers}} total</text>
+                  </view>
+                </view>
+              </view>
+
+              <view class="bento-card card-editorial">
+                <view class="bento-icon-box bento-icon--blue">
+                  <view class="icon-svg-clock"></view>
+                </view>
+                <view class="bento-data">
+                  <text class="bento-label">Research Time</text>
+                  <view class="bento-num-wrap font-mono">
+                    <text class="bento-val">{{statsBento.todayMinutes}}m</text>
+                    <text class="bento-sub">/ {{statsBento.totalHours}}h all</text>
+                  </view>
+                </view>
+              </view>
+
+              <view class="bento-card card-editorial">
+                <view class="bento-icon-box bento-icon--teal">
+                  <view class="icon-svg-triple"></view>
+                </view>
+                <view class="bento-data">
+                  <text class="bento-label">Concepts Acquired</text>
+                  <view class="bento-num-wrap font-mono">
+                    <text class="bento-val">{{statsBento.conceptsAcquired}}</text>
+                    <text class="bento-sub">triples</text>
+                  </view>
+                </view>
+              </view>
+
+              <view class="bento-card card-editorial">
+                <view class="bento-icon-box bento-icon--orange">
+                  <view class="icon-svg-notes"></view>
+                </view>
+                <view class="bento-data">
+                  <text class="bento-label">Annotations</text>
+                  <view class="bento-num-wrap font-mono">
+                    <text class="bento-val">{{statsBento.annotationsCount}}</text>
+                    <text class="bento-sub">insights</text>
+                  </view>
+                </view>
+              </view>
+            </view>
+
+            <!-- 领域研究精力分布 (Discipline & Topic Focus) -->
+            <view class="discipline-section card-editorial">
+              <view class="section-title-bar">
+                <text class="section-title">Domain Expertise Focus</text>
+                <text class="sub-counter font-mono">Corpus Balance</text>
+              </view>
+              <view class="domain-bars-wrap">
+                <view class="domain-row" wx:for="{{domainExpertise}}" wx:key="name">
+                  <view class="domain-meta">
+                    <text class="domain-name">{{item.name}}</text>
+                    <text class="domain-stats font-mono">{{item.count}} papers · {{item.percent}}%</text>
+                  </view>
+                  <view class="domain-progress-track">
+                    <view class="domain-progress-fill" style="width: {{item.percent}}%;"></view>
+                  </view>
+                </view>
+              </view>
+            </view>
           </view>
-          <view class="menu-item-text">
-            <view class="menu-item-title">Research Annotations</view>
-            <view class="menu-item-sub">156 entries · 6 documents</view>
+
+          <!-- 右列: 学术知识三元组沉淀流 + 菜单列表 -->
+          <view class="profile-column profile-column--right">
+            <!-- 学术知识与三元组沉淀流 (F14 提取概念精炼展示) -->
+            <view class="concepts-section card-editorial">
+              <view class="section-title-bar">
+                <view class="title-with-pill">
+                  <text class="section-title">Knowledge Extraction Feed</text>
+                  <text class="badge-pill font-mono">Recent Triples</text>
+                </view>
+                <text class="sub-counter font-mono">{{acquiredConcepts.length}} extracted</text>
+              </view>
+
+              <view class="concept-cards-flow">
+                <view class="concept-item" wx:for="{{acquiredConcepts}}" wx:key="id">
+                  <view class="concept-header">
+                    <text class="concept-keyword font-mono">#{{item.keyword}}</text>
+                    <text class="concept-category">{{item.category}}</text>
+                  </view>
+                  <text class="concept-fact">“{{item.fact}}”</text>
+                  <view class="concept-footer">
+                    <text class="concept-source font-mono">Ref: {{item.sourceBook}}</text>
+                  </view>
+                </view>
+              </view>
+            </view>
+
+            <!-- 个人操作与系统控制清单 (Editorial Actions Menu) -->
+            <view class="menu-section card-editorial">
+              <view class="menu-item" bindtap="handleDeveloping">
+                <view class="menu-item-icon icon-bg-blue">
+                  <view class="icon-menu-notes"></view>
+                </view>
+                <view class="menu-item-text">
+                  <view class="menu-item-title">Research Annotations & Quotes</view>
+                  <view class="menu-item-sub">156 verified entries · 6 manuscripts</view>
+                </view>
+                <view class="icon-arrow-right-small"></view>
+              </view>
+
+              <view class="menu-item" bindtap="handleDeveloping">
+                <view class="menu-item-icon icon-bg-amber">
+                  <view class="icon-menu-fav"></view>
+                </view>
+                <view class="menu-item-text">
+                  <view class="menu-item-title">Bookmarked Findings & Citations</view>
+                  <view class="menu-item-sub">12 key claims saved</view>
+                </view>
+                <view class="icon-arrow-right-small"></view>
+              </view>
+
+              <view class="menu-item" bindtap="handleOpenSettings">
+                <view class="menu-item-icon icon-bg-teal">
+                  <view class="icon-menu-settings"></view>
+                </view>
+                <view class="menu-item-text">
+                  <view class="menu-item-title">AI Academic Preferences</view>
+                  <view class="menu-item-sub">Model routing, prompt persona & synthesis</view>
+                </view>
+                <view class="icon-arrow-right-small"></view>
+              </view>
+
+              <view class="menu-item" bindtap="handleLogout">
+                <view class="menu-item-icon icon-bg-red">
+                  <view class="icon-menu-logout"></view>
+                </view>
+                <view class="menu-item-text">
+                  <view class="menu-item-title logout-text">Sign Out</view>
+                  <view class="menu-item-sub">Switch account or clear local cache</view>
+                </view>
+              </view>
+            </view>
           </view>
-          <view class="icon-arrow-right-small"></view>
+
         </view>
 
-        <view class="menu-item" bindtap="handleDeveloping">
-          <view class="menu-item-icon green">
-            <view class="icon-menu-fav"></view>
-          </view>
-          <view class="menu-item-text">
-            <view class="menu-item-title">Bookmarked Citations</view>
-            <view class="menu-item-sub">12 texts · 3 notes</view>
-          </view>
-          <view class="icon-arrow-right-small"></view>
-        </view>
-
-        <view class="menu-item" bindtap="handleDeveloping">
-          <view class="menu-item-icon warm">
-            <view class="icon-menu-history"></view>
-          </view>
-          <view class="menu-item-text">
-            <view class="menu-item-title">Session History</view>
-            <view class="menu-item-sub">Last 7 days reading logs</view>
-          </view>
-          <view class="icon-arrow-right-small"></view>
-        </view>
-
-        <view class="menu-item" bindtap="handleOpenSettings">
-          <view class="menu-item-icon green">
-            <view class="icon-menu-settings"></view>
-          </view>
-          <view class="menu-item-text">
-            <view class="menu-item-title">AI Preferences</view>
-            <view class="menu-item-sub">Model & prompt tuning</view>
-          </view>
-          <view class="icon-arrow-right-small"></view>
-        </view>
-
-        <view class="menu-item" bindtap="handleLogout">
-          <view class="menu-item-icon red">
-            <view class="icon-menu-logout"></view>
-          </view>
-          <view class="menu-item-text">
-            <view class="menu-item-title logout-text">Sign Out</view>
-          </view>
-        </view>
-      </view>
-
+      </view> <!-- Close editorial-profile-canvas -->
       <view class="safe-area-bottom"></view>
-    </view> <!-- Close main-sections -->
-  </view> <!-- Close scroll-content -->
-</scroll-view> <!-- Close scroll-area -->
+    </view> <!-- Close scroll-content -->
+  </scroll-view> <!-- Close scroll-area -->
 
   <!-- Profile Modal -->
   <view wx:if="{{showProfileModal}}" class="profile-overlay" bindtap="handleCloseProfile">

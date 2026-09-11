@@ -68,11 +68,32 @@
       <view class="pad-dashboard-container fade-up" wx:if="{{isLargeScreen}}">
         <view class="pad-dashboard-canvas">
           <view class="pad-dash-header">
-            <view class="pad-dash-title-group">
-              <view class="pad-dash-icon"></view>
-              <text class="pad-dash-title">Dashboard</text>
+            <view class="pad-dash-brand">
+              <view class="pad-brand-logo">
+                <view class="pad-brand-book-icon"></view>
+              </view>
+              <view class="pad-dash-tabs">
+                <view 
+                  wx:for="{{padTabs}}" 
+                  wx:key="*this" 
+                  class="pad-tab-item {{padActiveTab === item ? 'pad-tab-item--active' : ''}}"
+                  bindtap="handlePadTabTap"
+                  data-tab="{{item}}"
+                >
+                  <text>{{item}}</text>
+                </view>
+              </view>
             </view>
-            <view class="pad-dash-meta-badge font-mono">LitCompanion · System Active</view>
+
+            <view class="pad-dash-user-profile">
+              <view class="user-avatar-wrap">
+                <text class="user-avatar-txt font-mono">E</text>
+              </view>
+              <view class="user-info-meta">
+                <text class="user-name">Emma</text>
+                <text class="user-role-badge font-mono">Young Explorer</text>
+              </view>
+            </view>
           </view>
 
           <view class="pad-dash-grid">
@@ -93,7 +114,7 @@
               <view class="pad-history-panel card-editorial">
                 <view class="panel-section-title">Reading History</view>
                 <view class="history-list">
-                  <view class="history-item" wx:for="{{(books && books.length ? books : recommendBooks).slice(0, 3)}}" wx:key="id" bindtap="handleBookTap" data-id="{{item.id}}">
+                  <view class="history-item" wx:for="{{padHistoryBooks}}" wx:key="id" bindtap="handleBookTap" data-id="{{item.id}}">
                     <view class="history-item-top">
                       <view class="history-cover-wrap">
                         <image wx:if="{{item.coverUrl}}" src="{{item.coverUrl}}" mode="aspectFill" />
@@ -126,28 +147,28 @@
               <!-- F15: Quantitative Metrics Bento -->
               <view class="pad-metrics-grid">
                 <view class="metric-card card-editorial">
-                  <view class="metric-icon-wrap icon-book-glow"></view>
+                  <view class="metric-icon metric-icon--book"><view class="icon-inner-book"></view></view>
                   <view class="metric-body">
                     <view class="metric-label">Today read</view>
                     <view class="metric-value font-mono">3 <text class="metric-unit">books</text></view>
                   </view>
                 </view>
                 <view class="metric-card card-editorial">
-                  <view class="metric-icon-wrap icon-corpus-glow"></view>
+                  <view class="metric-icon metric-icon--layers"><view class="icon-inner-layers"></view></view>
                   <view class="metric-body">
                     <view class="metric-label">Total read</view>
                     <view class="metric-value font-mono">7 <text class="metric-unit">books</text></view>
                   </view>
                 </view>
                 <view class="metric-card card-editorial">
-                  <view class="metric-icon-wrap icon-hourglass-glow"></view>
+                  <view class="metric-icon metric-icon--hourglass"><view class="icon-inner-hourglass"></view></view>
                   <view class="metric-body">
                     <view class="metric-label">Today spent</view>
                     <view class="metric-value font-mono">13 <text class="metric-unit">minutes</text></view>
                   </view>
                 </view>
                 <view class="metric-card card-editorial">
-                  <view class="metric-icon-wrap icon-clock-glow"></view>
+                  <view class="metric-icon metric-icon--clock"><view class="icon-inner-clock"></view></view>
                   <view class="metric-body">
                     <view class="metric-label">Total spent</view>
                     <view class="metric-value font-mono">26 <text class="metric-unit">minutes</text></view>

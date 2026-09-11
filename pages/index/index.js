@@ -39,6 +39,9 @@ Page({
     activeCategory: "All",
     categories: ["All"],
     books: [],
+    padHistoryBooks: [],
+    padActiveTab: 'Dashboard',
+    padTabs: ['Library', 'Dashboard', 'Customize My Storybook'],
     filteredBooks: [],
     loadError: false,
     scrolled: false,
@@ -420,6 +423,7 @@ Page({
     this.setData({
       recommendBooks,
       books: listBooks,
+      padHistoryBooks: (listBooks && listBooks.length ? listBooks : recommendBooks).slice(0, 3),
       loading: false,
     });
 
@@ -559,6 +563,17 @@ Page({
     this.applyFilters(this.data.books, this.data.searchValue, activeCategory);
   },
 
+  
+  handlePadTabTap(e) {
+    const tab = e.currentTarget.dataset.tab;
+    if (!tab) return;
+    this.setData({ padActiveTab: tab });
+    if (tab === "Library") {
+      wx.navigateTo({ url: "/pages/library/index" }).catch(() => {});
+    } else if (tab === "Customize My Storybook") {
+      wx.navigateTo({ url: "/pages/derivative/index" }).catch(() => {});
+    }
+  },
   handleBookTap(event) {
     const { id } = event.currentTarget.dataset;
     wx.navigateTo({
