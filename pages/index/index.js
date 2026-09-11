@@ -39,7 +39,7 @@ Page({
     activeCategory: "All",
     categories: ["All"],
     books: [],
-    padHistoryBooks: [],
+    historyBooks: [],
     padActiveTab: 'Dashboard',
     padTabs: ['Library', 'Dashboard', 'Customize My Storybook'],
     filteredBooks: [],
@@ -378,6 +378,7 @@ Page({
       this.setData({
         recommendBooks: [],
         books: [],
+        historyBooks: [],
         filteredBooks: [],
         loading: false,
       });
@@ -423,7 +424,7 @@ Page({
     this.setData({
       recommendBooks,
       books: listBooks,
-      padHistoryBooks: (listBooks && listBooks.length ? listBooks : recommendBooks).slice(0, 3),
+      historyBooks: listBooks.slice(0, 3),
       loading: false,
     });
 
@@ -473,6 +474,7 @@ Page({
         this.setData({
           books: [],
           recommendBooks: [],
+          historyBooks: [],
           loadError: true,
           loading: false,
         });

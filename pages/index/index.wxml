@@ -114,7 +114,7 @@
               <view class="pad-history-panel card-editorial">
                 <view class="panel-section-title">Reading History</view>
                 <view class="history-list">
-                  <view class="history-item" wx:for="{{padHistoryBooks}}" wx:key="id" bindtap="handleBookTap" data-id="{{item.id}}">
+                  <view class="history-item" wx:for="{{historyBooks}}" wx:key="id" bindtap="handleBookTap" data-id="{{item.id}}">
                     <view class="history-item-top">
                       <view class="history-cover-wrap">
                         <image wx:if="{{item.coverUrl}}" src="{{item.coverUrl}}" mode="aspectFill" />

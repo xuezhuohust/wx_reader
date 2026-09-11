@@ -15,15 +15,15 @@
   background: #ffffff;
 }
 
-/* Pad 横屏的伴读栏也展示章节意境图。图片限制在组件容器内，避免覆盖左侧原文。 */
-.chat-page--embedded.chat-page--large.chat-page--has-background {
+/* 伴读栏展示章节意境或用户生成的场景图，图片限制在组件容器内。 */
+.chat-page--embedded.chat-page--has-background {
   background: transparent;
   isolation: isolate;
 }
 
-.chat-page--embedded.chat-page--large.chat-page--has-background .custom-nav--embedded,
-.chat-page--embedded.chat-page--large.chat-page--has-background .embedded-book-tag-bar,
-.chat-page--embedded.chat-page--large.chat-page--has-background .chat-footer {
+.chat-page--embedded.chat-page--has-background .custom-nav--embedded,
+.chat-page--embedded.chat-page--has-background .embedded-book-tag-bar,
+.chat-page--embedded.chat-page--has-background .chat-footer {
   background: rgba(255, 255, 255, 0.78);
   backdrop-filter: blur(14px);
 }
@@ -54,10 +54,10 @@
 .chat-page--embedded .message-container { gap: 4px; }
 .chat-page--embedded .chat-avatar,
 .chat-page--embedded .skeleton-avatar { width: 32px; height: 32px; font-size: 14px; }
-.chat-page--embedded .message-bubble { padding: 3px 0; font-size: 16px; line-height: 1.65; }
+.chat-page--embedded .message-bubble { padding: 3px 0; font-size: 22px; line-height: 1.65; }
 .chat-page--embedded .message-text,
 .chat-page--embedded .callout-text,
-.chat-page--embedded .creative-content { font-size: 16px; }
+.chat-page--embedded .creative-content { font-size: 22px; }
 .chat-page--embedded .message-block { margin-bottom: 8px; }
 .chat-page--embedded .block-list { gap: 6px; }
 .chat-page--embedded .list-item { gap: 8px; }
@@ -80,7 +80,7 @@
 .chat-page--embedded .message-actions { gap: 10px; padding: 0 4px; }
 .chat-page--embedded .voice-control,
 .chat-page--embedded .copy-control,
-.chat-page--embedded .voice-status-text { gap: 4px; padding: 4px 0; margin-right: 10px; font-size: 12px; }
+.chat-page--embedded .voice-status-text { gap: 4px; padding: 4px 0; margin-right: 10px; font-size: 14px; }
 .chat-page--embedded .voice-icon-new,
 .chat-page--embedded .copy-icon { width: 14px; height: 14px; }
 .chat-page--embedded .chat-footer { padding: 10px 0 12px; }
@@ -180,7 +180,7 @@
 
 .chat-page--large .message-list {
   padding: 10px 16px 16px;
-  gap: 10px;
+  gap: 16px;
 }
 
 .chat-page--large .message-row {
@@ -199,12 +199,13 @@
   font-size: 14px;
 }
 
+/* 放大问答正文，保证双栏截图缩放到论文版面后仍清晰可读。 */
 .chat-page--large .message-bubble,
 .chat-page--large .message-text,
 .chat-page--large .callout-text,
 .chat-page--large .creative-content {
-  font-size: 15px;
-  line-height: 1.58;
+  font-size: 22px;
+  line-height: 1.65;
 }
 
 /* 横屏 Pad 保留清晰的对话气泡层级，且长文本始终在气泡内换行。 */
@@ -216,7 +217,7 @@
 .chat-page--large .message-bubble {
   min-width: 0;
   max-width: 100%;
-  padding: 7px 10px;
+  padding: 10px 14px;
   border: 1px solid rgba(27, 27, 27, 0.06);
   border-radius: 14px;
   box-sizing: border-box;
@@ -224,7 +225,7 @@
 }
 
 .chat-page--large .bubble-user {
-  padding: 7px 11px;
+  padding: 10px 14px;
   background: #f0f7ff;
   color: #1e3a8a;
   border-color: rgba(0, 113, 227, 0.10);
@@ -354,7 +355,7 @@
 /* 流式光标和播放中的声波也必须脱离 rpx，避免在 Pad 上被放大。 */
 .chat-page--large .typing-cursor {
   width: 2px;
-  height: 18px;
+  height: 22px;
   margin-left: 3px;
 }
 
@@ -816,8 +817,8 @@
 
 .message-bubble {
   padding: 6rpx 0; /* 垂直内边距，移除水平内边距以去卡片化 */
-  font-size: 29rpx;
-  line-height: 1.55;
+  font-size: 36rpx;
+  line-height: 1.65;
   position: relative;
 }
 
@@ -877,7 +878,7 @@
 }
 
 .block-p {
-  line-height: 1.6;
+  line-height: 1.65;
 }
 
 .text-strong {
@@ -926,9 +927,9 @@
 }
 
 .callout-text {
-  font-size: 28rpx;
+  font-size: 36rpx;
   color: #4a4a4a;
-  line-height: 1.5;
+  line-height: 1.65;
 }
 
 .block-code {
@@ -988,7 +989,7 @@
 }
 
 .creative-content {
-  font-size: 28rpx;
+  font-size: 36rpx;
   line-height: 1.7;
   color: var(--charcoal);
   white-space: pre-wrap;
@@ -1339,8 +1340,8 @@
 }
 
 .message-text {
-  font-size: 28rpx;
-  line-height: 1.6;
+  font-size: 36rpx;
+  line-height: 1.65;
   color: var(--charcoal);
   word-break: break-word;
 }

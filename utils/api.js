@@ -1321,6 +1321,15 @@ function generateDramaScenePlan(planId, options) {
   });
 }
 
+/** Use the complete stored storyboard to generate one conversation background. */
+function generateDramaSceneImage(planId) {
+  return request({
+    url: `/api/drama/scene-plans/${encodeURIComponent(planId)}/generate-image`,
+    method: "POST",
+    timeout: 30000,
+  });
+}
+
 /** @deprecated 兼容旧版调用；小程序不再向用户暴露 Generation Clip。 */
 function generateDramaScenePlanClip(planId, clipId, options) {
   const payload = options || {};
@@ -1410,6 +1419,7 @@ module.exports = {
   createDramaScenePlan,
   getDramaScenePlan,
   generateDramaScenePlan,
+  generateDramaSceneImage,
   generateDramaScenePlanClip,
   getDramaJob,
   listDramaVideos,

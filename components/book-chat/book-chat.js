@@ -4,6 +4,14 @@ const { loadIdentity } = require("../../utils/storage");
 const AGENT_AVATAR_URL = api.toAbsoluteUrl("/uploads/cover_5f40aae0502c.jpg");
 const DEFAULT_DRAMA_DURATION_SECONDS = 30;
 
+function formatConversation(conversation) {
+  return Object.assign({}, conversation, {
+    updatedDate: conversation.updatedAt
+      ? String(conversation.updatedAt).slice(0, 10)
+      : "",
+  });
+}
+
 Component({
   properties: {
     bookId: {
@@ -108,6 +116,7 @@ Component({
     // 2026-07-02 新增：背景图支持
     backgroundImage: "",
     backgroundChapterId: "",
+    backgroundSource: "chapter",
     chapterId: "",
     chapterTitle: "",
     storyProgress: null,
@@ -145,11 +154,15 @@ Component({
     dramaVideos: [],
     dramaStarting: false,
     dramaSubmitting: false,
+    dramaImageGenerating: false,
     showDramaPlaylist: false,
     dramaVideoUrl: "",
   },
 
   observers: {
+    currentConversationId: function () {
+      if (this._chatInitialized) this.restoreDramaSceneBackground();
+    },
     "sourceChapterId, sourceChapterTitle": function (chapterId, chapterTitle) {
       if (!this._chatInitialized) return;
       this.setData({
@@ -259,6 +272,7 @@ Component({
       this._streamRequestTask = null;
       this._dramaPollTimer = null;
       this._dramaPollingVideoId = "";
+      this._chatDisposed = false;
       this.audioQueue = []; // {messageId, text} 待生成
       this.readyMap = {}; // seq -> {messageId, audioUrl} 已生成
       this.nextPlaySeq = 0; // 下一个该播放的序号
@@ -531,13 +545,14 @@ Component({
         return `我会参考《${bookTitle}》和当前章节，帮你续写、改写、写番外或补一段人物对话。直接告诉我想怎么创作。`;
       }
       if (mode === "drama") {
-        return `我会为《${bookTitle}》生成带音乐和配音的横屏短剧。先告诉我想制作哪一段情节。`;
+        return `我会为《${bookTitle}》生成带音乐和配音的横屏短剧，或生成场景图作为对话背景。先告诉我想制作哪一段情节。`;
       }
       return `你好，我已经了解《${bookTitle}》的内容，你可以问我关于这本书的问题。`;
     },
 
     /** 生成章节意境背景图 */
     generateChatBackground(bookId, chapterId) {
+      if (this.data.backgroundSource === "scene") return;
       // 手机嵌入态没有独立的伴读画布；Pad 横屏右栏则可以完整展示章节意境。
       if (this.properties.embedded && !this.properties.largeScreen) {
         return;
@@ -547,7 +562,7 @@ Component({
         return;
       }
 
-      const requestKey = `${bookId}:${targetChapterId}`;
+      const requestKey = `${bookId}:${this.data.currentConversationId || ""}:${targetChapterId}`;
       // sourceChapterId 与 sourceChapterTitle 可能分两次下发，避免为同一章
       // 重复调用耗时的图片生成接口。
       if (this._backgroundRequestKey === requestKey) {
@@ -564,7 +579,7 @@ Component({
       api
         .generateImage(bookId, targetChapterId)
         .then((res) => {
-          if (this._backgroundRequestKey !== requestKey) {
+          if (this._chatDisposed || this._backgroundRequestKey !== requestKey || this.data.backgroundSource === "scene") {
             return;
           }
           // res 已经是解包后的 data.data
@@ -1038,7 +1053,7 @@ Component({
           const session = (result && result.session) || {};
           const assistant = (result && result.assistant) || {};
           const content = String(
-            assistant.content || "请选择需要生成的视频位置。",
+            assistant.content || "请选择需要生成的情节位置。",
           );
           const message = this.decorateMessage({
             id: `drama_question_${Date.now()}`,
@@ -1318,7 +1333,7 @@ Component({
             : (item.selectedClipIds || []),
           progressMessage: message,
           content: current.status === "ready"
-            ? "镜头规划已完成。请选择要生成的长镜头，多选后会按分镜顺序拼接。"
+            ? "镜头规划已完成。选择长镜头后可生成视频，也可使用完整分镜生成场景图并设为对话背景。"
             : this.dramaPlanStatusText(current.status || item.status, message),
         });
       });
@@ -1359,15 +1374,174 @@ Component({
     },
 
     handleGenerateSelectedDramaClips(event) {
+      if (this.data.dramaSubmitting || this.data.dramaImageGenerating || this._dramaChoosingTarget) return;
       const messageId = String(event.currentTarget.dataset.messageId || "");
       const planId = String(event.currentTarget.dataset.planId || "");
       const message = this.data.messages.find((item) => item.id === messageId) || {};
-      const selectedClipIds = Array.isArray(message.selectedClipIds) ? message.selectedClipIds : [];
-      if (!selectedClipIds.length) {
-        wx.showToast({ title: "请至少选择一个长镜头", icon: "none" });
-        return;
+      if (!planId || message.status !== "ready") return;
+      const selectedClipIds = Array.isArray(message.selectedClipIds) ? message.selectedClipIds.slice() : [];
+      const conversationId = this.data.currentConversationId;
+      this._dramaChoosingTarget = true;
+      wx.showActionSheet({
+        alertText: "选择生成内容",
+        itemList: ["生成视频", "生成场景图"],
+        success: ({ tapIndex }) => {
+          if (this._chatDisposed || conversationId !== this.data.currentConversationId) return;
+          if (tapIndex === 1) {
+            this.startDramaSceneImageGeneration(planId);
+          } else if (tapIndex === 0) {
+            if (!selectedClipIds.length) {
+              wx.showToast({ title: "请至少选择一个长镜头", icon: "none" });
+              return;
+            }
+            this.startDramaSceneGeneration(planId, messageId, selectedClipIds);
+          }
+        },
+        complete: () => { this._dramaChoosingTarget = false; },
+      });
+    },
+
+    dramaSceneBackgroundKey(conversationId) {
+      return `drama_scene_background:${this.bookId}:${conversationId}`;
+    },
+
+    saveDramaSceneBackground(conversationId, value) {
+      try {
+        wx.setStorageSync(this.dramaSceneBackgroundKey(conversationId), value);
+      } catch (error) {
+        console.warn("[drama] scene background save failed", error);
       }
-      this.startDramaSceneGeneration(planId, messageId, selectedClipIds);
+    },
+
+    restoreDramaSceneBackground() {
+      clearTimeout(this._dramaImagePollTimer);
+      this._dramaImageRun = null;
+      this._backgroundRequestKey = "";
+      const hadSceneBackground = this.data.backgroundSource === "scene";
+      const conversationId = this.data.currentConversationId;
+      let saved;
+      try {
+        saved = conversationId && wx.getStorageSync(this.dramaSceneBackgroundKey(conversationId));
+      } catch (error) {
+        console.warn("[drama] scene background load failed", error);
+      }
+      this.setData({
+        dramaImageGenerating: false,
+        backgroundSource: saved && saved.imageUrl ? "scene" : "chapter",
+        ...(saved && saved.imageUrl ? { backgroundImage: saved.imageUrl } : hadSceneBackground ? { backgroundImage: "" } : {}),
+      });
+      if ((!saved || !saved.imageUrl) && this.data.chapterId) {
+        this.generateChatBackground(this.bookId, this.data.chapterId);
+      }
+      if (saved && saved.pendingPlanId) {
+        const run = this.beginDramaSceneImageRun(saved.pendingPlanId);
+        this.pollDramaSceneImage(run);
+      }
+    },
+
+    beginDramaSceneImageRun(planId) {
+      clearTimeout(this._dramaImagePollTimer);
+      const run = {
+        planId,
+        bookId: this.bookId,
+        conversationId: this.data.currentConversationId,
+        messageId: `drama_image_${Date.now()}`,
+        previousImageUrl: this.data.backgroundSource === "scene" ? this.data.backgroundImage : "",
+      };
+      this._dramaImageRun = run;
+      this.setData({
+        dramaImageGenerating: true,
+        messages: [...this.data.messages, this.decorateMessage({
+          id: run.messageId, role: "assistant", type: "drama-image", status: "queued",
+          scenePlanId: planId, content: "正在根据完整分镜生成场景图，完成后将自动替换当前对话背景。",
+        })],
+      }, () => this.scrollToBottom());
+      return run;
+    },
+
+    isCurrentDramaSceneImageRun(run) {
+      return !this._chatDisposed && this._dramaImageRun === run
+        && this.bookId === run.bookId && this.data.currentConversationId === run.conversationId;
+    },
+
+    startDramaSceneImageGeneration(planId) {
+      if (!planId || !this.data.currentConversationId || this.data.dramaSubmitting || this.data.dramaImageGenerating) return;
+      const run = this.beginDramaSceneImageRun(planId);
+      return api.generateDramaSceneImage(planId)
+        .then((result) => {
+          const job = result && result.sceneImage;
+          if (!job || !job.status) throw new Error("场景图任务创建失败");
+          // Persist an accepted task even if navigation happened during submission.
+          // It will resume when the originating conversation is opened again.
+          this.saveDramaSceneBackground(run.conversationId, {
+            imageUrl: run.previousImageUrl,
+            pendingPlanId: planId,
+          });
+          if (!this.isCurrentDramaSceneImageRun(run)) return;
+          if (!this.applyDramaSceneImageJob(run, job)) this.pollDramaSceneImage(run);
+        })
+        .catch((error) => this.applyDramaSceneImageJob(run, {
+          status: "failed", errorMessage: error.message || "场景图任务提交失败",
+        }));
+    },
+
+    pollDramaSceneImage(run) {
+      if (!this.isCurrentDramaSceneImageRun(run)) return;
+      return api.getDramaScenePlan(run.planId)
+        .then((result) => {
+          if (!this.isCurrentDramaSceneImageRun(run)) return;
+          const job = result && result.scenePlan && result.scenePlan.sceneImage;
+          if (!job || !job.status) {
+            this.applyDramaSceneImageJob(run, { status: "failed", errorMessage: "场景图任务不存在，请重试" });
+            return;
+          }
+          if (!this.applyDramaSceneImageJob(run, job)) {
+            this._dramaImagePollTimer = setTimeout(() => this.pollDramaSceneImage(run), 5000);
+          }
+        })
+        .catch((error) => {
+          if (!this.isCurrentDramaSceneImageRun(run)) return;
+          if ([403, 404].indexOf(error.statusCode) >= 0) {
+            this.applyDramaSceneImageJob(run, { status: "failed", errorMessage: error.message || "场景图任务不可访问" });
+            return;
+          }
+          console.warn("[drama] scene image poll failed", error);
+          this._dramaImagePollTimer = setTimeout(() => this.pollDramaSceneImage(run), 10000);
+        });
+    },
+
+    applyDramaSceneImageJob(run, job) {
+      if (!this.isCurrentDramaSceneImageRun(run)) return true;
+      const terminal = job.status === "completed" || job.status === "failed";
+      const image = job.image || {};
+      const imageUrl = api.toAbsoluteUrl(image.imageUrl || image.relativeUrl || image.url || "");
+      if (job.status === "completed" && !imageUrl) {
+        return this.applyDramaSceneImageJob(run, { status: "failed", errorMessage: "生成结果缺少场景图，请重试" });
+      }
+      const completed = job.status === "completed";
+      const content = completed ? "场景图已生成，已替换当前对话背景。"
+        : job.status === "failed" ? (job.errorMessage || "场景图生成失败，请重试")
+        : "正在根据完整分镜生成场景图，完成后将自动替换当前对话背景。";
+      // Invalidate any chapter image request that was started before this scene finished.
+      if (completed) this._backgroundRequestKey = "";
+      this.setData({
+        dramaImageGenerating: !terminal,
+        ...(completed ? { backgroundImage: imageUrl, backgroundSource: "scene" } : {}),
+        messages: this.data.messages.map((item) => item.id === run.messageId
+          ? this.decorateMessage({ ...item, status: job.status, content, imageUrl }) : item),
+      }, () => this.scrollToBottom());
+      if (terminal) {
+        clearTimeout(this._dramaImagePollTimer);
+        this.saveDramaSceneBackground(run.conversationId, {
+          imageUrl: completed ? imageUrl : this.data.backgroundSource === "scene" ? this.data.backgroundImage : "",
+        });
+        this._dramaImageRun = null;
+      }
+      return terminal;
+    },
+
+    handleRetryDramaSceneImage(event) {
+      this.startDramaSceneImageGeneration(String(event.currentTarget.dataset.planId || ""));
     },
 
     startDramaSceneGeneration(planId, planMessageId, generationClipIds) {
@@ -2000,6 +2174,9 @@ Component({
     },
 
     disposeChat() {
+      this._chatDisposed = true;
+      this._dramaImageRun = null;
+      clearTimeout(this._dramaImagePollTimer);
       clearTimeout(this._scrollTailTimer);
       clearTimeout(this._streamFlushTimer);
       clearTimeout(this._autoScrollTimer);
@@ -2352,7 +2529,7 @@ Component({
             // 有已有对话 → 选中最近更新的一个
             const latest = scopedConversations[0];
             this.setData({
-              conversations: scopedConversations,
+              conversations: scopedConversations.map(formatConversation),
               currentConversationId: latest.id,
               currentConversationTitle: latest.title,
             });
@@ -2407,7 +2584,7 @@ Component({
           }
           this.setData(
             {
-              messages: formatted,
+              messages: formatted.concat(this.data.messages.filter((item) => item.type === "drama-image")),
               loadingMessages: false, // 关闭骨架屏
             },
             () => {
@@ -2452,7 +2629,7 @@ Component({
             ? conv.messages
             : [];
           this.setData({
-            conversations: [conv],
+            conversations: [formatConversation(conv)],
             currentConversationId: conv.id,
             currentConversationTitle: conv.title,
           });
@@ -2599,7 +2776,7 @@ Component({
           }
           this.setData(
             {
-              messages: formatted,
+              messages: formatted.concat(this.data.messages.filter((item) => item.type === "drama-image")),
             },
             () => {
               this.scrollToBottom(true);
@@ -3807,7 +3984,7 @@ Component({
 
       // 书籍、模式和章节均通过独立字段发送；不能把内部约束拼进 message，
       // 否则后端保存会话后会把它当成用户输入回显。
-      const serverQuestion = `${message}\n回复精简`;
+      // 回复长短由后端提示词控制；message 只发送用户原文，供语言识别与历史保存。
       const userMessage = this.createMessage("user", message);
       // 创建带有思考状态的 AI 消息
       const loadingMessage = this.decorateMessage({
@@ -3862,7 +4039,7 @@ Component({
       const streamPlaybackEpoch = this.playbackEpoch;
       const streamPromise = api.sendBookChatMessageStream(
         chatBookId,
-        serverQuestion,
+        message,
         {
           conversationId: convId,
           entry: this.chatEntry,

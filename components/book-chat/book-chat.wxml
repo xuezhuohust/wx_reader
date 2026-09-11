@@ -1,6 +1,6 @@
 <view wx:if="{{book}}" class="page-shell chat-page {{embedded ? 'chat-page--embedded' : ''}} {{largeScreen ? 'chat-page--large' : ''}} {{backgroundImage ? 'chat-page--has-background' : ''}}" style="{{!embedded && viewportHeight ? 'height: ' + viewportHeight + 'px;' : ''}}">
   <!-- 背景意境图 -->
-  <view wx:if="{{backgroundImage && (!embedded || largeScreen)}}" class="chat-bg-container {{embedded ? 'chat-bg-container--embedded' : ''}}">
+  <view wx:if="{{backgroundImage && (!embedded || largeScreen || backgroundSource === 'scene')}}" class="chat-bg-container {{embedded ? 'chat-bg-container--embedded' : ''}}">
     <image class="chat-bg-image" src="{{backgroundImage}}" mode="aspectFill" />
     <view class="chat-bg-mask"></view>
   </view>
@@ -39,7 +39,7 @@
         <text class="conv-item-icon">💬</text>
         <view class="conv-item-info">
           <text class="conv-item-title">{{item.title}}</text>
-          <text class="conv-item-time">{{item.updatedAt ? item.updatedAt.slice(0, 10) : ''}}</text>
+          <text class="conv-item-time">{{item.updatedDate}}</text>
         </view>
       </view>
     </scroll-view>
@@ -186,7 +186,7 @@
 
               <!-- 1. 剧创位置选择与视频任务卡片 -->
               <view wx:if="{{item.type === 'drama-question'}}" class="drama-question-card">
-                <text class="drama-card-title">{{item.selectionStage === 'scene' ? '选择生成场景' : '选择视频位置'}}</text>
+                <text class="drama-card-title">{{item.selectionStage === 'scene' ? '选择生成场景' : '选择生成位置'}}</text>
                 <text class="drama-card-copy">{{item.content}}</text>
                 <view wx:if="{{item.positionOptions && item.positionOptions.length}}" class="drama-position-list">
                   <block wx:if="{{item.selectionStage === 'scene'}}">
@@ -249,12 +249,21 @@
                   </block>
                   <button
                     class="drama-generate-clips-button"
-                    disabled="{{dramaSubmitting || !item.selectedClipIds.length}}"
+                    disabled="{{dramaSubmitting || dramaImageGenerating}}"
                     data-message-id="{{item.id}}"
                     data-plan-id="{{item.scenePlanId}}"
                     bindtap="handleGenerateSelectedDramaClips"
-                  >生成已选 {{item.selectedClipIds.length}} 个镜头并拼接</button>
+                  >选择生成视频或场景图</button>
                 </view>
+              </view>
+
+              <view wx:elif="{{item.type === 'drama-image'}}" class="drama-video-card {{item.status === 'failed' ? 'drama-video-card--failed' : ''}}">
+                <view class="drama-video-card-header">
+                  <text class="drama-card-title">场景图</text>
+                  <text class="drama-status-tag">{{item.status === 'completed' ? '已完成' : item.status === 'failed' ? '失败' : '生成中'}}</text>
+                </view>
+                <text class="drama-card-copy">{{item.content}}</text>
+                <button wx:if="{{item.status === 'failed'}}" class="drama-generate-clips-button" disabled="{{dramaSubmitting || dramaImageGenerating}}" data-plan-id="{{item.scenePlanId}}" bindtap="handleRetryDramaSceneImage">重试生成场景图</button>
               </view>
 
               <view wx:elif="{{item.type === 'drama-video'}}" class="drama-video-card {{item.status === 'failed' ? 'drama-video-card--failed' : ''}}">
