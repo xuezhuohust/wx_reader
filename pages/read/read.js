@@ -1,5 +1,6 @@
 const api = require('../../utils/api')
 const { getLayoutProfile } = require('../../utils/layout')
+const { createTextMeasurer, wrapTextLines } = require('../../utils/reader-pagination')
 
 const FOOTER_AUTO_HIDE_MS = 1200
 // 原文分页窗口最多会返回 1000 行；横屏右栏只需要供二创模式参考的片段，
@@ -544,12 +545,16 @@ Page({
       const viewportHeight = Number(this.data.readerLandscapeViewportHeight)
         || Math.max(0, Number(layout.height || this.data.windowHeight || 712) - 112)
       const fontSize = 16
-      const charsPerLine = Math.max(20, Math.floor((viewportWidth - 60) / (fontSize * 1.05)))
-      // 20px/16px 是左栏正文容器的上下内边距；再留一行避免贴住章节导航。
-      const usableHeight = viewportHeight - 36
+      // Container padding already separates the article from the footer. Keep
+      // just 4px extra for rounding instead of reserving another whole line.
+      const lineHeight = fontSize * 1.72
+      const usableHeight = Math.max(lineHeight, viewportHeight - 36 - 4)
       return {
-        charsPerLine,
-        maxLinesPerPage: Math.max(12, Math.floor(usableHeight / (fontSize * 1.72)) - 1),
+        fontSize,
+        textWidth: Math.max(fontSize, viewportWidth - 60 - 4),
+        maxLinesPerPage: usableHeight / lineHeight,
+        paragraphGapLines: 10 / lineHeight,
+        dividerLines: (fontSize * 1.4 + 24) / lineHeight,
       }
     }
 
@@ -560,19 +565,20 @@ Page({
       const width = Number(this.data.readerTextViewportWidth || layout.width || 712)
       const height = Number(layout.height || this.data.windowHeight || 1068)
       const fontSize = 20
-      const charsPerLine = Math.max(24, Math.floor((width - 56) / (fontSize * 1.05)))
       const textViewportHeight = Number(this.data.readerTextViewportHeight)
       const viewportHeight = textViewportHeight || (height - 132)
       // AI 入口改为右下悬浮按钮，正文顶部只需要避开导航栏本身。
       const topInset = Number(this.data.navBarHeight || 0) + 8
       // 对应 Pad 竖屏 .reader-article 的 6px 顶部与 16px 底部内边距。
       const usableHeight = viewportHeight - topInset - 22
-      // 字体渲染、段落间距和小数像素会占用一小段高度。保留一行余量优先
-      // 保证正文不会落到 footer 后面，而不是冒险多塞一行被吞掉。
-      const maxLinesPerPage = Math.max(12, Math.floor(usableHeight / (fontSize * 1.72)) - 1)
+      const lineHeight = fontSize * 1.72
+      const maxLinesPerPage = Math.max(1, (usableHeight - 4) / lineHeight)
       return {
-        charsPerLine,
+        fontSize,
+        textWidth: Math.max(fontSize, width - 56 - 4),
         maxLinesPerPage,
+        paragraphGapLines: 10 / lineHeight,
+        dividerLines: (fontSize * 1.4 + 24) / lineHeight,
       }
     }
     return {
@@ -586,7 +592,16 @@ Page({
   },
 
   paginateSourceLines(sourceLines) {
-    const { charsPerLine, maxLinesPerPage } = this.getPaginationConfig()
+    const { charsPerLine, maxLinesPerPage, fontSize, textWidth, paragraphGapLines = 0.5, dividerLines = 1 } = this.getPaginationConfig()
+    if (textWidth && this._readerMeasureContext === undefined) {
+      try {
+        const canvas = wx.createOffscreenCanvas({ type: '2d', width: 1, height: 1 })
+        this._readerMeasureContext = canvas.getContext('2d')
+      } catch (_) {
+        this._readerMeasureContext = null
+      }
+    }
+    const measureText = textWidth ? createTextMeasurer(fontSize, this._readerMeasureContext) : null
     const contentPages = []
     let currentPage = []
     let consumedLines = 0
@@ -645,16 +660,16 @@ Page({
           paraSourceMap.push(i - 1);
           currentPara = trimmed;
         } else {
-          currentPara += trimmed;
+          currentPara += /[A-Za-z0-9,;:]$/.test(currentPara) && /^[A-Za-z0-9]/.test(trimmed) ? ` ${trimmed}` : trimmed;
         }
       } else {
-        const endsWithPunct = /[。！？；：…”’"」』》】>\])）~—]$/.test(currentPara);
+        const endsWithPunct = /[。！？；：….!?;:”’"」』》】>\])）~—]$/.test(currentPara);
         if (endsWithPunct) {
           paragraphs.push(currentPara);
           paraSourceMap.push(i - 1);
           currentPara = trimmed;
         } else {
-          currentPara += trimmed;
+          currentPara += /[A-Za-z0-9,;:]$/.test(currentPara) && /^[A-Za-z0-9]/.test(trimmed) ? ` ${trimmed}` : trimmed;
         }
       }
     }
@@ -674,7 +689,7 @@ Page({
       const isDivider = this.isDividerLine(text)
 
       if (isDivider) {
-        if (consumedLines + 1 > maxLinesPerPage && currentPage.length > 0) {
+        if (consumedLines + dividerLines > maxLinesPerPage && currentPage.length > 0) {
           flushPage()
         }
         currentPage.push({
@@ -686,18 +701,20 @@ Page({
           isSplitTop: false,
           isSplitBottom: false,
         })
-        consumedLines += 1
+        consumedLines += dividerLines
         continue
       }
 
+      const wrappedLines = textWidth ? wrapTextLines(text, textWidth, measureText) : null
+      let lineOffset = 0
       while (text.length > 0) {
-        const availableLines = maxLinesPerPage - consumedLines
+        const availableLines = Math.floor(maxLinesPerPage - consumedLines)
         if (availableLines <= 0) {
           flushPage()
           continue
         }
 
-        const totalLinesNeeded = Math.ceil(text.length / charsPerLine)
+        const totalLinesNeeded = wrappedLines ? wrappedLines.length - lineOffset : Math.ceil(text.length / charsPerLine)
 
         if (totalLinesNeeded <= availableLines) {
           currentPage.push({
@@ -710,17 +727,17 @@ Page({
             isSplitBottom: false,
           })
           consumedLines += totalLinesNeeded
-          consumedLines += 0.5 // Simulate margin-bottom space
+          consumedLines += paragraphGapLines
           text = ''
         } else {
           let splitLines = availableLines;
           let remainLines = totalLinesNeeded - splitLines;
           
-          if (splitLines < 2) {
+          if (splitLines < 2 && currentPage.length > 0) {
             flushPage();
             continue;
           }
-          if (remainLines < 2) {
+          if (remainLines < 2 && splitLines > 2) {
             splitLines -= 1;
             if (splitLines < 2) {
               flushPage();
@@ -728,7 +745,9 @@ Page({
             }
           }
 
-          let maxChars = Math.floor(splitLines * charsPerLine)
+          let maxChars = wrappedLines
+            ? wrappedLines.slice(lineOffset, lineOffset + splitLines).join('').length
+            : Math.floor(splitLines * charsPerLine)
           let splitIndex = maxChars
           
           const chunk = text.substring(0, splitIndex)
@@ -744,6 +763,7 @@ Page({
           
           consumedLines += splitLines
           text = text.substring(splitIndex)
+          lineOffset += splitLines
           flushPage()
         }
       }

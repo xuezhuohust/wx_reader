@@ -264,6 +264,18 @@
   font-size: 20px;
   line-height: 1.72;
   margin-bottom: 10px;
+  padding: 0;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.reader-page--landscape .paragraph,
+.reader-page--pad-portrait .paragraph {
+  overflow-wrap: break-word;
+}
+
+.reader-page--pad-portrait .paragraph.is-divider-line {
+  margin: 8px 0 16px;
 }
 
 .reader-page--pad-portrait .paragraph.is-blank-line {
